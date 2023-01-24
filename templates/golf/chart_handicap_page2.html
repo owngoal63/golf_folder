@@ -1,0 +1,52 @@
+<!-- templates/golf/chart_handicap_page2.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <div id="container" style="width: 95%;">
+    <canvas id="chart_handicap_graph" data-url="{% url 'chart_handicap_graph2' %}"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+
+// const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O'];
+// const data = labels.map(l => Math.floor(Math.random() * 1000) + 1);
+// const sortedData = data.slice().sort((a, b) => a - b);
+// const backgroundColors = data.map(v => sortedData.indexOf(v) >= data.length - 3 ? 'red' : 'green');
+// console.log(backgroundColors)
+
+var $roundsChart = $("#chart_handicap_graph");
+
+new Chart(document.getElementById('chart_handicap_graph'), {
+  url: $roundsChart.data("url"),
+  type: 'bar',
+  data: {
+    labels: data.labels,
+    datasets: [{
+      label: "My Dataset",
+      data: data.data,
+      backgroundColor: '#3f51b5'
+    }]
+  },
+  options: {
+    legend: {
+      display: false
+    },
+    scales: {
+      yAxes: [{
+        ticks: {
+          beginAtZero: true
+        }
+      }]
+    }
+  }
+});
+
+  </script>
+
+<br>
+<button><a href="/golf/chart_rounds_page/">Show Rounds Chart</a></button>
+
+{% endblock %}

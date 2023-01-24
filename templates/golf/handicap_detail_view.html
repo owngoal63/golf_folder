@@ -1,0 +1,18 @@
+<!-- templates/golf/handicap_detail_view.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Handicap Details{% endblock %}
+
+{% block content %}
+
+
+    <div class="circle">
+        <div class="circle__text">
+            <div class="handicap">Your handicap is</div>
+            {{ view.kwargs.calculated_handicap }}
+            <div class="handicap">Based upon the lowest<br> {{ view.kwargs.number_of_lowest_rounds}} of {{ view.kwargs.total_number_of_rounds}} rounds</div>
+        </div>
+    </div>
+    
+{% endblock %}

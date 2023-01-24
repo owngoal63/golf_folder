@@ -1,0 +1,29 @@
+<!-- templates/golf/round_detail.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Round Detail{% endblock %}
+
+{% block content %}
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Round Details &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button><a href="update\">&#9998;</a></button></h1>
+        Date<br>
+        <div style="color:black;background-color:lightgray;display: inline-block; border:1px solid black;border-radius:3px;">&nbsp;{{round.date}}&nbsp;</div><br>
+        Course<br>
+        <div style="color:black;background-color:lightgray;display: inline-block; border:1px solid black;border-radius:3px;">&nbsp;{{round.course}}&nbsp;</div><br>
+        Score<br>
+        <div style="color:black;background-color:lightgray;display: inline-block; border:1px solid black;border-radius:3px;">&nbsp;{{round.score}}&nbsp;</div><br>
+
+        <hr>
+
+        <table class="w3-table w3-bordered">
+            <tr>
+                <td>Course Par</td><td>Course Rating</td><td>Slope Rating</td><td>Net Score</td>
+            </tr>
+            <tr>
+                <td>{{round.course.par}}</td><td>{{round.course.course_rating}}</td><td>{{round.course.slope_rating}}</td><td>{{ round.net_score }}</td>
+            </tr>
+
+        </table>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+<!-- templates/golf/course_detail.html -->
+{% extends "base.html" %}
+
+{% block title %}Course Detail{% endblock %}
+
+{% block content %}
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Course Details &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button><a href="update\">&#9998;</a></button></h1>
+    {% for field_name, value in course.get_fields %}
+        {% if field_name != "ID" %}
+            {{field_name|title}}<br>
+            <div style="color:black;background-color:lightgray;display: inline-block; border:1px solid black;border-radius:3px;">&nbsp;{{value}}&nbsp;</div><br>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}

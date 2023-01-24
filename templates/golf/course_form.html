@@ -1,0 +1,26 @@
+<!-- templates/golf/courseform.html -->
+{% extends "base.html" %}
+
+{% block title %}Add/Update Course{% endblock %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="w3-card w3-teal w3-padding">
+    {% if 'update' in request.path %}
+        <h1 class="w3-large">Update Course&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button><a href="..\delete\">&#128465;</a></button></h1>
+    {% else %}
+        <h1 class="w3-large">Add Course</h1>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <p> </p>
+        {% if 'update' in request.path %}
+            <button type="submit">Update</button>
+        {% else %}
+            <button type="submit">Add</button>
+        {% endif %}
+
+    </form>
+</div>
+{% endblock %}

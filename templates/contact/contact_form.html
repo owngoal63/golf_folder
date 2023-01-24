@@ -1,0 +1,18 @@
+<!-- templates/contact/email.html -->
+{% extends 'base.html' %}
+
+{% block title %}Contact{% endblock %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Contact Us</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div class="form-actions">
+        <button type="submit">Send</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

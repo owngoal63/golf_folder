@@ -1,0 +1,12 @@
+<!-- templates/email/email_sent.html -->
+{% extends "base.html" %}
+
+{% block title %}Email Confirmation{% endblock %}
+
+{% block content %}
+<div class="w3-card w3-teal w3-padding">
+   <h1 class="w3-large">Email Confirmation</h1>
+   <p>Email has been sent to {{email_address}}</p>
+</div>
+
+{% endblock %}

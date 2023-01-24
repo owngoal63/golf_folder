@@ -1,0 +1,35 @@
+<!-- templates/golf/round_list_handicap.html -->
+{% extends "base.html" %}
+
+{% block title %}Round List Handicap{% endblock %}
+
+{% block content %}
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Round List Handicap:</h1>
+    <p style="font-size:16px">{{ player }}</p>
+    {% if total_number_of_rounds >= 3 %}
+        <button><a href="{% url 'handicapview' calculated_handicap=calculated_handicap total_number_of_rounds=total_number_of_rounds number_of_lowest_rounds=number_of_lowest_rounds  %}">Calculate Handicap</a></button>
+    {% else %}
+        {{ message }}
+    {% endif %}
+    <table class="w3-table w3-bordered">
+        <tr>
+            <td style="font-size:11px">Date</td><td style="font-size:11px">Course</td><td style="font-size:11px">Course / Slope Rating</td><td style="font-size:11px">Score</td><td style="font-size:11px">HndCp Diff.</td>
+        </tr>
+        {% for round_details in object_list %}
+            {% if round_details.id in lowest_round_id_list %}
+                <tr style="background-color:darkblue">
+            {% else %}
+                <tr>
+            {% endif %}
+                <td style="font-size:11px">{{ round_details.date|date:"d M y" }}</td><td style="font-size:11px">{{ round_details.course }}</td><td style="font-size:11px">{{ round_details.course.course_rating }} / {{ round_details.course.slope_rating }}</td><td style="font-size:11px">{{ round_details.score }}</td><td style="font-size:11px">{{ round_details.handicap_differential }}</td>
+            </tr>
+        {% empty %}
+            <li>No rounds yet.</li>
+        {% endfor %}
+    </table>
+    <br>
+   
+
+</div>
+{% endblock %}

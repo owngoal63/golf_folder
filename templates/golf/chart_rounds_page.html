@@ -1,0 +1,67 @@
+<!-- templates/golf/chart.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <div id="container" style="width: 95%;">
+    <canvas id="chart_rounds_graph" data-url="{% url 'chart_rounds_graph' %}"></canvas>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+  <script>
+
+    $(function () {
+
+      var $roundsChart = $("#chart_rounds_graph");
+      $.ajax({
+        url: $roundsChart.data("url"),
+        success: function (data) {
+
+          var ctx = $roundsChart[0].getContext("2d");
+
+          new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: data.labels,
+              datasets: [{
+                label: 'Round Score',
+                backgroundColor: '#3f51b5',
+                data: data.data
+              }]          
+            },
+            options: {
+              responsive: true,
+              legend: {
+                position: 'top',
+              },
+              title: {
+                display: true,
+                text: 'Rounds Bar Chart',
+                    font: {
+                        size: 40
+                    }
+              },
+              scales: {
+                yAxes: [{
+                            display: true,
+                            ticks: {
+                                suggestedMin: 65,
+                            }
+                        }]  
+                }
+            }
+          });
+
+        }
+      });
+
+    });
+
+  </script>
+
+  <br>
+  <button><a href="/golf/chart_handicap_page/">Show Handicap Tracking Chart</a></button>
+
+{% endblock %}

@@ -1,0 +1,113 @@
+<!-- templates/base.html -->
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>{% block title %}Base Django Page{% endblock %}</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+<style>
+body,h1,h2,h3,h4,h5 {font-family: "Poppins", sans-serif}
+body {font-size:16px; background-color: linen;}
+.w3-half img{margin-bottom:-6px;margin-top:16px;opacity:0.8;cursor:pointer}
+.w3-half img:hover{opacity:1}
+a {text-decoration: none;}
+button {color:#fff!important;background-color:#607d8b!important; border-radius:8px; border-style: none ; padding-left: 10px; padding-right: 10px; padding-top: 5px; padding-bottom: 5px;}
+button:hover{color:#fff!important;background-color:#3f51b5!important}
+.logged-out {text-align: center; margin-left: auto !important;}
+.login-box {max-width: 50rem; margin: 0 auto;}
+.circle{width: 15rem; height: 15rem; border-radius: 50%; border: 4px solid white; margin: 0 auto; background-color: #009688; display: flex; justify-content: center; align-items: center; margin-top: 4rem; text-align: center;}
+.circle__text{ color: white; font-size: 3.8rem;}
+.handicap {
+    color: white;
+    text-align: center;
+    font-size: 1rem;
+}
+</style>
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-teal w3-collapse w3-top w3-large w3-padding" style="z-index:3;width:300px;font-weight:bold;" id="mySidebar"><br>
+  <a href="javascript:void(0)" onclick="w3_close()" class="w3-button w3-hide-large w3-display-topleft w3-teal" style="width:100%;font-size:22px">Close Menu</a>
+  <div class="w3-container" style="display:flex;align-items:center; flex-direction:row;">
+    <h3 class="w3-padding-64"><b>Handi Cappy</b></h3>
+    <img src="{% static "media/golfpin.png" %}" alt="logo" style="width:100%;max-width:100px" />
+  </div>
+  <div class="w3-bar-block">
+    <a href="/" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
+    <a href="/golf/list_courses/" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Courses</a> 
+    <a href="/golf/list_rounds/" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Rounds</a> 
+    <a href="/golf/list_round_handicaps/" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Handicap</a> 
+    <a href="/golf/list_golf_groups/" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Buddy groups</a> 
+    <a href="/golf/chart_handicap_page/" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Charts</a> 
+    <a href="/accounts/logout" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Log out</a>
+  </div>
+</nav>
+
+<!-- Top menu on small screens -->
+<header class="w3-container w3-top w3-hide-large w3-teal w3-xlarge w3-padding"  style="display:flex;align-items:center; flex-direction:row;">
+  <a href="javascript:void(0)" class="w3-button w3-teal w3-margin-right" onclick="w3_open()">☰</a>
+  <img src="{% static "media/golfpin.png" %}" alt="logo" style="width:100%;max-width:100px" />
+  <span><b>Handi Cappy</b></span>
+</header>
+{% else %}
+<header class="w3-container w3-top w3-hide-large w3-gray w3-xlarge w3-padding logged-out" style="display:flex;align-items:center; flex-direction:row;">
+    <img src="{% static "media/golfpin.png" %}" alt="logo" style="width:100%;max-width:100px" />
+    <span>Handi Cappy</span>
+  </header>
+{% endif %}
+
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+
+<!-- !PAGE CONTENT! -->
+{% if user.is_authenticated %}
+<div class="w3-main" style="margin-left:340px;margin-right:40px">
+{% else %}
+<div class="w3-main logged-out" style="margin-left:340px;margin-right:40px">
+{% endif %}
+
+  <!-- Header -->
+  <div class="w3-container" style="margin-top:80px" id="showcase">
+    {% if not user.is_authenticated %}
+        <img src="{% static "media/golfpin.png" %}" alt="logo"/>
+        <h1 class="w3-xlarge"><b>Handi Cappy</b></h1>
+    {% endif %}
+    {% block content %}
+    {% endblock %}
+  </div>
+  
+<!-- End page content -->
+</div>
+
+<!-- W3.CSS Container -->
+<div class="w3-blue-grey w3-container w3-padding-32" style="margin-top:75px;padding-right:58px"><p class="w3-right">Powered by <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-opacity">w3.css</a></p></div>
+
+<script>
+// Script to open and close sidebar
+function w3_open() {
+  document.getElementById("mySidebar").style.display = "block";
+  document.getElementById("myOverlay").style.display = "block";
+}
+ 
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+  document.getElementById("myOverlay").style.display = "none";
+}
+
+// Modal Image Gallery
+function onClick(element) {
+  document.getElementById("img01").src = element.src;
+  document.getElementById("modal01").style.display = "block";
+  var captionText = document.getElementById("caption");
+  captionText.innerHTML = element.alt;
+}
+</script>
+
+</body>
+</html>

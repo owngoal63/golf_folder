@@ -1,0 +1,42 @@
+<!-- templates/golf/round_list.html -->
+{% extends "base.html" %}
+
+{% block title %}Round List{% endblock %}
+
+{% block content %}
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Round List for {{ user.email }}</h1>
+    <table class="w3-table w3-bordered">
+        {% for round in object_list %}
+            <tr>
+                <td style="width:90%;"><a href="/golf/display_round/{{ round.id }}/">{{ round.date|date:"d M y" }} | {{ round.course }} | {{round.score}}</a></td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td>No rounds yet.</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; First</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+    <p> </p>
+    <button><a href="{% url 'addround' %}">Add Round</a></button>
+</div>
+{% endblock %}

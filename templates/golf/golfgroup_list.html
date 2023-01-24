@@ -1,0 +1,60 @@
+<!-- templates/golf/golfgroup_list.html -->
+{% extends "base.html" %}
+
+{% block title %}Golf Group List{% endblock %}
+
+{% block content %}
+<div class="w3-card w3-teal w3-padding">
+    {% if groups_user_is_in.all %}
+        <h1 class="w3-large">Golf Groups you are a member of</h1>
+    {% endif %}
+    <table class="w3-table w3-bordered">
+            {% for groups_in in groups_user_is_in %}
+                <tr>
+                    <td style="width:70%">{{ groups_in.group_name }}</td><td style="width:30%;"><button><a href="/golf/list_buddies/{{ groups_in.id }}/">Buddies</a></button></td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td>You are not currently in any groups.</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+    
+    {% if object_list.all %}
+    <h1 class="w3-large">Golf Groups you administer</h1>
+    <table class="w3-table w3-bordered">
+        {% for group in object_list %}
+            <tr>
+                <td style="width:70%"><a href="/golf/display_golf_group/{{ group.id }}/">{{ group.group_name }}</a></td><td style="width:30%;"><button><a href="/golf/list_buddies/{{ group.id }}/">Buddies</a></button></td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td>No groups created yet.</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+    {% endif %}
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; First</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+    <p> </p>
+    <button><a href="{% url 'addgolfgroup' %}">Add Golf group</a></button>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+<!-- templates/registration/signup.html -->
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Sign up</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit">Sign Up</button>
+    </form>
+</div>
+{% endblock %}
