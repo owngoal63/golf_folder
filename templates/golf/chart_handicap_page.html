@@ -1,73 +1,96 @@
-<!-- templates/golf/chart_handicap_page.html -->
+<!-- templates/golf/chart_handicap_page2.html -->
 
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
 
-{% block content %}
+<div id="container" style="width: 95%;">
+  <canvas id="chart_handicap_graph" data-url="{% url 'chart_handicap_graph' %}"></canvas>
+</div>
 
-  <div id="container" style="width: 95%;">
-    <canvas id="chart_handicap_graph" data-url="{% url 'chart_handicap_graph' %}"></canvas>
-  </div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
-  <script>
+<script>
 
-    $(function () {
+$(function () {
 
-      var $roundsChart = $("#chart_handicap_graph");
+  
+
+  var $roundsChart = $("#chart_handicap_graph");
       $.ajax({
         url: $roundsChart.data("url"),
         success: function (data) {
-
+        
           var ctx = $roundsChart[0].getContext("2d");
 
-          new Chart(ctx, {
-            type: 'bar',
-            data: {
-              labels: data.labels,
-              datasets: [{
-                label: 'Deviation from overall average (' + data.average + ')',
-                backgroundColor: data.backgroundcolors,
-                borderRadius: 5,
-                data: data.data
-              }]          
-            },
-            options: {
-              responsive: true,
-              legend: {
-                position: 'top',
-              },
-              title: {
-                display: true,
-                text: 'Handicap Tracking Chart',
-                    font: {
-                        size: 40
-                    }
-              },
-              
-              scales: {
-                yAxes: [{
-                            display: true,
-                            ticks: {
-                                suggestedMin: data.s_min,
-                                suggestedMax: data.s_max
-                            },
-                            scaleLabel: {
-                            display: true,
-                            labelString: 'Deviation (+/-)'
-                            }
-                        }]  
-                }
-            }
-          });
 
+          const customLegend = {
+    id:'customLegend',
+    afterDraw: (chart, args, pluginOptions) => {
+      const {ctx, chartArea: {left, right, top, bottom, width, height}, scales: { x,y}} = chart;
+      ctx.save();
+      ctx.font = 'bolder 11px sans-serif';
+      
+      // data.roundcourses.forEach((roundcourse, index) =>{
+      //   ctx.fillText(roundcourse, chart.getDatasetMeta(0).data[index].x, chart.getDatasetMeta(0).data[index].y + 10);
+      // })
+      data.coursesplayed.forEach((courseplayed, index) =>{
+        ctx.fillStyle = data.coursesplayedcolor[index];
+        // ctx.fillText(courseplayed, chart.getDatasetMeta(0).data[index].x, chart.getDatasetMeta(0).data[index].y + 10);
+        ctx.fillText(courseplayed, 0, (index + 1) * 15 + 30);
+      })
+      // ctx.fillText(data.courses[1], chart.getDatasetMeta(0).data[1].x, chart.getDatasetMeta(0).data[1].y + 10);
+      // ctx.fillText(data.backgroundcolors[2], chart.getDatasetMeta(0).data[2].x, chart.getDatasetMeta(0).data[2].y + 10);
+      // ctx.fillText(data.backgroundcolors[3], chart.getDatasetMeta(0).data[3].x, chart.getDatasetMeta(0).data[3].y + 10);
+    }
+  }
+
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: data.labels.slice(-20),
+      datasets: [
+        {
+          label: 'Deviation (+/-) from overall average (' + data.average + ')',
+          backgroundColor: data.backgroundcolors.slice(-20),
+          borderRadius: 5,
+          data: data.data.slice(-20),
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      layout: {
+        padding: {
+          left: 100
         }
-      });
-
-    });
-
-  </script>
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+      plugins: {
+      legend: { 
+        display: true,
+        position: 'bottom',
+        labels: { color: '#3366CC' }
+        
+      },
+      title: {
+                  display: true,
+                  text: 'Form Tracking Chart',
+                  font: {
+                    size: 20
+                  }
+                },
+      }
+    },
+    plugins: [customLegend]
+  });
+        }
+});
+})
+</script>
 
 <br>
 <button><a href="/golf/chart_rounds_page/">Show Rounds Chart</a></button>

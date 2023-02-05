@@ -16,6 +16,7 @@ from django.http import JsonResponse
 # from django.db.models.functions import Concat
 
 from django.contrib.auth.decorators import login_required
+import json
 
 # ~~~~~~~ Course Table CRUD views ~~~~~~~
 
@@ -294,6 +295,17 @@ class BuddyDeleteView(DeleteView):
 
 # ~~~~~~~ Stat views ~~~~~~~
 
+class MyObject:
+    def __init__(self, d=None):
+        if d is not None:
+            for key, value in d.items():
+                setattr(self, key, value)
+
+class Object:
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
+
 @login_required
 def chart_rounds_page(request):
     return render(request, 'golf/chart_rounds_page.html')
@@ -318,11 +330,95 @@ def chart_rounds_graph(request):
 def chart_handicap_page(request):
     return render(request, 'golf/chart_handicap_page.html')
 
+# @login_required
+# def chart_handicap_graph(request):
+#     labels = []
+#     data = []
+#     backgroundcolors = []
+#     defaultColors = [
+#         "#3366CC", "#DC3912", "#FF9900", "#109618", "#990099", "#3B3EAC", "#0099C6",
+#         "#DD4477", "#66AA00", "#B82E2E", "#316395", "#994499", "#22AA99", "#AAAA11",
+#         "#6633CC", "#E67300", "#8B0707", "#329262", "#5574A6", "#651067"
+#         ]
+#     course_colours = dict()
+
+#     # queryset = Round.objects.all().values('date','handicap_differential').filter(player=request.user).order_by('date')
+#     queryset = Round.objects.all().values('date', 'course__name','handicap_differential').filter(player=request.user).order_by('date')
+#     # print(queryset)
+#     queryset_courses = Round.objects.values('course__name').annotate(dcount=Count('course__name')).filter(player=request.user).order_by()
+#     # print(queryset_courses)
+#     for course in enumerate(queryset_courses):
+#         # print(course[0])
+#         # print(course[1].get("course__name"))
+#         course_colours[course[1].get("course__name")] = defaultColors[course[0]]
+#     # print(course_colours)
+
+#     _min = queryset.aggregate(min = Min('handicap_differential'))
+#     _max = queryset.aggregate(max = Max('handicap_differential'))
+#     _avg = queryset.aggregate(avg = Avg('handicap_differential'))
+#     average_handicap = _avg.get("avg")
+#     max_height = max(_min.get("min"), _max.get("max")) - average_handicap
+#     suggested_min = 0-max_height
+#     suggested_max = max_height
+
+#     # Limit to last x rounds
+#     # This is now done in chart.js
+
+#     raw_dict = {
+#         "x": 0,
+#         "y": 0,
+#         "course": ""
+#     }
+
+#     n=0
+#     for entry in queryset:
+#         labels.append(entry['date'])
+#         me = Object()
+#         # me.name = "Onur"
+#         # me.age = 35
+#         # me.dog = Object()
+#         # me.dog.name = "Apollo"
+#         me.x = n
+#         me.y = int(entry['handicap_differential'] - average_handicap)
+#         # me.course = entry['course__name']
+#         raw_dict["x"] = n
+#         raw_dict["y"] = entry['handicap_differential'] - average_handicap
+#         # raw_dict["course"] = entry['course__name']
+#         raw_obj = MyObject(raw_dict)
+#         # print(me)
+#         # print(raw_obj.x)
+#         # print(stop)
+#         # obj_string = "{ x: " + str(n) + ", y: " + str(entry['handicap_differential'] - average_handicap) + ", course: '" + entry['course__name'] + "'}"
+#         # print(raw_obj)
+#         data.append(int(entry['handicap_differential'] - average_handicap))
+#         # data.append(me)
+#         # print(course_colours[entry['course__name']])
+#         backgroundcolors.append(course_colours[entry['course__name']])
+#         # print(entry['course__name'], entry['date'], backgroundcolors[n])
+#         n=n+1
+#     print(data)
+    
+#     return JsonResponse(data={
+#         'labels': labels,
+#         'data': data,
+#         's_min': suggested_min,
+#         's_max': suggested_max,
+#         'average': str(round(average_handicap,2)),
+#         'backgroundcolors': backgroundcolors
+#     })
+
+# @login_required
+# def chart_handicap_page2(request):
+#     return render(request, 'golf/chart_handicap_page2.html')
+
 @login_required
 def chart_handicap_graph(request):
     labels = []
     data = []
     backgroundcolors = []
+    roundcourses = []
+    coursesplayed = []
+    coursesplayedcolor = []
     defaultColors = [
         "#3366CC", "#DC3912", "#FF9900", "#109618", "#990099", "#3B3EAC", "#0099C6",
         "#DD4477", "#66AA00", "#B82E2E", "#316395", "#994499", "#22AA99", "#AAAA11",
@@ -336,10 +432,11 @@ def chart_handicap_graph(request):
     queryset_courses = Round.objects.values('course__name').annotate(dcount=Count('course__name')).filter(player=request.user).order_by()
     # print(queryset_courses)
     for course in enumerate(queryset_courses):
-        # print(course[0])
-        # print(course[1].get("course__name"))
         course_colours[course[1].get("course__name")] = defaultColors[course[0]]
-    print(course_colours)
+        coursesplayed.append(course[1].get("course__name"))
+        coursesplayedcolor.append(defaultColors[course[0]])
+    # print(coursesplayed)
+    # print(coursesplayedcolor)
 
     _min = queryset.aggregate(min = Min('handicap_differential'))
     _max = queryset.aggregate(max = Max('handicap_differential'))
@@ -350,15 +447,16 @@ def chart_handicap_graph(request):
     suggested_max = max_height
 
     # Limit to last x rounds
-    queryset = queryset[:20]
+    # This is now done in chart.js
 
     # print(queryset)
     for entry in queryset:
         labels.append(entry['date'])
-        data.append(entry['handicap_differential'] - average_handicap)
+        data.append(int(entry['handicap_differential'] - average_handicap))
         # print(course_colours[entry['course__name']])
         backgroundcolors.append(course_colours[entry['course__name']])
-    print(backgroundcolors)
+        roundcourses.append(entry['course__name'])
+    # print(roundcourses)
     
     return JsonResponse(data={
         'labels': labels,
@@ -366,62 +464,10 @@ def chart_handicap_graph(request):
         's_min': suggested_min,
         's_max': suggested_max,
         'average': str(round(average_handicap,2)),
-        'backgroundcolors': backgroundcolors
-    })
-
-@login_required
-def chart_handicap_page2(request):
-    return render(request, 'golf/chart_handicap_page2.html')
-
-@login_required
-def chart_handicap_graph2(request):
-    labels = []
-    data = []
-    backgroundcolors = []
-    defaultColors = [
-        "#3366CC", "#DC3912", "#FF9900", "#109618", "#990099", "#3B3EAC", "#0099C6",
-        "#DD4477", "#66AA00", "#B82E2E", "#316395", "#994499", "#22AA99", "#AAAA11",
-        "#6633CC", "#E67300", "#8B0707", "#329262", "#5574A6", "#651067"
-        ]
-    course_colours = dict()
-
-    # queryset = Round.objects.all().values('date','handicap_differential').filter(player=request.user).order_by('date')
-    queryset = Round.objects.all().values('date', 'course__name','handicap_differential').filter(player=request.user).order_by('date')
-    # print(queryset)
-    queryset_courses = Round.objects.values('course__name').annotate(dcount=Count('course__name')).filter(player=request.user).order_by()
-    # print(queryset_courses)
-    for course in enumerate(queryset_courses):
-        # print(course[0])
-        # print(course[1].get("course__name"))
-        course_colours[course[1].get("course__name")] = defaultColors[course[0]]
-    print(course_colours)
-
-    _min = queryset.aggregate(min = Min('handicap_differential'))
-    _max = queryset.aggregate(max = Max('handicap_differential'))
-    _avg = queryset.aggregate(avg = Avg('handicap_differential'))
-    average_handicap = _avg.get("avg")
-    max_height = max(_min.get("min"), _max.get("max")) - average_handicap
-    suggested_min = 0-max_height
-    suggested_max = max_height
-
-    # Limit to last x rounds
-    queryset = queryset[:20]
-
-    # print(queryset)
-    for entry in queryset:
-        labels.append(entry['date'])
-        data.append(entry['handicap_differential'] - average_handicap)
-        # print(course_colours[entry['course__name']])
-        backgroundcolors.append(course_colours[entry['course__name']])
-    print(backgroundcolors)
-    
-    return JsonResponse(data={
-        'labels': labels,
-        'data': data,
-        's_min': suggested_min,
-        's_max': suggested_max,
-        'average': str(round(average_handicap,2)),
-        'backgroundcolors': backgroundcolors
+        'backgroundcolors': backgroundcolors,
+        'roundcourses': roundcourses,
+        'coursesplayed': coursesplayed,
+        'coursesplayedcolor': coursesplayedcolor
     })
 
 

@@ -1,0 +1,82 @@
+<!-- templates/golf/chart_handicap_page.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div id="container" style="width: 95%;">
+  <canvas id="chart_handicap_graph" data-url="{% url 'chart_handicap_graph' %}"></canvas>
+</div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"><</script>
+<script>
+
+    $(function () {
+
+      var $roundsChart = $("#chart_handicap_graph");
+      $.ajax({
+        url: $roundsChart.data("url"),
+        success: function (data) {
+
+          var ctx = $roundsChart[0].getContext("2d");
+          // Chart.register(ChartDataLabels);
+          new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: data.labels.slice(-20),
+              datasets: [{
+                label: 'Deviation from overall average (' + data.average + ')',
+                backgroundColor: data.backgroundcolors.slice(-20),
+                borderRadius: 5,
+                data: data.data.slice(-20)
+              }]
+            },
+            options: {
+              plugins: {
+                
+                responsive: true,
+                legend: {
+                  position: 'bottom',
+                },
+                title: {
+                  display: true,
+                  text: 'Handicap Tracking Chart',
+                  font: {
+                    size: 25
+                  }
+                },
+
+                scales: {
+                  xAxis: [{
+                    barThickness: 90
+                  }],
+                  yAxis: [{
+                    display: true,
+                    ticks: {
+                      suggestedMin: data.s_min,
+                      suggestedMax: data.s_max
+                    },
+                    scaleLabel: {
+                      display: true,
+                      labelString: 'Deviation (+/-)'
+                    }
+                  }]
+                }
+              }
+            }
+          });
+
+        }
+      });
+
+    });
+
+</script>
+
+<br>
+<button><a href="/golf/chart_rounds_page/">Show Rounds Chart</a></button>
+
+{% endblock %}
