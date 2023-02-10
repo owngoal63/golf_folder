@@ -326,10 +326,6 @@ def chart_rounds_graph(request):
         'data': data,
     })
 
-@login_required
-def chart_handicap_page(request):
-    return render(request, 'golf/chart_handicap_page.html')
-
 # @login_required
 # def chart_handicap_graph(request):
 #     labels = []
@@ -412,7 +408,16 @@ def chart_handicap_page(request):
 #     return render(request, 'golf/chart_handicap_page2.html')
 
 @login_required
+def chart_handicap_page(request):
+    # player_id = request.user if len(request.GET.keys()) == 0 else request.GET.get('p')
+    # print(player_id)
+    return render(request, 'golf/chart_handicap_page.html')
+
+@login_required
 def chart_handicap_graph(request):
+    # player_id = request.user if len(request.GET.keys()) == 0 else request.GET.get('p')
+    # print("******************************************")
+    # print(player_id)
     labels = []
     data = []
     backgroundcolors = []

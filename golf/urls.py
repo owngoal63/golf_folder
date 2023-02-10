@@ -36,6 +36,7 @@ urlpatterns = [
     path('chart_rounds_graph/', chart_rounds_graph, name='chart_rounds_graph'),
     path('chart_handicap_page/', chart_handicap_page, name='chart_handicap_page'),
     path('chart_handicap_graph/', chart_handicap_graph, name='chart_handicap_graph'),
+    # path('chart_handicap_graph/<int:p>/', chart_handicap_graph, name='chart_handicap_graph'),
     # path('chart_handicap_page2/', chart_handicap_page2, name='chart_handicap_page2'),
     # path('chart_handicap_graph2/', chart_handicap_graph2, name='chart_handicap_graph2'),
 ]

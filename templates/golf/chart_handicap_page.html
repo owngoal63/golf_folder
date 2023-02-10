@@ -11,85 +11,68 @@
 
 <script>
 
-$(function () {
+  $(function () {
 
-  
+    var $roundsChart = $("#chart_handicap_graph");
+    $.ajax({
+      url: $roundsChart.data("url"),
+      success: function (data) {
 
-  var $roundsChart = $("#chart_handicap_graph");
-      $.ajax({
-        url: $roundsChart.data("url"),
-        success: function (data) {
-        
-          var ctx = $roundsChart[0].getContext("2d");
+        var ctx = $roundsChart[0].getContext("2d");
 
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: data.labels.slice(-20),
+            datasets: [
+              {
+                label: 'Deviation (+/-) from overall average (' + data.average + ')',
+                backgroundColor: data.backgroundcolors.slice(-20),
+                borderRadius: 5,
+                data: data.data.slice(-20),
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
 
-          const customLegend = {
-    id:'customLegend',
-    afterDraw: (chart, args, pluginOptions) => {
-      const {ctx, chartArea: {left, right, top, bottom, width, height}, scales: { x,y}} = chart;
-      ctx.save();
-      ctx.font = 'bolder 11px sans-serif';
-      
-      // data.roundcourses.forEach((roundcourse, index) =>{
-      //   ctx.fillText(roundcourse, chart.getDatasetMeta(0).data[index].x, chart.getDatasetMeta(0).data[index].y + 10);
-      // })
-      data.coursesplayed.forEach((courseplayed, index) =>{
-        ctx.fillStyle = data.coursesplayedcolor[index];
-        // ctx.fillText(courseplayed, chart.getDatasetMeta(0).data[index].x, chart.getDatasetMeta(0).data[index].y + 10);
-        ctx.fillText(courseplayed, 0, (index + 1) * 15 + 30);
-      })
-      // ctx.fillText(data.courses[1], chart.getDatasetMeta(0).data[1].x, chart.getDatasetMeta(0).data[1].y + 10);
-      // ctx.fillText(data.backgroundcolors[2], chart.getDatasetMeta(0).data[2].x, chart.getDatasetMeta(0).data[2].y + 10);
-      // ctx.fillText(data.backgroundcolors[3], chart.getDatasetMeta(0).data[3].x, chart.getDatasetMeta(0).data[3].y + 10);
-    }
-  }
-
-  new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: data.labels.slice(-20),
-      datasets: [
-        {
-          label: 'Deviation (+/-) from overall average (' + data.average + ')',
-          backgroundColor: data.backgroundcolors.slice(-20),
-          borderRadius: 5,
-          data: data.data.slice(-20),
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      layout: {
-        padding: {
-          left: 100
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
-      },
-      plugins: {
-      legend: { 
-        display: true,
-        position: 'bottom',
-        labels: { color: '#3366CC' }
-        
-      },
-      title: {
-                  display: true,
-                  text: 'Form Tracking Chart',
-                  font: {
-                    size: 20
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  generateLabels: chart => {
+                    const courselabel = []
+                    data.coursesplayed.forEach((courseplayed, index) => {
+                      courselabel.push({
+                        text: courseplayed,
+                        fillStyle: data.coursesplayedcolor[index],
+                        strokeStyle: data.coursesplayedcolor[index]
+                      })
+                    })
+                    return courselabel;
                   }
-                },
+                }
+
+              },
+              title: {
+                display: true,
+                text: 'Deviation (+/-) from overall average (' + data.average + ')',
+                font: {
+                  size: 12
+                }
+              },
+            }
+          },
+
+        });
       }
-    },
-    plugins: [customLegend]
-  });
-        }
-});
-})
+    });
+  })
 </script>
 
 <br>
