@@ -16,7 +16,7 @@
         <tr>
             <td style="font-size:11px">Date</td><td style="font-size:11px">Course</td><td style="font-size:11px">Course / Slope Rating</td><td style="font-size:11px">Score</td><td style="font-size:11px">HndCp Diff.</td>
         </tr>
-        {% for round_details in object_list %}
+        {% for round_details in object %}
             {% if round_details.id in lowest_round_id_list %}
                 <tr style="background-color:darkblue">
             {% else %}

@@ -136,7 +136,7 @@ class RoundListHandicapView(ListView):
         round_obj = Round.objects.filter(player = player_id ).order_by('-date')[0:20] # Most recent 20 rounds
         context['object'] = round_obj
         # Determine if weighting factor needs to be applied
-        num_score_differentials = len(round_obj)
+        num_score_differentials = len(Round.objects.filter(player = player_id ))
         context['total_number_of_rounds'] = num_score_differentials
         if(num_score_differentials >= 3 and num_score_differentials <= 20):
             diffadjustment_obj = DiffAjustment.objects.filter(num_of_scores = num_score_differentials )[0]
@@ -167,13 +167,25 @@ class RoundListHandicapView(ListView):
             context['lowest_round_id_list'] = lowest_round_id_list
 
         elif(num_score_differentials > 20):
-            round_obj_bylowest = Round.objects.filter(player = player_id ).order_by('handicap_differential')[:8]
+            lowest_handicap_diff_list = []
+            round_obj_bylowest = Round.objects.filter(player = player_id ).order_by('handicap_differential')
+            stop_loop_at = 8
+            count = 0
             for r in round_obj_bylowest:
-                lowest_round_id_list.append(r.id)
-            calculated_handicap = round_obj_bylowest.aggregate(Avg('handicap_differential'))
-            context['calculated_handicap'] = round(calculated_handicap.get('handicap_differential__avg'),1)
+                print(count)
+                if r in round_obj:
+                    lowest_round_id_list.append(r.id)
+                    lowest_handicap_diff_list.append(r.handicap_differential)
+                    count = count + 1
+                if count == stop_loop_at:
+                    break
+            print(lowest_round_id_list)
+            print(lowest_handicap_diff_list)
+            calculated_handicap = sum(lowest_handicap_diff_list) / len(lowest_handicap_diff_list)
+            context['calculated_handicap'] = round(calculated_handicap,1)
             context['number_of_lowest_rounds'] = "8"
             context['lowest_round_id_list'] = lowest_round_id_list
+            context['total_number_of_rounds'] = 20
 
         else:   # Greater than 6, less than 20
             round_obj_bylowest = Round.objects.filter(player = player_id ).order_by('handicap_differential')[:diffadjustment_obj.calculation_factor]
