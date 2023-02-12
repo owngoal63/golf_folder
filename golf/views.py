@@ -469,7 +469,7 @@ def chart_handicap_graph(request):
     # print(queryset)
     for entry in queryset:
         labels.append(entry['date'])
-        data.append(int(entry['handicap_differential'] - average_handicap))
+        data.append(entry['handicap_differential'] - average_handicap)
         # print(course_colours[entry['course__name']])
         backgroundcolors.append(course_colours[entry['course__name']])
         roundcourses.append(entry['course__name'])
