@@ -6,11 +6,8 @@
 {% block content %}
 {% if user.is_authenticated %}
 <h1 class="w3-large">Hi {{ user.email }}!</h1>
-  <p> Welcome to Handi Cappy your golf round and handicap recording and calculation site. Now that you have signed up, you can record the details of the courses
-    you are playing, enter your round scores and the once you have enough rounds ( minimum 3 ), the site will provide you with your handicap
-    calculation as per the World Handicap System.</p>
-  <p>Additionally if you have golf buddies, you can set up playing groups which will both track all your respective scores and provide net handicap details upcoming rounds.</p>
-  <p>To get started select the course that you are playing from the site menu. Happy swinging!</p>
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+<lottie-player src="https://assets7.lottiefiles.com/packages/lf20_gjbrnsui.json"  background="transparent"  speed="1"  style="width: 400px; height: 400px;"  loop  autoplay></lottie-player>
   <p><button><a href="{% url 'logout' %}">Log Out</a></button></p>
   <p><button><a href="{% url 'password_reset' %}">Reset Password</a></button></p>
 {% else %}
