@@ -1,0 +1,85 @@
+<!-- templates/golf/course_holes_form.html -->
+{% extends "base.html" %}
+
+{% block title %}Add/Update Course Holes{% endblock %}
+
+
+{% block content %}
+
+<style>
+    table, th, td {
+     border: 1px solid white;
+    }
+    td {
+        width: 50px;
+        text-align: center;}
+</style>
+
+{% load crispy_forms_tags %}
+<div class="w3-card w3-teal w3-padding">
+    {% if 'update' in request.path %}
+        <h1 class="w3-large">Update Course Holes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button><a href="..\delete\">&#128465;</a></button></h1>
+    {% else %}
+        <h1 class="w3-large">Course: {{round_meta.course_name}}</h1>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+
+
+        
+        <!-- <p>Player: {{key}} {{value.name}}</p> -->
+        <!-- <p>Course: {{round_meta.course_name}}</p> -->
+        <p>Player A: {{player_dict.player1.name}}:<br>
+            <input type="text" id="score1" name="score1"></p>
+        <p>Player B: {{player_dict.player2.name}}:<br>
+            <input type="text" id="score2" name="score2">  </p>
+        <p>Player C: {{player_dict.player3.name}}:<br>
+            <input type="text" id="score3" name="score3">  </p>
+        <p>Player D: {{player_dict.player4.name}}:<br>
+            <input type="text" id="score4" name="score4">&nbsp;&nbsp;&nbsp;<button type="submit">Add Scores</button> </p>
+
+        <!-- <p>{{player_dict.player1.holes_score.0.1}}</p>
+
+        {% for key, value in player_dict.items %} 
+            {{value.holes_score.0.1}}
+
+        {% endfor %} -->
+
+        <table>
+            <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th><th>&nbsp;A&nbsp;</th><th>&nbsp;B&nbsp;</th>
+       
+            <!-- <tr><td>{{player_dict.player1.holes_attr.0.0}}</td><td>{{player_dict.player1.holes_attr.0.1}}</td><td>{{player_dict.player1.holes_attr.0.2}}</td><td bgcolor='{{player_dict.player1.holes_attr.0.5}}'>{{player_dict.player1.holes_attr.0.4}}</td><td>{{player_dict.player2.holes_attr.0.4}}</td></tr> -->
+            <tr><td>{{player_dict.player1.holes_attr.0.0}}</td><td>{{player_dict.player1.holes_attr.0.1}}</td><td>{{player_dict.player1.holes_attr.0.2}}</td><td>{{player_dict.player1.holes_attr.0.4}}</td><td>{{player_dict.player2.holes_attr.0.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.1.0}}</td><td>{{player_dict.player1.holes_attr.1.1}}</td><td>{{player_dict.player1.holes_attr.1.2}}</td><td>{{player_dict.player1.holes_attr.1.4}}</td><td>{{player_dict.player2.holes_attr.1.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.2.0}}</td><td>{{player_dict.player1.holes_attr.2.1}}</td><td>{{player_dict.player1.holes_attr.2.2}}</td><td>{{player_dict.player1.holes_attr.2.4}}</td><td>{{player_dict.player2.holes_attr.2.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.3.0}}</td><td>{{player_dict.player1.holes_attr.3.1}}</td><td>{{player_dict.player1.holes_attr.3.2}}</td><td>{{player_dict.player1.holes_attr.3.4}}</td><td>{{player_dict.player2.holes_attr.3.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.4.0}}</td><td>{{player_dict.player1.holes_attr.4.1}}</td><td>{{player_dict.player1.holes_attr.4.2}}</td><td>{{player_dict.player1.holes_attr.4.4}}</td><td>{{player_dict.player2.holes_attr.4.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.5.0}}</td><td>{{player_dict.player1.holes_attr.5.1}}</td><td>{{player_dict.player1.holes_attr.5.2}}</td><td>{{player_dict.player1.holes_attr.5.4}}</td><td>{{player_dict.player2.holes_attr.5.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.6.0}}</td><td>{{player_dict.player1.holes_attr.6.1}}</td><td>{{player_dict.player1.holes_attr.6.2}}</td><td>{{player_dict.player1.holes_attr.6.4}}</td><td>{{player_dict.player2.holes_attr.6.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.7.0}}</td><td>{{player_dict.player1.holes_attr.7.1}}</td><td>{{player_dict.player1.holes_attr.7.2}}</td><td>{{player_dict.player1.holes_attr.7.4}}</td><td>{{player_dict.player2.holes_attr.7.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.8.0}}</td><td>{{player_dict.player1.holes_attr.8.1}}</td><td>{{player_dict.player1.holes_attr.8.2}}</td><td>{{player_dict.player1.holes_attr.8.4}}</td><td>{{player_dict.player2.holes_attr.8.4}}</td></tr>
+            <tr><td>Out</td><td>{{round_meta.outpar}}</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.9.0}}</td><td>{{player_dict.player1.holes_attr.9.1}}</td><td>{{player_dict.player1.holes_attr.9.2}}</td><td>{{player_dict.player1.holes_attr.9.4}}</td><td>{{player_dict.player2.holes_attr.9.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.10.0}}</td><td>{{player_dict.player1.holes_attr.10.1}}</td><td>{{player_dict.player1.holes_attr.10.2}}</td><td>{{player_dict.player1.holes_attr.10.4}}</td><td>{{player_dict.player2.holes_attr.10.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.11.0}}</td><td>{{player_dict.player1.holes_attr.11.1}}</td><td>{{player_dict.player1.holes_attr.11.2}}</td><td>{{player_dict.player1.holes_attr.11.4}}</td><td>{{player_dict.player2.holes_attr.11.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.12.0}}</td><td>{{player_dict.player1.holes_attr.12.1}}</td><td>{{player_dict.player1.holes_attr.12.2}}</td><td>{{player_dict.player1.holes_attr.12.4}}</td><td>{{player_dict.player2.holes_attr.12.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.13.0}}</td><td>{{player_dict.player1.holes_attr.13.1}}</td><td>{{player_dict.player1.holes_attr.13.2}}</td><td>{{player_dict.player1.holes_attr.13.4}}</td><td>{{player_dict.player2.holes_attr.13.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.14.0}}</td><td>{{player_dict.player1.holes_attr.14.1}}</td><td>{{player_dict.player1.holes_attr.14.2}}</td><td>{{player_dict.player1.holes_attr.14.4}}</td><td>{{player_dict.player2.holes_attr.14.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.15.0}}</td><td>{{player_dict.player1.holes_attr.15.1}}</td><td>{{player_dict.player1.holes_attr.15.2}}</td><td>{{player_dict.player1.holes_attr.15.4}}</td><td>{{player_dict.player2.holes_attr.15.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.16.0}}</td><td>{{player_dict.player1.holes_attr.16.1}}</td><td>{{player_dict.player1.holes_attr.16.2}}</td><td>{{player_dict.player1.holes_attr.16.4}}</td><td>{{player_dict.player2.holes_attr.16.4}}</td></tr>
+            <tr><td>{{player_dict.player1.holes_attr.17.0}}</td><td>{{player_dict.player1.holes_attr.17.1}}</td><td>{{player_dict.player1.holes_attr.17.2}}</td><td>{{player_dict.player1.holes_attr.17.4}}</td><td>{{player_dict.player2.holes_attr.17.4}}</td></tr>
+            <tr><td>In</td><td>{{round_meta.inpar}}</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+            <tr><td>Total</td><td>{{round_meta.totalpar}}</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        </table>
+        <!-- <p>Hole {{value.holes_attr.0.0}}  Par: {{value.holes_attr.0.1}} SI: {{value.holes_attr.0.2}} Strokes: {{value.holes_attr.0.3}}</p>
+        <p>Hole {{value.holes_attr.17.0}}  Par: {{value.holes_attr.17.1}} SI: {{value.holes_attr.17.2}} Strokes: {{value.holes_attr.17.3}}</p> -->
+        <!-- {% if 'update' in request.path %}
+            <button type="submit">Update</button>
+        {% else %}
+            <button type="submit">Add</button>
+        {% endif %} -->
+
+    </form>
+</div>
+{% endblock %}

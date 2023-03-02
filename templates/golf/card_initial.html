@@ -1,0 +1,19 @@
+<!-- templates/golf/card_initial.html -->
+{% extends "base.html" %}
+
+{% block title %}Setup Card for Round{% endblock %}
+
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Select Course & Enter Course Handicaps</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <p> </p>
+        <button type="submit">Start</button> </p>
+    </form>
+</div>
+{% endblock %}

@@ -26,7 +26,7 @@
     <table class="w3-table w3-bordered">
         {% for group in object_list %}
             <tr>
-                <td style="width:70%"><a href="/golf/display_golf_group/{{ group.id }}/">{{ group.group_name }}</a></td><td style="width:30%;"><button><a href="/golf/list_buddies/{{ group.id }}/">Buddies</a></button></td>
+                <td style="width:70%"><a href="/golf/display_golf_group/{{ group.id }}/">{{ group.group_name }}</a></td><td style="width:30%;"><button><a href="/golf/list_buddies/{{ group.id }}/">Buddies</a></button>&nbsp;<button><a href="/golf/cardinitial/{{ group.id }}/">Score</a></button></td>
             </tr>
         {% empty %}
             <tr>

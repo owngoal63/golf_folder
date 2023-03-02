@@ -39,4 +39,8 @@ urlpatterns = [
     # path('chart_handicap_graph/<int:p>/', chart_handicap_graph, name='chart_handicap_graph'),
     # path('chart_handicap_page2/', chart_handicap_page2, name='chart_handicap_page2'),
     # path('chart_handicap_graph2/', chart_handicap_graph2, name='chart_handicap_graph2'),
+    path('trackmatch/', trackmatch ,name='track_match'),
+    path('cardinitial/<int:group>/', login_required(CardInitialView.as_view()), name='cardinitialview'),
+    # path('cardentry/<int:group>/', login_required(CardEntryView.as_view()), name='cardentryview'),
+
 ]
