@@ -1,13 +1,15 @@
 # golf/views.py
 from django.db.models import Avg, Min, Max, Count
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic import TemplateView
 from django.urls import reverse
+from django.http import HttpResponseRedirect
+from random import randrange
 
-from .forms import CourseForm, RoundForm, GolfGroupForm, BuddyForm
-from .models import Course, Round, DiffAjustment, GolfGroup, Buddy
+from .forms import CourseForm, RoundForm, GolfGroupForm, BuddyForm, CardInitialForm, CardEntryForm
+from .models import *
 
 from django.shortcuts import render
 # from django.db.models import Sum
@@ -305,7 +307,7 @@ class BuddyDeleteView(DeleteView):
     def get_success_url(self):
         return reverse('buddylist', kwargs={'group': self.kwargs.get("group") })
 
-# ~~~~~~~ Stat views ~~~~~~~
+# ~~~~~~~ Chart views ~~~~~~~
 
 class MyObject:
     def __init__(self, d=None):
@@ -487,5 +489,351 @@ def chart_handicap_graph(request):
         'coursesplayedcolor': coursesplayedcolor
     })
 
+def make_stars(num):
+    return "*" * num
+
+@login_required
+def trackmatch(request, score_id, hole_no):
+    # Get Functional Parameters and Initaliase variables  
+    score_instance = Score.objects.get(id = score_id)
+    no_of_players = score_instance.no_of_players
+    player_hcps = []
+    player_hcps.append(score_instance.player_a_course_hcp)
+    player_hcps.append(score_instance.player_b_course_hcp)
+    player_hcps.append(score_instance.player_c_course_hcp)
+    player_hcps.append(score_instance.player_d_course_hcp)
+    holes_attr=[]
+    holes_attr2 = []
+    running_totals = []
+    stableford_dict = {
+        "1": 1,
+        "0": 2,
+        "-1": 3,
+        "-2": 4,
+        "-3": 5,
+        "-4": 6
+    }
+
+    cq = Course.objects.all().get(id = 1)
+    # cq = Course.objects.all().get(id = score_instance.course.id)      !!!!!!!!!!!!!! Remember to put this in and remove above line !!!!!!!!!!!!!!
+    buddy_queryset = Buddy.objects.all().filter(group = score_instance.group)
+
+    # Set Round Meta Parameters for passing to form
+    round_meta = {}
+    round_meta["round_id"] = score_instance.id
+    round_meta["round_admin"] = score_instance.player_a.email
+    round_meta["round_date"] = score_instance.date
+    round_meta["no_of_players"] = no_of_players
+    round_meta["hole_no"] = hole_no
+    round_meta["previous_hole_no"] = hole_no - 1
+    round_meta["next_hole_no"] = hole_no + 1
+    round_meta["holes_completed"] = hole_no - 1
+    round_meta["course_name"] = score_instance.course
+    round_meta["course_par"] = cq.par
+    round_meta["course_rating"] = cq.course_rating
+    round_meta["slope_rating"] = cq.slope_rating
+    round_meta["player_a_course_hcp"] = score_instance.player_a_course_hcp
+    round_meta["player_b_course_hcp"] = score_instance.player_b_course_hcp
+    round_meta["player_c_course_hcp"] = score_instance.player_c_course_hcp
+    round_meta["player_d_course_hcp"] = score_instance.player_d_course_hcp
+    round_meta["outpar"] = cq.hole1par + cq.hole2par + cq.hole3par + cq.hole4par + cq.hole5par + cq.hole6par + cq.hole7par + cq.hole8par + cq.hole9par
+    round_meta["inpar"] = cq.hole10par + cq.hole11par + cq.hole12par + cq.hole13par + cq.hole14par + cq.hole15par + cq.hole16par + cq.hole17par + cq.hole18par
+    round_meta["totalpar"] = round_meta["outpar"] + round_meta["inpar"]
+
+
+    # List of Stroke Indexes for Course
+    holesSI = [cq.hole1SI, cq.hole2SI, cq.hole3SI, cq.hole4SI, cq.hole5SI, cq.hole6SI, cq.hole7SI, cq.hole8SI, cq.hole9SI, 
+               cq.hole10SI, cq.hole11SI, cq.hole12SI, cq.hole13SI, cq.hole14SI, cq.hole15SI, cq.hole16SI, cq.hole17SI, cq.hole18SI ]
+    
+    # Main Loop for Building Handicaps and Scores for all players
+    for count, player_hcp in enumerate(player_hcps):
+        playerSI = []
+        alt_playerSI = []
+        if player_hcp <= 18:
+            for holeSI in holesSI:
+                playerSI.append(1) if holeSI <= player_hcp else playerSI.append(0)
+        if player_hcp > 18 and player_hcp <=36:
+            for holeSI in holesSI:
+                playerSI.append(2) if holeSI <= player_hcp - 18 else playerSI.append(1)
+        if player_hcp > 36 and player_hcp <=54:
+            for holeSI in holesSI:
+                playerSI.append(3) if holeSI <= player_hcp - 36 else playerSI.append(2)
+
+        # Logic for 2 Player Match play calculations
+        if count == 0 and no_of_players == 4:   # Get the SI for the 2nd player                             !!!!!!!!!!!!! Change the 4 to a 2
+            if player_hcps[1] <= 18:
+                for holeSI in holesSI:
+                    alt_playerSI.append(1) if holeSI <= player_hcps[1] else alt_playerSI.append(0)
+            if player_hcps[1] > 18 and player_hcps[1] <=36:
+                for holeSI in holesSI:
+                    alt_playerSI.append(2) if holeSI <= player_hcps[1] - 18 else alt_playerSI.append(1)
+            if player_hcps[1] > 36 and player_hcps[1] <=54:
+                for holeSI in holesSI:
+                    alt_playerSI.append(3) if holeSI <= player_hcps[1] - 36 else alt_playerSI.append(2)
+
+        # Logic for 2 Player Match play calculations
+        if count == 1 and no_of_players == 4:   # Get the SI for the 1st player                             !!!!!!!!!!!!! Change the 4 to a 2
+            if player_hcps[0] <= 18:
+                for holeSI in holesSI:
+                    alt_playerSI.append(1) if holeSI <= player_hcps[0] else alt_playerSI.append(0)
+            if player_hcps[0] > 18 and player_hcps[1] <=36:
+                for holeSI in holesSI:
+                    alt_playerSI.append(2) if holeSI <= player_hcps[0] - 18 else alt_playerSI.append(1)
+            if player_hcps[0] > 36 and player_hcps[1] <=54:
+                for holeSI in holesSI:
+                    alt_playerSI.append(3) if holeSI <= player_hcps[0] - 36 else alt_playerSI.append(2)
+
+        # Assign letter for player variable in list ( for use with getattr function retrieving record data from model )
+        if count == 0:
+            p_letter = "a"
+        elif count == 1:
+            p_letter = "b"
+        elif count == 2:
+            p_letter = "c"
+        else:
+            p_letter = "d"
+
+
+        # Logic and Calculation for each hole
+        hole_obj = ()
+        outcome = "x"
+        for i in range(1, 19):
+            gross_score = getattr(score_instance,"player_{0}_s{1}".format(p_letter, i)) if not getattr(score_instance,"player_{0}_s{1}".format(p_letter, i)) is None else 0
+            net_score = gross_score - playerSI[i-1]
+            compare_to_par = net_score - eval("cq.hole" + str(i) + "par")
+            if no_of_players != 2 and p_letter == 'a' and round_meta["holes_completed"] >= i:
+                player_a_compare_to_par = getattr(score_instance,"player_a_s{0}".format(i)) - playerSI[i-1] - eval("cq.hole" + str(i) + "par")
+                player_b_compare_to_par = getattr(score_instance,"player_b_s{0}".format(i)) - alt_playerSI[i-1] - eval("cq.hole" + str(i) + "par")
+                if player_a_compare_to_par < player_b_compare_to_par:
+                    outcome = 1
+                elif player_b_compare_to_par < player_a_compare_to_par:
+                    outcome = -1
+                else:
+                    outcome = 0
+                # print("Player A")
+                # print(outcome)
+            if no_of_players != 2 and p_letter == 'b' and round_meta["holes_completed"] >= i:
+                player_b_compare_to_par = getattr(score_instance,"player_b_s{0}".format(i)) - playerSI[i-1] - eval("cq.hole" + str(i) + "par")
+                player_a_compare_to_par = getattr(score_instance,"player_a_s{0}".format(i)) - alt_playerSI[i-1] - eval("cq.hole" + str(i) + "par")
+                if player_b_compare_to_par < player_a_compare_to_par:
+                    outcome = 1
+                elif player_a_compare_to_par < player_b_compare_to_par:
+                    outcome = -1
+                else:
+                    outcome = 0
+
+            hole_obj = hole_obj + ((
+                i,
+                eval("cq.hole" + str(i) + "par"),
+                eval("cq.hole" + str(i) + "SI"), playerSI[i-1],
+                make_stars(playerSI[i-1]) if round_meta["holes_completed"] < i else gross_score,
+                '' if round_meta["holes_completed"] < i else net_score,
+                '' if round_meta["holes_completed"] < i else compare_to_par,
+                '' if no_of_players != 2  and round_meta["holes_completed"] < i else outcome,
+                
+                ),
+                )
+
+        holes_attr.append(hole_obj)
+
+        # Get Gross, Net, Stableford, out_nine and in_nine running totals
+        gross, net, stableford, out_nine_gross, out_nine_net, in_nine_gross, in_nine_net = 0, 0, 0, 0, 0, 0, 0
+        player_match_play = 0
+
+        for i in range(1, round_meta["holes_completed"] + 1):
+            gross += getattr(score_instance,"player_{0}_s{1}".format(p_letter, i))
+            net += getattr(score_instance,"player_{0}_s{1}".format(p_letter, i)) - playerSI[i-1]
+            if i < 10:
+                out_nine_gross = gross
+                out_nine_net = net
+                out_nine_gross_neg = out_nine_gross
+                out_nine_net_neg = out_nine_net
+            if i >= 10:
+                in_nine_gross = gross - out_nine_gross_neg
+                print(">>>>>",gross, in_nine_gross)
+                in_nine_net = net - out_nine_net_neg
+            s = (getattr(score_instance,"player_{0}_s{1}".format(p_letter, i)) - playerSI[i-1]) - eval("cq.hole" + str(i) + "par")
+            stableford += 0 if s >= 2 else stableford_dict[str(s)]
+            if p_letter == "a":
+                print(hole_obj[i-1][7])
+                player_match_play += hole_obj[i-1][7]
+            if p_letter == "b":
+                print(hole_obj[i-1][7])
+                player_match_play += hole_obj[i-1][7]
+
+
+        # Covert Match play totals to text and assign background colour for cell
+        if player_match_play == 0:
+            player_match_play_text = "AS"
+            box_bk_colour = "#008080"
+        elif player_match_play < 0:
+            player_match_play_text = str(abs(player_match_play)) + "D"
+            box_bk_colour = "Black"
+        else:
+            player_match_play_text = str(player_match_play) + "U"
+            box_bk_colour = "OrangeRed"
+
+
+
+        running_totals.append((
+            (gross, net, stableford, player_match_play_text, box_bk_colour, out_nine_gross, out_nine_net, in_nine_gross, in_nine_net)
+            )
+        )
+
+    # Build the player_dict to pass to the form
+    player_dict = {}
+    player_details = {}
+    for count,player in enumerate(buddy_queryset):
+        player_details = {}
+        player_details["name"] = str(player.buddy_email)
+        player_details["holes_attr"] = holes_attr[count]
+        player_details["running_totals"] = running_totals[count]
+        player_dict["player" + str(count + 1)] = player_details
+
+    print(player_dict)
+
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = CardEntryForm(request.POST, player_a="", player_b="", player_c="", player_d="")
+        # check whether it's valid:
+        if form.is_valid():
+            # Update scores incrementing the model field name by the hole_no each time
+            setattr(score_instance, "player_a_s{0}".format(hole_no), form.cleaned_data['player_A'])
+            setattr(score_instance, "player_b_s{0}".format(hole_no), form.cleaned_data['player_B'])
+            setattr(score_instance, "player_c_s{0}".format(hole_no), form.cleaned_data['player_C'] if no_of_players > 2 else 0)
+            setattr(score_instance, "player_d_s{0}".format(hole_no), form.cleaned_data['player_D'] if no_of_players > 2 else 0)
+            hole_no += 1
+            score_instance.save()
+
+            # redirect to same page with increment of hole_no 
+            return HttpResponseRedirect(f'/golf/trackmatch/{score_id}/{hole_no}/')
+
+    # if a GET (or any other method) create a blank form
+    else:
+        if no_of_players == 2:
+            form = CardEntryForm(
+                player_a = f"A) {str(buddy_queryset[0].buddy_email)[:6]}.. ({score_instance.player_a_course_hcp})",
+                player_b = f"B) {str(buddy_queryset[1].buddy_email)[:6]}.. ({score_instance.player_b_course_hcp})"
+            )
+        elif no_of_players == 3:
+                form = CardEntryForm(
+                player_a = f"A) {str(buddy_queryset[0].buddy_email)[:6]}.. ({score_instance.player_a_course_hcp})",
+                player_b = f"B) {str(buddy_queryset[1].buddy_email)[:6]}.. ({score_instance.player_b_course_hcp})",
+                player_c = f"C) {str(buddy_queryset[2].buddy_email)[:6]}.. ({score_instance.player_c_course_hcp})"
+                )
+        else:
+            form = CardEntryForm(
+                player_a = f"A {str(buddy_queryset[0].buddy_email)[:6]}.. ({score_instance.player_a_course_hcp}) [{player_dict['player1']['running_totals'][0]}/{player_dict['player1']['running_totals'][1]}/{player_dict['player1']['running_totals'][2]}/{player_dict['player1']['running_totals'][3]}]",
+                player_b = f"B {str(buddy_queryset[1].buddy_email)[:6]}.. ({score_instance.player_b_course_hcp}) [{player_dict['player2']['running_totals'][0]}/{player_dict['player2']['running_totals'][1]}/{player_dict['player2']['running_totals'][2]}/{player_dict['player2']['running_totals'][3]}]",
+                player_c = f"C {str(buddy_queryset[2].buddy_email)[:6]}.. ({score_instance.player_c_course_hcp})",
+                player_d = f"D {str(buddy_queryset[3].buddy_email)[:6]}.. ({score_instance.player_d_course_hcp})"
+                )
+
+    
+
+    return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "form": form})
+
+class CardSetupView2(FormView):
+
+    template_name = 'golf/card_entry.html'
+    form_class = CardInitialForm
+    success_url = '/thanks/'
+
+    def get_queryset(self, **kwargs):
+       qs = super().get_queryset(**kwargs)
+       print(qs)
+       return qs.filter(group = self.kwargs.get("group"))
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['group'] = GolfGroup.objects.filter(id = self.kwargs.get("group") )
+        # print(context['group'])
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(CardInitialView, self).get_form_kwargs()
+        match_buddies = Buddy.objects.filter(group = self.kwargs.get("group") )
+        # print(match_buddies)
+        # print(len(match_buddies))
+        # for buddy in match_buddies:
+            # print(buddy.buddy_email)
+        kwargs['player_a'] = str(match_buddies[0])
+        kwargs['player_b'] = str(match_buddies[1])
+        if (len(match_buddies) == 3):
+            kwargs['player_c'] = str(match_buddies[2])
+        if (len(match_buddies) == 4):
+            kwargs['player_c'] = str(match_buddies[2])
+            kwargs['player_d'] = str(match_buddies[3])
+
+    def form_valid(self, form):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        pass
+        return super().form_valid(form)
+
+
+
+class CardInitialView(FormView):
+
+    template_name = 'golf/card_initial.html'
+    form_class = CardInitialForm
+    # success_url = '/thanks/'
+
+    def get_queryset(self, **kwargs):
+       qs = super().get_queryset(**kwargs)
+       print(qs)
+       return qs.filter(group = self.kwargs.get("group"))
+    
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['group'] = GolfGroup.objects.filter(id = self.kwargs.get("group") )
+    #     print(context['group'])
+    #     return context
+
+    def get_form_kwargs(self):
+        kwargs = super(CardInitialView, self).get_form_kwargs()
+        # golf_group_obj = GolfGroup.objects.filter(id = self.kwargs.get("group") )
+        match_buddies = Buddy.objects.filter(group = self.kwargs.get("group") )
+        # print(match_buddies)
+        # print(len(match_buddies))
+        # for buddy in match_buddies:
+        #     print(buddy.buddy_email)
+        kwargs['no_of_players'] = len(match_buddies)
+        kwargs['player_a'] = str(match_buddies[0])
+        kwargs['player_b'] = str(match_buddies[1])
+        if (len(match_buddies) == 3):
+            kwargs['player_c'] = str(match_buddies[2])
+        if (len(match_buddies) == 4):
+            kwargs['player_c'] = str(match_buddies[2])
+            kwargs['player_d'] = str(match_buddies[3])
+
+        
+        return kwargs
+
+    def form_valid(self, form):
+        match_buddies = Buddy.objects.filter(group = self.kwargs.get("group"))
+        no_of_players = len(match_buddies)
+        course_obj = Course.objects.get(id = form.cleaned_data['course'])
+        print("Form valid")
+        score_instance = Score.objects.create(course = course_obj,
+                      no_of_players = no_of_players,
+                      group = match_buddies[0].group,
+                      player_a = match_buddies[0].buddy_email,
+                      player_b = match_buddies[1].buddy_email,
+                      player_c = match_buddies[2].buddy_email if no_of_players > 2 else match_buddies[0].buddy_email,
+                      player_d = match_buddies[3].buddy_email if no_of_players > 3 else match_buddies[0].buddy_email,
+                      player_a_course_hcp = form.cleaned_data['player_A'],
+                      player_b_course_hcp = form.cleaned_data['player_B'],
+                      player_c_course_hcp = form.cleaned_data['player_C'],
+                      player_d_course_hcp = form.cleaned_data['player_D']
+                      )
+        print(score_instance.id)
+        # return super().form_valid(form)
+        return HttpResponseRedirect(self.get_success_url(score_instance.id))
+    
+    def get_success_url(self, score_id=None):
+        print(score_id)
+        return reverse('trackmatch', kwargs={'score_id': score_id, 'hole_no': 1})
+    
 
 

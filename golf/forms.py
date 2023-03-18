@@ -70,26 +70,43 @@ class CardInitialForm(forms.Form):
             self.fields['player_D'].initial = 0
             self.fields['player_D'].disabled = True
 
-class CardSetupxxForm(forms.Form):
+class CardEntryForm(forms.Form):
 
-    course = forms.ChoiceField()
     player_A = forms.IntegerField()
     player_B = forms.IntegerField()
     player_C = forms.IntegerField()
     player_D = forms.IntegerField()
 
     def __init__(self, *args, **kwargs):
+        no_of_players = len(kwargs)
+        # if no_of_players != 0:   # If 0 - must be request.method == POST so do not pop kwargs
         self.player_a = kwargs.pop('player_a')
         self.player_b = kwargs.pop('player_b')
-        self.player_c = kwargs.pop('player_c')
-        self.player_d = kwargs.pop('player_d')
-        super(CardSetupxxForm, self).__init__(*args,**kwargs)
-        self.fields['course'] = forms.ChoiceField(
-            choices=[(c.id, str(c.name)) for c in Course.objects.all()]
-        )
-        self.fields['player_A'].label = self.player_a
-        self.fields['player_B'].label = self.player_b
-        self.fields['player_C'].label = self.player_c
-        self.fields['player_D'].label = self.player_d
+        if no_of_players == 3:
+            self.player_c = kwargs.pop('player_c')
+        elif no_of_players == 4:
+            self.player_c = kwargs.pop('player_c')
+            self.player_d = kwargs.pop('player_d')
+        super(CardEntryForm, self).__init__(*args,**kwargs)
+        # self.fields['player_A'].label = self.player_a
+        self.fields['player_A'].label = ''
+        # self.fields['player_B'].label = self.player_b
+        self.fields['player_B'].label = ''
+        if no_of_players == 3:
+            # self.fields['player_C'].label = self.player_c
+            self.fields['player_C'].label = ''
+        if no_of_players == 4:
+            # self.fields['player_C'].label = self.player_c
+            self.fields['player_C'].label = ''
+            # self.fields['player_D'].label = self.player_d
+            self.fields['player_D'].label = ''
+        if no_of_players < 3:
+            self.fields['player_C'].initial = 0
+            self.fields['player_C'].disabled = True
+            self.fields['player_D'].initial = 0
+            self.fields['player_D'].disabled = True
+        elif no_of_players == 3:
+            self.fields['player_D'].initial = 0
+            self.fields['player_D'].disabled = True
     
 

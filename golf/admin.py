@@ -1,7 +1,7 @@
 #golf/admin.py
 from django.contrib import admin
 
-from golf.models import Course, Round, DiffAjustment, GolfGroup, Buddy, Score
+from golf.models import *
 
 admin.site.register(Course)
 admin.site.register(Round)

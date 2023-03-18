@@ -98,6 +98,7 @@ class Buddy(models.Model):
 class Score(models.Model):
     date = models.DateField(auto_now=True)
     course = models.ForeignKey(Course, related_name='course', on_delete=models.CASCADE)
+    group = models.ForeignKey(GolfGroup, on_delete=models.CASCADE)
     no_of_players = models.IntegerField()
     player_a = models.ForeignKey(CustomUser, related_name='player_a', on_delete=models.CASCADE, null=True, blank=True)
     player_b = models.ForeignKey(CustomUser, related_name='player_b', on_delete=models.CASCADE, null=True, blank=True)
@@ -181,7 +182,7 @@ class Score(models.Model):
     player_d_s18 = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return '%s %s %s' % (self.date, self.course, self.player_a)
+        return '%s %s %s' % (self.date, self.course, self.group)
 
 
 
