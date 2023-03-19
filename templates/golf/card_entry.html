@@ -10,19 +10,26 @@
     table, th, td {
      border: 1px solid white;
     }
+
     td {
         width: 45px;
         text-align: center;
     }
 
-    input {max-width: 3em};
+    input {max-width: 3em}
+
+    .hole_no {
+        width:30px;
+    }
+
+
 </style>
 
 {% load crispy_forms_tags %}
 <div class="w3-card w3-teal w3-padding">
     <h1 class="w3-small">
     {{round_meta.course_name}}&nbsp;&nbsp;{{round_meta.course_par}} / {{round_meta.course_rating}} / {{round_meta.slope_rating}}<br>
-    {{round_meta.round_date}}<br><br>
+    {{round_meta.round_date}}&nbsp;&nbsp;{{round_meta.buddy_group}}<br><br>
    
     {% if round_meta.hole_no > 1 %}
         <a href="/golf/trackmatch/{{round_meta.round_id}}/{{round_meta.previous_hole_no}}"><button><</button></a>
@@ -34,32 +41,40 @@
         &nbsp;Match Completed&nbsp;
     {% endif %}
 
-    {% if round_meta.hole_no <= 18 %}
+    {% if round_meta.hole_no <= 18 and round_meta.hole_no <= round_meta.last_hole_scored %}
     <a href="/golf/trackmatch/{{round_meta.round_id}}/{{round_meta.next_hole_no}}"><button>></button></a>
     {% endif %}
     <br>
 
-    
+    {{round_meta.match_status}} {{round_meta.last_hole_scored}} {{ round_meta.hole_no}}
 
     <form method="post">
         {% csrf_token %}
 
         <table>
-            <th>ID</th><th>Name&nbsp;</th><th>HCP</th><th>GRS/Net</th><th>Stbd</th><th>MP</th>{% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}<th>Score</th>{% endif %}
+            <th>ID</th><th>Name&nbsp;</th><th>HCP</th><th>GRS/Net</th><th>Stbd</th>
+            {% if round_meta.no_of_players == 2 %}<th>MP</th>{% endif %}
+            {% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}<th>Score</th>{% endif %}
             <tr>
                 <td>A</td><td>{{player_dict.player1.name|truncatechars:7}}</td>
                 <td>{{round_meta.player_a_course_hcp}}</td>
                 <td>{{player_dict.player1.running_totals.0}}/{{player_dict.player1.running_totals.1}}</td>
+                <!-- <td bgcolor="{{players_stableford_colors.a}}">{{player_dict.player1.running_totals.2}}</td> -->
                 <td>{{player_dict.player1.running_totals.2}}</td>
+                {% if round_meta.no_of_players == 2 %}
                 <td bgcolor="{{player_dict.player1.running_totals.4}}">{{player_dict.player1.running_totals.3}}</td>
+                {% endif %}
                 {% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}<td>{{ form.player_A|as_crispy_field }}</td>{% endif %}
             </tr>
             <tr>
                 <td>B</td><td>{{player_dict.player2.name|truncatechars:7}}</td>
                 <td>{{round_meta.player_b_course_hcp}}</td>
                 <td>{{player_dict.player2.running_totals.0}}/{{player_dict.player2.running_totals.1}}</td>
+                <!-- <td bgcolor="{{players_stableford_colors.b}}">{{player_dict.player2.running_totals.2}}</td> -->
                 <td>{{player_dict.player2.running_totals.2}}</td>
+                {% if round_meta.no_of_players == 2 %}
                 <td bgcolor="{{player_dict.player2.running_totals.4}}">{{player_dict.player2.running_totals.3}}</td>
+                {% endif %}
                 {% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}<td>{{ form.player_B|as_crispy_field }}</td>{% endif %}
             </tr>
             {% if round_meta.no_of_players > 2 %}
@@ -68,7 +83,9 @@
                 <td>{{round_meta.player_c_course_hcp}}</td>
                 <td>{{player_dict.player3.running_totals.0}}/{{player_dict.player3.running_totals.1}}</td>
                 <td>{{player_dict.player3.running_totals.2}}</td>
+                {% if round_meta.no_of_players == 2 %}
                 <td>{{player_dict.player3.running_totals.3}}</td>
+                {% endif %}
                 {% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}<td>{{ form.player_C|as_crispy_field }}</td>{% endif %}
             </tr>
             {% endif %}
@@ -78,7 +95,9 @@
                 <td>{{round_meta.player_d_course_hcp}}</td>
                 <td>{{player_dict.player4.running_totals.0}}/{{player_dict.player4.running_totals.1}}</td>
                 <td>{{player_dict.player4.running_totals.2}}</td>
+                {% if round_meta.no_of_players == 2 %}
                 <td>{{player_dict.player4.running_totals.3}}</td>
+                {% endif %}
                 {% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}<td>{{ form.player_D|as_crispy_field }}</td>{% endif %}
             </tr>
             {% endif %}
@@ -89,8 +108,71 @@
             <button type="submit">Add Scores</button>
         {% endif %}
 
-
     </form>
+
+    {% if request.user.email != round_meta.round_admin %}
+
+        {% if round_meta.last_hole_scored >= 1 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/2/"><button class="hole_no">1</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 2 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/3/"><button class="hole_no">2</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 3 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/4/"><button class="hole_no">3</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 4 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/5/"><button class="hole_no">4</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 5 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/6/"><button class="hole_no">5</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 6 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/7/"><button class="hole_no">6</button></a>&nbsp;
+        {% endif %}
+        <p> </p>
+        {% if round_meta.last_hole_scored >= 7 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/8/"><button class="hole_no">7</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 8 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/9/"><button class="hole_no">8</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 9 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/10/"><button class="hole_no">9</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 10 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/11/"><button class="hole_no">10</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 11 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/12/"><button class="hole_no">11</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 12 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/13/"><button class="hole_no">12</button></a>&nbsp;
+        {% endif %}
+        <p> </p>
+        {% if round_meta.last_hole_scored >= 13 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/14/"><button class="hole_no">13</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 14 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/15/"><button class="hole_no">14</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 15 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/16/"><button class="hole_no">15</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 16 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/17/"><button class="hole_no">16</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 17 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/18/"><button class="hole_no">17</button></a>&nbsp;
+        {% endif %}
+        {% if round_meta.last_hole_scored >= 18 %}
+        <a href="/golf/trackmatch/{{round_meta.round_id}}/19/"><button class="hole_no">18</button></a>&nbsp;
+        {% endif %}
+        
+    {% endif %}
+
+
+ 
 
         <hr>
         Scorecard
@@ -224,4 +306,19 @@
     </h1>  
 
 </div>
+{% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}
+<script>
+    (function(){
+        var forms = document.forms || [];
+        for(var i = 0; i < forms.length; i++){
+            for(var j = 0; j < forms[i].length; j++){
+                if(!forms[i][j].readonly != undefined && forms[i][j].type != "hidden" && forms[i][j].disabled != true && forms[i][j].style.display != 'none'){
+                    forms[i][j].focus();
+                    return;
+                }
+            }
+        }
+    })();
+</script>
+{% endif %}
 {% endblock %}

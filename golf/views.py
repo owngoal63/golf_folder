@@ -511,7 +511,14 @@ def trackmatch(request, score_id, hole_no):
         "-1": 3,
         "-2": 4,
         "-3": 5,
-        "-4": 6
+        "-4": 6,
+        "-5": 7
+    }
+    mp_colors = {
+        '0': 'Black',
+        '1': 'Red',
+        '2': 'GoldenRod',
+        '3': 'Green'
     }
 
     cq = Course.objects.all().get(id = 1)
@@ -521,6 +528,7 @@ def trackmatch(request, score_id, hole_no):
     # Set Round Meta Parameters for passing to form
     round_meta = {}
     round_meta["round_id"] = score_instance.id
+    round_meta["buddy_group"] = score_instance.group
     round_meta["round_admin"] = score_instance.player_a.email
     round_meta["round_date"] = score_instance.date
     round_meta["no_of_players"] = no_of_players
@@ -539,6 +547,18 @@ def trackmatch(request, score_id, hole_no):
     round_meta["outpar"] = cq.hole1par + cq.hole2par + cq.hole3par + cq.hole4par + cq.hole5par + cq.hole6par + cq.hole7par + cq.hole8par + cq.hole9par
     round_meta["inpar"] = cq.hole10par + cq.hole11par + cq.hole12par + cq.hole13par + cq.hole14par + cq.hole15par + cq.hole16par + cq.hole17par + cq.hole18par
     round_meta["totalpar"] = round_meta["outpar"] + round_meta["inpar"]
+
+    if score_instance.player_a_s18 is not None:     # Is the Match Completed
+        round_meta["match_status"] = "Completed"
+    else:
+        round_meta["match_status"] = "In Progress"
+
+    round_meta["last_hole_scored"] = 18         # Default for completed round
+    for i in range(1, 19):
+        if getattr(score_instance,"player_a_s{0}".format(i)) is None:
+            round_meta["last_hole_scored"] = i - 1
+            break
+
 
 
     # List of Stroke Indexes for Course
@@ -560,7 +580,7 @@ def trackmatch(request, score_id, hole_no):
                 playerSI.append(3) if holeSI <= player_hcp - 36 else playerSI.append(2)
 
         # Logic for 2 Player Match play calculations
-        if count == 0 and no_of_players == 4:   # Get the SI for the 2nd player                             !!!!!!!!!!!!! Change the 4 to a 2
+        if count == 0 and no_of_players == 2:   # Get the SI for the 2nd player                             !!!!!!!!!!!!! Change the 4 to a 2
             if player_hcps[1] <= 18:
                 for holeSI in holesSI:
                     alt_playerSI.append(1) if holeSI <= player_hcps[1] else alt_playerSI.append(0)
@@ -572,7 +592,7 @@ def trackmatch(request, score_id, hole_no):
                     alt_playerSI.append(3) if holeSI <= player_hcps[1] - 36 else alt_playerSI.append(2)
 
         # Logic for 2 Player Match play calculations
-        if count == 1 and no_of_players == 4:   # Get the SI for the 1st player                             !!!!!!!!!!!!! Change the 4 to a 2
+        if count == 1 and no_of_players == 2:   # Get the SI for the 1st player                             !!!!!!!!!!!!! Change the 4 to a 2
             if player_hcps[0] <= 18:
                 for holeSI in holesSI:
                     alt_playerSI.append(1) if holeSI <= player_hcps[0] else alt_playerSI.append(0)
@@ -596,12 +616,12 @@ def trackmatch(request, score_id, hole_no):
 
         # Logic and Calculation for each hole
         hole_obj = ()
-        outcome = "x"
+        outcome = 0
         for i in range(1, 19):
             gross_score = getattr(score_instance,"player_{0}_s{1}".format(p_letter, i)) if not getattr(score_instance,"player_{0}_s{1}".format(p_letter, i)) is None else 0
             net_score = gross_score - playerSI[i-1]
             compare_to_par = net_score - eval("cq.hole" + str(i) + "par")
-            if no_of_players != 2 and p_letter == 'a' and round_meta["holes_completed"] >= i:
+            if no_of_players == 2 and p_letter == 'a' and round_meta["holes_completed"] >= i:
                 player_a_compare_to_par = getattr(score_instance,"player_a_s{0}".format(i)) - playerSI[i-1] - eval("cq.hole" + str(i) + "par")
                 player_b_compare_to_par = getattr(score_instance,"player_b_s{0}".format(i)) - alt_playerSI[i-1] - eval("cq.hole" + str(i) + "par")
                 if player_a_compare_to_par < player_b_compare_to_par:
@@ -612,7 +632,7 @@ def trackmatch(request, score_id, hole_no):
                     outcome = 0
                 # print("Player A")
                 # print(outcome)
-            if no_of_players != 2 and p_letter == 'b' and round_meta["holes_completed"] >= i:
+            if no_of_players == 2 and p_letter == 'b' and round_meta["holes_completed"] >= i:
                 player_b_compare_to_par = getattr(score_instance,"player_b_s{0}".format(i)) - playerSI[i-1] - eval("cq.hole" + str(i) + "par")
                 player_a_compare_to_par = getattr(score_instance,"player_a_s{0}".format(i)) - alt_playerSI[i-1] - eval("cq.hole" + str(i) + "par")
                 if player_b_compare_to_par < player_a_compare_to_par:
@@ -635,6 +655,7 @@ def trackmatch(request, score_id, hole_no):
                 )
 
         holes_attr.append(hole_obj)
+        print(hole_obj)
 
         # Get Gross, Net, Stableford, out_nine and in_nine running totals
         gross, net, stableford, out_nine_gross, out_nine_net, in_nine_gross, in_nine_net = 0, 0, 0, 0, 0, 0, 0
@@ -668,10 +689,10 @@ def trackmatch(request, score_id, hole_no):
             box_bk_colour = "#008080"
         elif player_match_play < 0:
             player_match_play_text = str(abs(player_match_play)) + "D"
-            box_bk_colour = "Black"
+            box_bk_colour = "OrangeRed"
         else:
             player_match_play_text = str(player_match_play) + "U"
-            box_bk_colour = "OrangeRed"
+            box_bk_colour = "Black"
 
 
 
@@ -690,13 +711,43 @@ def trackmatch(request, score_id, hole_no):
         player_details["running_totals"] = running_totals[count]
         player_dict["player" + str(count + 1)] = player_details
 
+    print(player_dict["player1"]["running_totals"][2])    
+    print(player_dict["player2"]["running_totals"][2])
+    # print(player_dict["player3"]["running_totals"][2])
+    # print(player_dict["player4"]["running_totals"][2])
+    players_stableford = {}
+    players_stableford_colours = {}
+    players_stableford["a"] = player_dict["player1"]["running_totals"][2]
+    players_stableford["b"] = player_dict["player2"]["running_totals"][2]
+    if no_of_players > 2:
+        players_stableford["c"] = player_dict["player3"]["running_totals"][2]
+    if no_of_players > 3:
+        players_stableford["d"] = player_dict["player4"]["running_totals"][2]
+    
+    players_sorted = sorted(players_stableford, key=players_stableford.get, reverse=True)
+
+    for count, player in enumerate(players_sorted):
+        players_stableford_colours[players_sorted[count]] = mp_colors.get(str(players_sorted.index(player)))
+
+    # player_dict["player1"]["running_totals"].append(players_stableford_colours["a"])
+
+    print(players_stableford)
+    print(players_stableford_colours)
+
     print(player_dict)
 
     if request.method == 'POST':
+        print("here")
         # create a form instance and populate it with data from the request:
-        form = CardEntryForm(request.POST, player_a="", player_b="", player_c="", player_d="")
+        if no_of_players == 2:
+            form = CardEntryForm(request.POST, player_a="", player_b="")
+        if no_of_players == 3:
+            form = CardEntryForm(request.POST, player_a="", player_b="", player_c="")
+        if no_of_players == 4:
+            form = CardEntryForm(request.POST, player_a="", player_b="", player_c="", player_d="")
         # check whether it's valid:
         if form.is_valid():
+            print("here2")
             # Update scores incrementing the model field name by the hole_no each time
             setattr(score_instance, "player_a_s{0}".format(hole_no), form.cleaned_data['player_A'])
             setattr(score_instance, "player_b_s{0}".format(hole_no), form.cleaned_data['player_B'])
@@ -731,7 +782,7 @@ def trackmatch(request, score_id, hole_no):
 
     
 
-    return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "form": form})
+    return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "players_stableford_colors": players_stableford_colours, "form": form})
 
 class CardSetupView2(FormView):
 
@@ -834,6 +885,11 @@ class CardInitialView(FormView):
     def get_success_url(self, score_id=None):
         print(score_id)
         return reverse('trackmatch', kwargs={'score_id': score_id, 'hole_no': 1})
+    
+class ScoreListView(ListView):
+    model = Score
+    template_name = 'golf/score_list.html'
+    ordering = ['-date']
     
 
 

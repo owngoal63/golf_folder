@@ -96,7 +96,7 @@ class Buddy(models.Model):
         return '%s' % (self.buddy_email)
     
 class Score(models.Model):
-    date = models.DateField(auto_now=True)
+    date = models.DateField(auto_now_add = True)
     course = models.ForeignKey(Course, related_name='course', on_delete=models.CASCADE)
     group = models.ForeignKey(GolfGroup, on_delete=models.CASCADE)
     no_of_players = models.IntegerField()

@@ -41,6 +41,7 @@ urlpatterns = [
     # path('chart_handicap_graph2/', chart_handicap_graph2, name='chart_handicap_graph2'),
     path('trackmatch/<int:score_id>/<int:hole_no>/', trackmatch ,name='trackmatch'),
     path('cardinitial/<int:group>/', login_required(CardInitialView.as_view()), name='cardinitialview'),
+    path('list_scores/', ScoreListView.as_view(), name = "scorelist")
     # path('cardentry/<int:score>/', login_required(CardSetupView2.as_view()), name='cardentryview'),
 
 ]

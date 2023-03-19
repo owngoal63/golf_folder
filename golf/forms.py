@@ -79,6 +79,7 @@ class CardEntryForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         no_of_players = len(kwargs)
+        # print(no_of_players)
         # if no_of_players != 0:   # If 0 - must be request.method == POST so do not pop kwargs
         self.player_a = kwargs.pop('player_a')
         self.player_b = kwargs.pop('player_b')
@@ -101,10 +102,12 @@ class CardEntryForm(forms.Form):
             # self.fields['player_D'].label = self.player_d
             self.fields['player_D'].label = ''
         if no_of_players < 3:
-            self.fields['player_C'].initial = 0
-            self.fields['player_C'].disabled = True
-            self.fields['player_D'].initial = 0
-            self.fields['player_D'].disabled = True
+            # self.fields['player_C'].initial = 0
+            # self.fields['player_C'].disabled = True
+            # self.fields['player_D'].initial = 0
+            # self.fields['player_D'].disabled = True
+            self.fields['player_C'].required = False
+            self.fields['player_D'].required = False
         elif no_of_players == 3:
             self.fields['player_D'].initial = 0
             self.fields['player_D'].disabled = True
