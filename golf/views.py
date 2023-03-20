@@ -492,6 +492,30 @@ def chart_handicap_graph(request):
 def make_stars(num):
     return "*" * num
 
+def calculate_positions(numbers_list):
+    sorted_numbers = sorted(numbers_list, reverse=True)
+    positions = []
+    for number in numbers_list:
+        position = sorted_numbers.index(number) + 1
+        if position == 1:
+            positions.append("Gold")
+        elif position == 2:
+            positions.append("Silver")
+        elif position == 3:
+            positions.append("DarkGoldenRod")
+        elif position == 4:
+            positions.append("#008080")
+        else:
+            # Handle ties
+            same_rank = sorted_numbers.count(number)
+            if same_rank == 1:
+                positions.append(str(position) + "th")
+            else:
+                rank_range = list(range(position, position+same_rank))
+                rank_str = '-'.join([str(rank) for rank in rank_range])
+                positions.append(rank_str + " equal")
+    return positions
+
 @login_required
 def trackmatch(request, score_id, hole_no):
     # Get Functional Parameters and Initaliase variables  
@@ -513,12 +537,6 @@ def trackmatch(request, score_id, hole_no):
         "-3": 5,
         "-4": 6,
         "-5": 7
-    }
-    mp_colors = {
-        '0': 'Black',
-        '1': 'Red',
-        '2': 'GoldenRod',
-        '3': 'Green'
     }
 
     cq = Course.objects.all().get(id = 1)
@@ -711,28 +729,42 @@ def trackmatch(request, score_id, hole_no):
         player_details["running_totals"] = running_totals[count]
         player_dict["player" + str(count + 1)] = player_details
 
-    print(player_dict["player1"]["running_totals"][2])    
-    print(player_dict["player2"]["running_totals"][2])
+    # print(player_dict["player1"]["running_totals"][2])    
+    # print(player_dict["player2"]["running_totals"][2])
     # print(player_dict["player3"]["running_totals"][2])
     # print(player_dict["player4"]["running_totals"][2])
-    players_stableford = {}
-    players_stableford_colours = {}
-    players_stableford["a"] = player_dict["player1"]["running_totals"][2]
-    players_stableford["b"] = player_dict["player2"]["running_totals"][2]
+
+    players_stableford_list = []
+    players_stableford_list.append(player_dict["player1"]["running_totals"][2])
+    players_stableford_list.append(player_dict["player2"]["running_totals"][2])
     if no_of_players > 2:
-        players_stableford["c"] = player_dict["player3"]["running_totals"][2]
+        players_stableford_list.append(player_dict["player3"]["running_totals"][2])
     if no_of_players > 3:
-        players_stableford["d"] = player_dict["player4"]["running_totals"][2]
+        players_stableford_list.append(player_dict["player4"]["running_totals"][2])
     
-    players_sorted = sorted(players_stableford, key=players_stableford.get, reverse=True)
+    print(players_stableford_list)
 
-    for count, player in enumerate(players_sorted):
-        players_stableford_colours[players_sorted[count]] = mp_colors.get(str(players_sorted.index(player)))
+    positions = calculate_positions(players_stableford_list)
+    print(positions)
 
-    # player_dict["player1"]["running_totals"].append(players_stableford_colours["a"])
+    stableford_medal_positions = {}
+    stableford_medal_positions["a"] = positions[0] 
+    stableford_medal_positions["b"] = positions[1]
+    if no_of_players > 2:
+        stableford_medal_positions["c"] = positions[2]
+    if no_of_players > 3:
+        stableford_medal_positions["d"] = positions[3]
 
-    print(players_stableford)
-    print(players_stableford_colours)
+
+    print(stableford_medal_positions)
+
+    # for count, player in enumerate(players_sorted):
+    #     players_stableford_colours[players_sorted[count]] = mp_colors.get(str(players_sorted.index(player)))
+
+    # # player_dict["player1"]["running_totals"].append(players_stableford_colours["a"])
+
+    # print(players_stableford)
+    # print(players_stableford_colours)
 
     print(player_dict)
 
@@ -782,7 +814,7 @@ def trackmatch(request, score_id, hole_no):
 
     
 
-    return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "players_stableford_colors": players_stableford_colours, "form": form})
+    return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "stableford_medal_positions": stableford_medal_positions, "form": form})
 
 class CardSetupView2(FormView):
 
