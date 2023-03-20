@@ -27,7 +27,6 @@ class Course(models.Model):
     hole17par = models.IntegerField(blank=True, default = 0)
     hole18par = models.IntegerField(blank=True, default = 0)
     hole1SI = models.IntegerField(blank=True, default = 0)
-    hole1SI = models.IntegerField(blank=True, default = 0)
     hole2SI = models.IntegerField(blank=True, default = 0)
     hole3SI = models.IntegerField(blank=True, default = 0)
     hole4SI = models.IntegerField(blank=True, default = 0)

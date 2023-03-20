@@ -8,7 +8,8 @@ class CourseForm(ModelForm):
 
     class Meta:
         model = Course
-        fields = ('name', 'tee_name', 'par', 'course_rating', 'slope_rating')
+        fields = ('name', 'tee_name', 'par', 'course_rating', 'slope_rating', 'hole1par', 'hole1par', 'hole2par', 'hole3par', 'hole4par', 'hole5par', 'hole6par', 'hole7par', 'hole8par', 'hole9par', 'hole10par', 'hole11par', 'hole12par', 'hole13par', 'hole14par', 'hole15par', 'hole16par', 'hole17par', 'hole18par',
+                 'hole1SI', 'hole2SI', 'hole3SI', 'hole4SI', 'hole5SI', 'hole6SI', 'hole7SI', 'hole8SI', 'hole9SI', 'hole10SI', 'hole11SI', 'hole12SI', 'hole13SI', 'hole14SI', 'hole15SI', 'hole16SI', 'hole17SI', 'hole18SI' )
 
 class RoundForm(ModelForm):
 
