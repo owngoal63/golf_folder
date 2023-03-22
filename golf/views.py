@@ -922,6 +922,7 @@ class ScoreListView(ListView):
     model = Score
     template_name = 'golf/score_list.html'
     ordering = ['-date']
+    paginate_by = 20
     
 @login_required
 def displaymaxhole(request, score_id):
