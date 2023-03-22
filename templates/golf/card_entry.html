@@ -30,6 +30,10 @@
     <h1 class="w3-small">
     {{round_meta.course_name}}&nbsp;&nbsp;{{round_meta.course_par}} / {{round_meta.course_rating}} / {{round_meta.slope_rating}}<br>
     {{round_meta.round_date}}&nbsp;&nbsp;{{round_meta.buddy_group}}<br><br>
+
+    {% if request.user.email != round_meta.round_admin %}
+    <a href="/golf/display_max_hole/{{round_meta.round_id}}/"><button>&#8635;</button></a>&nbsp;&nbsp;
+    {% endif %}
    
     {% if round_meta.hole_no > 1 %}
         <a href="/golf/trackmatch/{{round_meta.round_id}}/{{round_meta.previous_hole_no}}"><button><</button></a>

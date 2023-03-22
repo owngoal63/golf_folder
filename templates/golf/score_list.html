@@ -9,7 +9,7 @@
     <table class="w3-table w3-bordered">
         {% for score in object_list %}
             <tr>
-                <td style="width:90%;"><a href="/golf/trackmatch/{{ score.id }}/1/">{{ score.date|date:"d M y" }} | {{ score.course }} | {{score.group}}</a></td>
+                <td style="width:90%;"><a href="/golf/display_max_hole/{{ score.id }}/">{{ score.date|date:"d M y" }} | {{ score.course }} | {{score.group}}</a></td>
             </tr>
         {% empty %}
             <tr>

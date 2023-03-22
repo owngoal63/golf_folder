@@ -1,6 +1,7 @@
 # golf/models.py
 from django.db import models
 from accounts.models import CustomUser
+from datetime import date
 
 class Course(models.Model):
     name = models.CharField(max_length=255, default=' ')
@@ -95,7 +96,7 @@ class Buddy(models.Model):
         return '%s' % (self.buddy_email)
     
 class Score(models.Model):
-    date = models.DateField(auto_now_add = True)
+    date = models.DateField(default=date.today)
     course = models.ForeignKey(Course, related_name='course', on_delete=models.CASCADE)
     group = models.ForeignKey(GolfGroup, on_delete=models.CASCADE)
     no_of_players = models.IntegerField()

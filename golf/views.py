@@ -539,8 +539,7 @@ def trackmatch(request, score_id, hole_no):
         "-5": 7
     }
 
-    cq = Course.objects.all().get(id = 1)
-    # cq = Course.objects.all().get(id = score_instance.course.id)      !!!!!!!!!!!!!! Remember to put this in and remove above line !!!!!!!!!!!!!!
+    cq = Course.objects.all().get(id = score_instance.course.id)      
     buddy_queryset = Buddy.objects.all().filter(group = score_instance.group)
 
     # Set Round Meta Parameters for passing to form
@@ -905,6 +904,7 @@ class CardInitialView(FormView):
                       player_b = match_buddies[1].buddy_email,
                       player_c = match_buddies[2].buddy_email if no_of_players > 2 else match_buddies[0].buddy_email,
                       player_d = match_buddies[3].buddy_email if no_of_players > 3 else match_buddies[0].buddy_email,
+                      date = form.cleaned_data["date"],
                       player_a_course_hcp = form.cleaned_data['player_A'],
                       player_b_course_hcp = form.cleaned_data['player_B'],
                       player_c_course_hcp = form.cleaned_data['player_C'],
@@ -923,5 +923,18 @@ class ScoreListView(ListView):
     template_name = 'golf/score_list.html'
     ordering = ['-date']
     
+@login_required
+def displaymaxhole(request, score_id):
+    # Get the maximum number of holes scored/saved and redirect to that url page
+    score_instance = Score.objects.get(id = score_id)
 
+    # Check through the fields to find the first balnk against Player A
+    hole_id = 19
+    for i in range(1, 19):
+        if getattr(score_instance,"player_a_s{0}".format(i)) is None:
+            hole_id = i
+            break
+
+    print(hole_id)
+    return HttpResponseRedirect("/golf/trackmatch/{0}/{1}/".format(score_id,hole_id))
 

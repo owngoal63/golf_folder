@@ -2,6 +2,7 @@ from django import forms
 from django.forms import ModelForm
 #from django.views.generic.edit import CreateView
 from .models import Course, Round, GolfGroup, Buddy
+from datetime import date
 
 
 class CourseForm(ModelForm):
@@ -34,6 +35,11 @@ class BuddyForm(ModelForm):
 
 class CardInitialForm(forms.Form):
 
+    date = forms.DateField(
+        required=True,
+        initial = date.today,
+        widget=forms.DateInput(attrs={"type": "date"}))
+    
     course = forms.ChoiceField()
     player_A = forms.IntegerField()
     player_B = forms.IntegerField()

@@ -39,9 +39,10 @@ urlpatterns = [
     # path('chart_handicap_graph/<int:p>/', chart_handicap_graph, name='chart_handicap_graph'),
     # path('chart_handicap_page2/', chart_handicap_page2, name='chart_handicap_page2'),
     # path('chart_handicap_graph2/', chart_handicap_graph2, name='chart_handicap_graph2'),
-    path('trackmatch/<int:score_id>/<int:hole_no>/', trackmatch ,name='trackmatch'),
+
+    path('list_scores/', ScoreListView.as_view(), name = "scorelist"),
     path('cardinitial/<int:group>/', login_required(CardInitialView.as_view()), name='cardinitialview'),
-    path('list_scores/', ScoreListView.as_view(), name = "scorelist")
-    # path('cardentry/<int:score>/', login_required(CardSetupView2.as_view()), name='cardentryview'),
+    path('trackmatch/<int:score_id>/<int:hole_no>/', trackmatch ,name='trackmatch'),
+    path('display_max_hole/<int:score_id>/', displaymaxhole, name='displaymaxhole')
 
 ]
