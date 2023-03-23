@@ -881,13 +881,13 @@ class CardInitialView(FormView):
         # for buddy in match_buddies:
         #     print(buddy.buddy_email)
         kwargs['no_of_players'] = len(match_buddies)
-        kwargs['player_a'] = str(match_buddies[0])
-        kwargs['player_b'] = str(match_buddies[1])
+        kwargs['player_a'] = "<p> </p>" + str(match_buddies[0]) + "<br> Course Hcp"
+        kwargs['player_b'] = "<p> </p>" +  str(match_buddies[1]) + "<br> Course Hcp"
         if (len(match_buddies) == 3):
-            kwargs['player_c'] = str(match_buddies[2])
+            kwargs['player_c'] = "<p> </p>" +  str(match_buddies[2]) + "<br> Course Hcp"
         if (len(match_buddies) == 4):
-            kwargs['player_c'] = str(match_buddies[2])
-            kwargs['player_d'] = str(match_buddies[3])
+            kwargs['player_c'] = "<p> </p>" +  str(match_buddies[2]) + "<br> Course Hcp"
+            kwargs['player_d'] = "<p> </p>" +  str(match_buddies[3]) + "<br> Course Hcp"
 
         
         return kwargs
@@ -922,7 +922,21 @@ class ScoreListView(ListView):
     model = Score
     template_name = 'golf/score_list.html'
     ordering = ['-date']
-    paginate_by = 20
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pass the groups to template where current user is the group admin and number of members is greater than 1
+        list_of_groups_with_min_two_members = []
+        groups_user_is_the_admin = GolfGroup.objects.filter(administrator = self.request.user )
+        for group in groups_user_is_the_admin:
+            if Buddy.objects.filter(group = group).count() > 1:
+                list_of_groups_with_min_two_members.append(group)
+        # print(list_of_groups_with_min_two_members)
+        # print(list(set(groups_user_is_the_admin) & set(list_of_groups_with_min_two_members)))
+        context['groups_which_can_start_rounds'] = list(set(groups_user_is_the_admin) & set(list_of_groups_with_min_two_members))
+        return context
+
     
 @login_required
 def displaymaxhole(request, score_id):

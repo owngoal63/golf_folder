@@ -6,6 +6,12 @@
 
 {% block content %}
 
+<style>
+  
+    input {max-width: 8em}
+
+</style>
+
 {% load crispy_forms_tags %}
 <div class="w3-card w3-teal w3-padding">
     <h1 class="w3-large">Select Course & Enter Course Handicaps</h1>
@@ -13,7 +19,7 @@
         {% csrf_token %}
         {{ form|crispy }}
         <p> </p>
-        <button type="submit">Start</button> </p>
+        <button type="submit">Start Round</button> </p>
     </form>
 </div>
 {% endblock %}

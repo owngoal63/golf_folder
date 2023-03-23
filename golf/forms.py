@@ -73,9 +73,12 @@ class CardInitialForm(forms.Form):
             self.fields['player_C'].disabled = True
             self.fields['player_D'].initial = 0
             self.fields['player_D'].disabled = True
+            self.fields['player_C'].widget = forms.HiddenInput()
+            self.fields['player_D'].widget = forms.HiddenInput()
         elif self.no_of_players == 3:
             self.fields['player_D'].initial = 0
             self.fields['player_D'].disabled = True
+            self.fields['player_D'].widget = forms.HiddenInput()
 
 class CardEntryForm(forms.Form):
 

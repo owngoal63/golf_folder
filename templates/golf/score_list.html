@@ -17,6 +17,7 @@
             </tr>
         {% endfor %}
     </table>
+   
     <br>
 
     <div class="pagination">
@@ -37,5 +38,9 @@
         </span>
     </div>
     <p> </p>
+    {% for group in groups_which_can_start_rounds %}
+        <a href="/golf/cardinitial/{{ group.id }}/"><button>New Scorecard: {{group.group_name}}</button></a><p> </p>
+    {% endfor %}
 </div>
+
 {% endblock %}
