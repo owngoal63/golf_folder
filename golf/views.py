@@ -705,10 +705,10 @@ def trackmatch(request, score_id, hole_no):
             player_match_play_text = "AS"
             box_bk_colour = "#008080"
         elif player_match_play < 0:
-            player_match_play_text = str(abs(player_match_play)) + "D"
+            player_match_play_text = str(abs(player_match_play)) + " Dn"
             box_bk_colour = "OrangeRed"
         else:
-            player_match_play_text = str(player_match_play) + "U"
+            player_match_play_text = str(player_match_play) + " Up"
             box_bk_colour = "Black"
 
 

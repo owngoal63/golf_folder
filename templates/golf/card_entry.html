@@ -22,14 +22,31 @@
         width:30px;
     }
 
+    .recessed {
+        /* background-color: #fff;  */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add a box shadow to create the recessed effect */
+        padding: 10px; /* Add some padding for spacing */
+    }
+
 
 </style>
 
 {% load crispy_forms_tags %}
 <div class="w3-card w3-teal w3-padding">
     <h1 class="w3-small">
+
+    {% if request.user.email != round_meta.round_admin %}
+        <div class="recessed">
+        <a href="/golf/display_max_hole/{{round_meta.round_id}}/">
+    {% endif %}
+    
     {{round_meta.course_name}}&nbsp;&nbsp;{{round_meta.course_par}} / {{round_meta.course_rating}} / {{round_meta.slope_rating}}<br>
-    {{round_meta.round_date}}&nbsp;&nbsp;{{round_meta.buddy_group}}<br><br>
+    {{round_meta.round_date}}&nbsp;&nbsp;{{round_meta.buddy_group}}<br>
+
+    {% if request.user.email != round_meta.round_admin %}
+        </a></div>
+    {% endif %}
+    <br>
 
     {% if request.user.email != round_meta.round_admin %}
     <a href="/golf/display_max_hole/{{round_meta.round_id}}/"><button>&#8635;</button></a>&nbsp;&nbsp;
