@@ -6,6 +6,43 @@
 
 {% block content %}
 
+<style>
+    .circle{
+        width: 5rem;
+        height: 5rem;
+        border-radius: 50%;
+        border: 1px solid white;
+        animation: grow 1s ease-in-out forwards;
+        margin: 0 auto;
+        background-color: #009688;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 7rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .circle__text{ color: white; font-size: 1rem;}
+
+    .handicap {
+        color: white;
+        text-align: center;
+        font-size: 0.35rem;
+    }
+
+
+    @keyframes grow {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(3);
+    }
+    }
+
+</style>
+
 
     <div class="circle">
         <div class="circle__text">
