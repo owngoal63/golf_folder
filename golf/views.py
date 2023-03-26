@@ -273,7 +273,7 @@ class BuddyAddView(CreateView):
 
 class BuddyListView(ListView):
     model = Buddy
-    ordering = ['buddy_email']
+    # ordering = ['buddy_email']
     paginate_by = 10
 
     # Filter queryset to show only buddies for this signed in user

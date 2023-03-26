@@ -194,44 +194,113 @@
         Scorecard
         <table>
             <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th><th>&nbsp;A&nbsp;</th><th>&nbsp;B&nbsp;</th>
+            {% if round_meta.no_of_players > 2 %}
+            <th>&nbsp;C&nbsp;</th>
+            {% endif %}
+            {% if round_meta.no_of_players > 3 %}
+            <th>&nbsp;D&nbsp;</th>
+            {% endif %}
        
             <!-- <tr><td>{{player_dict.player1.holes_attr.0.0}}</td><td>{{player_dict.player1.holes_attr.0.1}}</td><td>{{player_dict.player1.holes_attr.0.2}}</td><td bgcolor='{{player_dict.player1.holes_attr.0.5}}'>{{player_dict.player1.holes_attr.0.4}}</td><td>{{player_dict.player2.holes_attr.0.4}}</td></tr> -->
 
             <tr><td>{{player_dict.player1.holes_attr.0.0}}</td><td>{{player_dict.player1.holes_attr.0.1}}</td><td>{{player_dict.player1.holes_attr.0.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.0.8}}">{{player_dict.player1.holes_attr.0.4}}{% if player_dict.player1.holes_attr.0.4 > player_dict.player1.holes_attr.0.5 and player_dict.player1.holes_attr.0.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.0.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.0.8}}">{{player_dict.player2.holes_attr.0.4}}{% if player_dict.player2.holes_attr.0.4 > player_dict.player2.holes_attr.0.5 and player_dict.player2.holes_attr.0.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.0.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.0.8}}">{{player_dict.player2.holes_attr.0.4}}{% if player_dict.player2.holes_attr.0.4 > player_dict.player2.holes_attr.0.5 and player_dict.player2.holes_attr.0.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.0.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.0.8}}">{{player_dict.player3.holes_attr.0.4}}{% if player_dict.player3.holes_attr.0.4 > player_dict.player3.holes_attr.0.5 and player_dict.player3.holes_attr.0.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.0.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.0.8}}">{{player_dict.player4.holes_attr.0.4}}{% if player_dict.player4.holes_attr.0.4 > player_dict.player4.holes_attr.0.5 and player_dict.player4.holes_attr.0.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.0.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.1.0}}</td><td>{{player_dict.player1.holes_attr.1.1}}</td><td>{{player_dict.player1.holes_attr.1.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.1.8}}">{{player_dict.player1.holes_attr.1.4}}{% if player_dict.player1.holes_attr.1.4 > player_dict.player1.holes_attr.1.5 and player_dict.player1.holes_attr.1.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.1.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.1.8}}">{{player_dict.player2.holes_attr.1.4}}{% if player_dict.player2.holes_attr.1.4 > player_dict.player2.holes_attr.1.5 and player_dict.player2.holes_attr.1.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.1.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.1.8}}">{{player_dict.player2.holes_attr.1.4}}{% if player_dict.player2.holes_attr.1.4 > player_dict.player2.holes_attr.1.5 and player_dict.player2.holes_attr.1.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.1.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.1.8}}">{{player_dict.player3.holes_attr.1.4}}{% if player_dict.player3.holes_attr.1.4 > player_dict.player3.holes_attr.1.5 and player_dict.player3.holes_attr.1.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.1.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.1.8}}">{{player_dict.player4.holes_attr.1.4}}{% if player_dict.player4.holes_attr.1.4 > player_dict.player4.holes_attr.1.5 and player_dict.player4.holes_attr.1.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.1.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.2.0}}</td><td>{{player_dict.player1.holes_attr.2.1}}</td><td>{{player_dict.player1.holes_attr.2.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.2.8}}">{{player_dict.player1.holes_attr.2.4}}{% if player_dict.player1.holes_attr.2.4 > player_dict.player1.holes_attr.2.5 and player_dict.player1.holes_attr.2.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.2.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.2.8}}">{{player_dict.player2.holes_attr.2.4}}{% if player_dict.player2.holes_attr.2.4 > player_dict.player2.holes_attr.2.5 and player_dict.player2.holes_attr.2.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.2.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.2.8}}">{{player_dict.player2.holes_attr.2.4}}{% if player_dict.player2.holes_attr.2.4 > player_dict.player2.holes_attr.2.5 and player_dict.player2.holes_attr.2.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.2.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.2.8}}">{{player_dict.player3.holes_attr.2.4}}{% if player_dict.player3.holes_attr.2.4 > player_dict.player3.holes_attr.2.5 and player_dict.player3.holes_attr.2.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.2.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.2.8}}">{{player_dict.player4.holes_attr.2.4}}{% if player_dict.player4.holes_attr.2.4 > player_dict.player4.holes_attr.2.5 and player_dict.player4.holes_attr.2.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.2.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.3.0}}</td><td>{{player_dict.player1.holes_attr.3.1}}</td><td>{{player_dict.player1.holes_attr.3.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.3.8}}">{{player_dict.player1.holes_attr.3.4}}{% if player_dict.player1.holes_attr.3.4 > player_dict.player1.holes_attr.3.5 and player_dict.player1.holes_attr.3.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.3.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.3.8}}">{{player_dict.player2.holes_attr.3.4}}{% if player_dict.player2.holes_attr.3.4 > player_dict.player2.holes_attr.3.5 and player_dict.player2.holes_attr.3.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.3.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.3.8}}">{{player_dict.player2.holes_attr.3.4}}{% if player_dict.player2.holes_attr.3.4 > player_dict.player2.holes_attr.3.5 and player_dict.player2.holes_attr.3.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.3.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.3.8}}">{{player_dict.player3.holes_attr.3.4}}{% if player_dict.player3.holes_attr.3.4 > player_dict.player3.holes_attr.3.5 and player_dict.player3.holes_attr.3.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.3.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.3.8}}">{{player_dict.player4.holes_attr.3.4}}{% if player_dict.player4.holes_attr.3.4 > player_dict.player4.holes_attr.3.5 and player_dict.player4.holes_attr.3.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.3.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.4.0}}</td><td>{{player_dict.player1.holes_attr.4.1}}</td><td>{{player_dict.player1.holes_attr.4.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.4.8}}">{{player_dict.player1.holes_attr.4.4}}{% if player_dict.player1.holes_attr.4.4 > player_dict.player1.holes_attr.4.5 and player_dict.player1.holes_attr.4.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.4.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.4.8}}">{{player_dict.player2.holes_attr.4.4}}{% if player_dict.player2.holes_attr.4.4 > player_dict.player2.holes_attr.4.5 and player_dict.player2.holes_attr.4.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.4.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.4.8}}">{{player_dict.player2.holes_attr.4.4}}{% if player_dict.player2.holes_attr.4.4 > player_dict.player2.holes_attr.4.5 and player_dict.player2.holes_attr.4.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.4.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.4.8}}">{{player_dict.player3.holes_attr.4.4}}{% if player_dict.player3.holes_attr.4.4 > player_dict.player3.holes_attr.4.5 and player_dict.player3.holes_attr.4.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.4.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.4.8}}">{{player_dict.player4.holes_attr.4.4}}{% if player_dict.player4.holes_attr.4.4 > player_dict.player4.holes_attr.4.5 and player_dict.player4.holes_attr.4.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.4.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.5.0}}</td><td>{{player_dict.player1.holes_attr.5.1}}</td><td>{{player_dict.player1.holes_attr.5.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.5.8}}">{{player_dict.player1.holes_attr.5.4}}{% if player_dict.player1.holes_attr.5.4 > player_dict.player1.holes_attr.5.5 and player_dict.player1.holes_attr.5.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.5.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.5.8}}">{{player_dict.player2.holes_attr.5.4}}{% if player_dict.player2.holes_attr.5.4 > player_dict.player2.holes_attr.5.5 and player_dict.player2.holes_attr.5.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.5.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.5.8}}">{{player_dict.player2.holes_attr.5.4}}{% if player_dict.player2.holes_attr.5.4 > player_dict.player2.holes_attr.5.5 and player_dict.player2.holes_attr.5.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.5.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.5.8}}">{{player_dict.player3.holes_attr.5.4}}{% if player_dict.player3.holes_attr.5.4 > player_dict.player3.holes_attr.5.5 and player_dict.player3.holes_attr.5.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.5.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.5.8}}">{{player_dict.player4.holes_attr.5.4}}{% if player_dict.player4.holes_attr.5.4 > player_dict.player4.holes_attr.5.5 and player_dict.player4.holes_attr.5.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.5.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.6.0}}</td><td>{{player_dict.player1.holes_attr.6.1}}</td><td>{{player_dict.player1.holes_attr.6.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.6.8}}">{{player_dict.player1.holes_attr.6.4}}{% if player_dict.player1.holes_attr.6.4 > player_dict.player1.holes_attr.6.5 and player_dict.player1.holes_attr.6.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.6.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.6.8}}">{{player_dict.player2.holes_attr.6.4}}{% if player_dict.player2.holes_attr.6.4 > player_dict.player2.holes_attr.6.5 and player_dict.player2.holes_attr.6.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.6.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.6.8}}">{{player_dict.player2.holes_attr.6.4}}{% if player_dict.player2.holes_attr.6.4 > player_dict.player2.holes_attr.6.5 and player_dict.player2.holes_attr.6.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.6.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.6.8}}">{{player_dict.player3.holes_attr.6.4}}{% if player_dict.player3.holes_attr.6.4 > player_dict.player3.holes_attr.6.5 and player_dict.player3.holes_attr.6.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.6.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.6.8}}">{{player_dict.player4.holes_attr.6.4}}{% if player_dict.player4.holes_attr.6.4 > player_dict.player4.holes_attr.6.5 and player_dict.player4.holes_attr.6.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.6.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.7.0}}</td><td>{{player_dict.player1.holes_attr.7.1}}</td><td>{{player_dict.player1.holes_attr.7.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.7.8}}">{{player_dict.player1.holes_attr.7.4}}{% if player_dict.player1.holes_attr.7.4 > player_dict.player1.holes_attr.7.5 and player_dict.player1.holes_attr.7.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.7.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.7.8}}">{{player_dict.player2.holes_attr.7.4}}{% if player_dict.player2.holes_attr.7.4 > player_dict.player2.holes_attr.7.5 and player_dict.player2.holes_attr.7.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.7.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.7.8}}">{{player_dict.player2.holes_attr.7.4}}{% if player_dict.player2.holes_attr.7.4 > player_dict.player2.holes_attr.7.5 and player_dict.player2.holes_attr.7.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.7.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.7.8}}">{{player_dict.player3.holes_attr.7.4}}{% if player_dict.player3.holes_attr.7.4 > player_dict.player3.holes_attr.7.5 and player_dict.player3.holes_attr.7.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.7.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.7.8}}">{{player_dict.player4.holes_attr.7.4}}{% if player_dict.player4.holes_attr.7.4 > player_dict.player4.holes_attr.7.5 and player_dict.player4.holes_attr.7.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.7.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.8.0}}</td><td>{{player_dict.player1.holes_attr.8.1}}</td><td>{{player_dict.player1.holes_attr.8.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.8.8}}">{{player_dict.player1.holes_attr.8.4}}{% if player_dict.player1.holes_attr.8.4 > player_dict.player1.holes_attr.8.5 and player_dict.player1.holes_attr.8.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.8.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.8.8}}">{{player_dict.player2.holes_attr.8.4}}{% if player_dict.player2.holes_attr.8.4 > player_dict.player2.holes_attr.8.5 and player_dict.player2.holes_attr.8.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.8.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.8.8}}">{{player_dict.player2.holes_attr.8.4}}{% if player_dict.player2.holes_attr.8.4 > player_dict.player2.holes_attr.8.5 and player_dict.player2.holes_attr.8.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.8.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.8.8}}">{{player_dict.player3.holes_attr.8.4}}{% if player_dict.player3.holes_attr.8.4 > player_dict.player3.holes_attr.8.5 and player_dict.player3.holes_attr.8.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.8.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.8.8}}">{{player_dict.player4.holes_attr.8.4}}{% if player_dict.player4.holes_attr.8.4 > player_dict.player4.holes_attr.8.5 and player_dict.player4.holes_attr.8.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.8.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>Out</td><td>{{round_meta.outpar}}</td><td>&nbsp;</td>
                 {% if round_meta.hole_no > 9 %}
@@ -244,6 +313,20 @@
                     {% else %}
                     <td>&nbsp;</td>
                     {% endif %}
+                {% if round_meta.no_of_players > 2 and round_meta.hole_no > 9 %}
+                <td bgcolor="DarkSlateGray">{{player_dict.player3.running_totals.5}}/{{player_dict.player3.running_totals.6}}</td>
+                    {% else %}
+                    {% if round_meta.no_of_players > 2 %}
+                    <td>&nbsp;</td>
+                    {% endif %}
+                    {% endif %}
+                {% if round_meta.no_of_players > 3 and round_meta.hole_no > 9 %}
+                <td bgcolor="DarkSlateGray">{{player_dict.player4.running_totals.5}}/{{player_dict.player4.running_totals.6}}</td>
+                    {% else %}
+                    {% if round_meta.no_of_players > 3 %}
+                    <td>&nbsp;</td>
+                    {% endif %}
+                    {% endif %}
                 </tr>
             <tr>
             </tr>
@@ -252,39 +335,102 @@
 
             <tr><td>{{player_dict.player1.holes_attr.9.0}}</td><td>{{player_dict.player1.holes_attr.9.1}}</td><td>{{player_dict.player1.holes_attr.9.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.9.8}}">{{player_dict.player1.holes_attr.9.4}}{% if player_dict.player1.holes_attr.9.4 > player_dict.player1.holes_attr.9.5 and player_dict.player1.holes_attr.9.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.9.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.9.8}}">{{player_dict.player2.holes_attr.9.4}}{% if player_dict.player2.holes_attr.9.4 > player_dict.player2.holes_attr.9.5 and player_dict.player2.holes_attr.9.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.9.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.9.8}}">{{player_dict.player2.holes_attr.9.4}}{% if player_dict.player2.holes_attr.9.4 > player_dict.player2.holes_attr.9.5 and player_dict.player2.holes_attr.9.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.9.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.9.8}}">{{player_dict.player3.holes_attr.9.4}}{% if player_dict.player3.holes_attr.9.4 > player_dict.player3.holes_attr.9.5 and player_dict.player3.holes_attr.9.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.9.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.9.8}}">{{player_dict.player4.holes_attr.9.4}}{% if player_dict.player4.holes_attr.9.4 > player_dict.player4.holes_attr.9.5 and player_dict.player4.holes_attr.9.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.9.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.10.0}}</td><td>{{player_dict.player1.holes_attr.10.1}}</td><td>{{player_dict.player1.holes_attr.10.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.10.8}}">{{player_dict.player1.holes_attr.10.4}}{% if player_dict.player1.holes_attr.10.4 > player_dict.player1.holes_attr.10.5 and player_dict.player1.holes_attr.10.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.10.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.10.8}}">{{player_dict.player2.holes_attr.10.4}}{% if player_dict.player2.holes_attr.10.4 > player_dict.player2.holes_attr.10.5 and player_dict.player2.holes_attr.10.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.10.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.10.8}}">{{player_dict.player2.holes_attr.10.4}}{% if player_dict.player2.holes_attr.10.4 > player_dict.player2.holes_attr.10.5 and player_dict.player2.holes_attr.10.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.10.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.10.8}}">{{player_dict.player3.holes_attr.10.4}}{% if player_dict.player3.holes_attr.10.4 > player_dict.player3.holes_attr.10.5 and player_dict.player3.holes_attr.10.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.10.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.10.8}}">{{player_dict.player4.holes_attr.10.4}}{% if player_dict.player4.holes_attr.10.4 > player_dict.player4.holes_attr.10.5 and player_dict.player4.holes_attr.10.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.10.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.11.0}}</td><td>{{player_dict.player1.holes_attr.11.1}}</td><td>{{player_dict.player1.holes_attr.11.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.11.8}}">{{player_dict.player1.holes_attr.11.4}}{% if player_dict.player1.holes_attr.11.4 > player_dict.player1.holes_attr.11.5 and player_dict.player1.holes_attr.11.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.11.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.11.8}}">{{player_dict.player2.holes_attr.11.4}}{% if player_dict.player2.holes_attr.11.4 > player_dict.player2.holes_attr.11.5 and player_dict.player2.holes_attr.11.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.11.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.11.8}}">{{player_dict.player2.holes_attr.11.4}}{% if player_dict.player2.holes_attr.11.4 > player_dict.player2.holes_attr.11.5 and player_dict.player2.holes_attr.11.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.11.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.11.8}}">{{player_dict.player3.holes_attr.11.4}}{% if player_dict.player3.holes_attr.11.4 > player_dict.player3.holes_attr.11.5 and player_dict.player3.holes_attr.11.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.11.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.11.8}}">{{player_dict.player4.holes_attr.11.4}}{% if player_dict.player4.holes_attr.11.4 > player_dict.player4.holes_attr.11.5 and player_dict.player4.holes_attr.11.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.11.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.12.0}}</td><td>{{player_dict.player1.holes_attr.12.1}}</td><td>{{player_dict.player1.holes_attr.12.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.12.8}}">{{player_dict.player1.holes_attr.12.4}}{% if player_dict.player1.holes_attr.12.4 > player_dict.player1.holes_attr.12.5 and player_dict.player1.holes_attr.12.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.12.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.12.8}}">{{player_dict.player2.holes_attr.12.4}}{% if player_dict.player2.holes_attr.12.4 > player_dict.player2.holes_attr.12.5 and player_dict.player2.holes_attr.12.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.12.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.12.8}}">{{player_dict.player2.holes_attr.12.4}}{% if player_dict.player2.holes_attr.12.4 > player_dict.player2.holes_attr.12.5 and player_dict.player2.holes_attr.12.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.12.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.12.8}}">{{player_dict.player3.holes_attr.12.4}}{% if player_dict.player3.holes_attr.12.4 > player_dict.player3.holes_attr.12.5 and player_dict.player3.holes_attr.12.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.12.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.12.8}}">{{player_dict.player4.holes_attr.12.4}}{% if player_dict.player4.holes_attr.12.4 > player_dict.player4.holes_attr.12.5 and player_dict.player4.holes_attr.12.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.12.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.13.0}}</td><td>{{player_dict.player1.holes_attr.13.1}}</td><td>{{player_dict.player1.holes_attr.13.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.13.8}}">{{player_dict.player1.holes_attr.13.4}}{% if player_dict.player1.holes_attr.13.4 > player_dict.player1.holes_attr.13.5 and player_dict.player1.holes_attr.13.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.13.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.13.8}}">{{player_dict.player2.holes_attr.13.4}}{% if player_dict.player2.holes_attr.13.4 > player_dict.player2.holes_attr.13.5 and player_dict.player2.holes_attr.13.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.13.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.13.8}}">{{player_dict.player2.holes_attr.13.4}}{% if player_dict.player2.holes_attr.13.4 > player_dict.player2.holes_attr.13.5 and player_dict.player2.holes_attr.13.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.13.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.13.8}}">{{player_dict.player3.holes_attr.13.4}}{% if player_dict.player3.holes_attr.13.4 > player_dict.player3.holes_attr.13.5 and player_dict.player3.holes_attr.13.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.13.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.13.8}}">{{player_dict.player4.holes_attr.13.4}}{% if player_dict.player4.holes_attr.13.4 > player_dict.player4.holes_attr.13.5 and player_dict.player4.holes_attr.13.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.13.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.14.0}}</td><td>{{player_dict.player1.holes_attr.14.1}}</td><td>{{player_dict.player1.holes_attr.14.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.14.8}}">{{player_dict.player1.holes_attr.14.4}}{% if player_dict.player1.holes_attr.14.4 > player_dict.player1.holes_attr.14.5 and player_dict.player1.holes_attr.14.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.14.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.14.8}}">{{player_dict.player2.holes_attr.14.4}}{% if player_dict.player2.holes_attr.14.4 > player_dict.player2.holes_attr.14.5 and player_dict.player2.holes_attr.14.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.14.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.14.8}}">{{player_dict.player2.holes_attr.14.4}}{% if player_dict.player2.holes_attr.14.4 > player_dict.player2.holes_attr.14.5 and player_dict.player2.holes_attr.14.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.14.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.14.8}}">{{player_dict.player3.holes_attr.14.4}}{% if player_dict.player3.holes_attr.14.4 > player_dict.player3.holes_attr.14.5 and player_dict.player3.holes_attr.14.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.14.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.14.8}}">{{player_dict.player4.holes_attr.14.4}}{% if player_dict.player4.holes_attr.14.4 > player_dict.player4.holes_attr.14.5 and player_dict.player4.holes_attr.14.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.14.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.15.0}}</td><td>{{player_dict.player1.holes_attr.15.1}}</td><td>{{player_dict.player1.holes_attr.15.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.15.8}}">{{player_dict.player1.holes_attr.15.4}}{% if player_dict.player1.holes_attr.15.4 > player_dict.player1.holes_attr.15.5 and player_dict.player1.holes_attr.15.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.15.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.15.8}}">{{player_dict.player2.holes_attr.15.4}}{% if player_dict.player2.holes_attr.15.4 > player_dict.player2.holes_attr.15.5 and player_dict.player2.holes_attr.15.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.15.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.15.8}}">{{player_dict.player2.holes_attr.15.4}}{% if player_dict.player2.holes_attr.15.4 > player_dict.player2.holes_attr.15.5 and player_dict.player2.holes_attr.15.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.15.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.15.8}}">{{player_dict.player3.holes_attr.15.4}}{% if player_dict.player3.holes_attr.15.4 > player_dict.player3.holes_attr.15.5 and player_dict.player3.holes_attr.15.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.15.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.15.8}}">{{player_dict.player4.holes_attr.15.4}}{% if player_dict.player4.holes_attr.15.4 > player_dict.player4.holes_attr.15.5 and player_dict.player4.holes_attr.15.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.15.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.16.0}}</td><td>{{player_dict.player1.holes_attr.16.1}}</td><td>{{player_dict.player1.holes_attr.16.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.16.8}}">{{player_dict.player1.holes_attr.16.4}}{% if player_dict.player1.holes_attr.16.4 > player_dict.player1.holes_attr.16.5 and player_dict.player1.holes_attr.16.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.16.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.16.8}}">{{player_dict.player2.holes_attr.16.4}}{% if player_dict.player2.holes_attr.16.4 > player_dict.player2.holes_attr.16.5 and player_dict.player2.holes_attr.16.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.16.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.16.8}}">{{player_dict.player2.holes_attr.16.4}}{% if player_dict.player2.holes_attr.16.4 > player_dict.player2.holes_attr.16.5 and player_dict.player2.holes_attr.16.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.16.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.16.8}}">{{player_dict.player3.holes_attr.16.4}}{% if player_dict.player3.holes_attr.16.4 > player_dict.player3.holes_attr.16.5 and player_dict.player3.holes_attr.16.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.16.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.16.8}}">{{player_dict.player4.holes_attr.16.4}}{% if player_dict.player4.holes_attr.16.4 > player_dict.player4.holes_attr.16.5 and player_dict.player4.holes_attr.16.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.16.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
 
             <tr><td>{{player_dict.player1.holes_attr.17.0}}</td><td>{{player_dict.player1.holes_attr.17.1}}</td><td>{{player_dict.player1.holes_attr.17.2}}</td>
                 <td bgcolor="{{player_dict.player1.holes_attr.17.8}}">{{player_dict.player1.holes_attr.17.4}}{% if player_dict.player1.holes_attr.17.4 > player_dict.player1.holes_attr.17.5 and player_dict.player1.holes_attr.17.4|slice:"1" != "*" %}/{{player_dict.player1.holes_attr.17.5}} {% endif %}</td>
-                <td bgcolor="{{player_dict.player2.holes_attr.17.8}}">{{player_dict.player2.holes_attr.17.4}}{% if player_dict.player2.holes_attr.17.4 > player_dict.player2.holes_attr.17.5 and player_dict.player2.holes_attr.17.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.17.5}} {% endif %}</td></tr>
+                <td bgcolor="{{player_dict.player2.holes_attr.17.8}}">{{player_dict.player2.holes_attr.17.4}}{% if player_dict.player2.holes_attr.17.4 > player_dict.player2.holes_attr.17.5 and player_dict.player2.holes_attr.17.4|slice:"1" != "*" %}/{{player_dict.player2.holes_attr.17.5}} {% endif %}</td>
+                {% if round_meta.no_of_players > 2 %}
+                <td bgcolor="{{player_dict.player3.holes_attr.17.8}}">{{player_dict.player3.holes_attr.17.4}}{% if player_dict.player3.holes_attr.17.4 > player_dict.player3.holes_attr.17.5 and player_dict.player3.holes_attr.17.4|slice:"1" != "*" %}/{{player_dict.player3.holes_attr.17.5}} {% endif %}</td>
+                {% endif %}
+                {% if round_meta.no_of_players > 3 %}
+                <td bgcolor="{{player_dict.player4.holes_attr.17.8}}">{{player_dict.player4.holes_attr.17.4}}{% if player_dict.player4.holes_attr.17.4 > player_dict.player4.holes_attr.17.5 and player_dict.player4.holes_attr.17.4|slice:"1" != "*" %}/{{player_dict.player4.holes_attr.17.5}} {% endif %}</td>
+                {% endif %}
+            </tr>
                 
 
             <tr><td>In</td><td>{{round_meta.inpar}}</td><td>&nbsp;</td>
@@ -297,6 +443,20 @@
                 <td bgcolor="DarkSlateGray">{{player_dict.player2.running_totals.7}}/{{player_dict.player2.running_totals.8}}</td>
                     {% else %}
                     <td>&nbsp;</td>
+                    {% endif %}
+                {% if round_meta.no_of_players > 2 and round_meta.hole_no == 19 %}
+                <td bgcolor="DarkSlateGray">{{player_dict.player3.running_totals.7}}/{{player_dict.player3.running_totals.8}}</td>
+                    {% else %}
+                    {% if round_meta.no_of_players > 2 %}
+                    <td>&nbsp;</td>
+                    {% endif %}
+                    {% endif %}
+                {% if round_meta.no_of_players > 3 and round_meta.hole_no == 19 %}
+                <td bgcolor="DarkSlateGray">{{player_dict.player4.running_totals.7}}/{{player_dict.player4.running_totals.8}}</td>
+                    {% else %}
+                    {% if round_meta.no_of_players > 3 %}
+                    <td>&nbsp;</td>
+                    {% endif %}
                     {% endif %}
                 </tr>
 
@@ -315,6 +475,20 @@
                 <td bgcolor="Black">{{player_dict.player2.running_totals.0}}/{{player_dict.player2.running_totals.1}}</td>
                     {% else %}
                     <td>&nbsp;</td>
+                    {% endif %}
+                {% if round_meta.no_of_players > 2 and round_meta.hole_no == 19 %}
+                <td bgcolor="Black">{{player_dict.player3.running_totals.0}}/{{player_dict.player3.running_totals.1}}</td>
+                    {% else %}
+                    {% if round_meta.no_of_players > 2 %}
+                    <td>&nbsp;</td>
+                    {% endif %}
+                    {% endif %}
+                {% if round_meta.no_of_players > 3 and round_meta.hole_no == 19 %}
+                <td bgcolor="Black">{{player_dict.player4.running_totals.0}}/{{player_dict.player4.running_totals.1}}</td>
+                    {% else %}
+                    {% if round_meta.no_of_players > 3 %}
+                    <td>&nbsp;</td>
+                    {% endif %}
                     {% endif %}
                 </tr>
         </table>
