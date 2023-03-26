@@ -597,7 +597,7 @@ def trackmatch(request, score_id, hole_no):
                 playerSI.append(3) if holeSI <= player_hcp - 36 else playerSI.append(2)
 
         # Logic for 2 Player Match play calculations
-        if count == 0 and no_of_players == 2:   # Get the SI for the 2nd player                             !!!!!!!!!!!!! Change the 4 to a 2
+        if count == 0 and no_of_players == 2:   # Get the SI for the 2nd player
             if player_hcps[1] <= 18:
                 for holeSI in holesSI:
                     alt_playerSI.append(1) if holeSI <= player_hcps[1] else alt_playerSI.append(0)
@@ -609,7 +609,7 @@ def trackmatch(request, score_id, hole_no):
                     alt_playerSI.append(3) if holeSI <= player_hcps[1] - 36 else alt_playerSI.append(2)
 
         # Logic for 2 Player Match play calculations
-        if count == 1 and no_of_players == 2:   # Get the SI for the 1st player                             !!!!!!!!!!!!! Change the 4 to a 2
+        if count == 1 and no_of_players == 2:   # Get the SI for the 1st player
             if player_hcps[0] <= 18:
                 for holeSI in holesSI:
                     alt_playerSI.append(1) if holeSI <= player_hcps[0] else alt_playerSI.append(0)
@@ -659,6 +659,8 @@ def trackmatch(request, score_id, hole_no):
                 else:
                     outcome = 0
 
+            # hole_obj structure
+            # hole_no, par, SI, Strokes, Gross (or *), Net, Compare Net to Par, Match Play Outcome, BG Colour if net hole score greater than Double Bogey 
             hole_obj = hole_obj + ((
                 i,
                 eval("cq.hole" + str(i) + "par"),
@@ -667,12 +669,12 @@ def trackmatch(request, score_id, hole_no):
                 '' if round_meta["holes_completed"] < i else net_score,
                 '' if round_meta["holes_completed"] < i else compare_to_par,
                 '' if no_of_players != 2  and round_meta["holes_completed"] < i else outcome,
-                
+                '#009688' if round_meta["holes_completed"] < i or int(net_score - eval("cq.hole" + str(i) + "par")) <= 2 else '#D2691E',
                 ),
                 )
 
         holes_attr.append(hole_obj)
-        print(hole_obj)
+        # print(hole_obj)
 
         # Get Gross, Net, Stableford, out_nine and in_nine running totals
         gross, net, stableford, out_nine_gross, out_nine_net, in_nine_gross, in_nine_net = 0, 0, 0, 0, 0, 0, 0
@@ -688,15 +690,15 @@ def trackmatch(request, score_id, hole_no):
                 out_nine_net_neg = out_nine_net
             if i >= 10:
                 in_nine_gross = gross - out_nine_gross_neg
-                print(">>>>>",gross, in_nine_gross)
+                # print(">>>>>",gross, in_nine_gross)
                 in_nine_net = net - out_nine_net_neg
             s = (getattr(score_instance,"player_{0}_s{1}".format(p_letter, i)) - playerSI[i-1]) - eval("cq.hole" + str(i) + "par")
             stableford += 0 if s >= 2 else stableford_dict[str(s)]
             if p_letter == "a":
-                print(hole_obj[i-1][7])
+                # print(hole_obj[i-1][7])
                 player_match_play += hole_obj[i-1][7]
             if p_letter == "b":
-                print(hole_obj[i-1][7])
+                # print(hole_obj[i-1][7])
                 player_match_play += hole_obj[i-1][7]
 
 
@@ -741,10 +743,10 @@ def trackmatch(request, score_id, hole_no):
     if no_of_players > 3:
         players_stableford_list.append(player_dict["player4"]["running_totals"][2])
     
-    print(players_stableford_list)
+    # print(players_stableford_list)
 
     positions = calculate_positions(players_stableford_list)
-    print(positions)
+    # print(positions)
 
     stableford_medal_positions = {}
     stableford_medal_positions["a"] = positions[0] 
@@ -755,7 +757,7 @@ def trackmatch(request, score_id, hole_no):
         stableford_medal_positions["d"] = positions[3]
 
 
-    print(stableford_medal_positions)
+    # print(stableford_medal_positions)
 
     # for count, player in enumerate(players_sorted):
     #     players_stableford_colours[players_sorted[count]] = mp_colors.get(str(players_sorted.index(player)))
@@ -766,6 +768,7 @@ def trackmatch(request, score_id, hole_no):
     # print(players_stableford_colours)
 
     print(player_dict)
+    print(" ")
 
     if request.method == 'POST':
         print("here")
