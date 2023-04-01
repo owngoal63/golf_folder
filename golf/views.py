@@ -946,7 +946,7 @@ def displaymaxhole(request, score_id):
     # Get the maximum number of holes scored/saved and redirect to that url page
     score_instance = Score.objects.get(id = score_id)
 
-    # Check through the fields to find the first balnk against Player A
+    # Check through the fields to find the first blank against Player A
     hole_id = 19
     for i in range(1, 19):
         if getattr(score_instance,"player_a_s{0}".format(i)) is None:

@@ -36,17 +36,17 @@
 <div class="w3-card w3-teal w3-padding">
     <h1 class="w3-small">
 
-    {% if request.user.email != round_meta.round_admin %}
+
         <div class="recessed">
         <a href="/golf/display_max_hole/{{round_meta.round_id}}/">
-    {% endif %}
+
     
     {{round_meta.course_name}}&nbsp;&nbsp;{{round_meta.course_par}} / {{round_meta.course_rating}} / {{round_meta.slope_rating}}<br>
     {{round_meta.round_date}}&nbsp;&nbsp;{{round_meta.buddy_group}}<br>
 
-    {% if request.user.email != round_meta.round_admin %}
+
         </a></div>
-    {% endif %}
+
     <br>
    
     {% if round_meta.hole_no > 1 %}
@@ -191,7 +191,7 @@
  
 
         <hr>
-        Scorecard
+        Scorecard&nbsp;({{round_meta.round_id}})
         <table>
             <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th><th>&nbsp;A&nbsp;</th><th>&nbsp;B&nbsp;</th>
             {% if round_meta.no_of_players > 2 %}
