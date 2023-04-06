@@ -1,0 +1,15 @@
+<!-- templates/golf/score_confirm_delete.html -->
+{% extends 'base.html' %}
+
+{% block title %}Confirm Scorecard Deletion{% endblock %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="w3-card w3-teal w3-padding">
+    <form method="post">{% csrf_token %}
+        <p>Are you sure you want to delete "{{ object }}"?</p>
+        {{ form }}
+        <button type="submit">Confirm</button> &nbsp;&nbsp;<button><a href="../">Cancel</a></button>
+    </form>
+</div>
+{% endblock %}

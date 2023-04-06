@@ -9,7 +9,14 @@
     <table class="w3-table w3-bordered">
         {% for score in object_list %}
             <tr>
-                <td style="width:90%;"><a href="/golf/display_max_hole/{{ score.id }}/">{{ score.date|date:"d M y" }} | {{ score.course }} | {{score.group}}</a></td>
+                <td style="width:90%; font-size:12px; "><a href="/golf/display_max_hole/{{ score.id }}/">{{ score.date|date:"dMy" }} | {{ score.course }} | {{score.group}}</a></td>
+                
+                <!-- Show delete button if user is the admin of the scorecard -->
+                {% if score.player_a.email == user.email %}
+                    <td style="width:10%;font-size:12px;"><button><a href="{{ score.id }}/delete">&#128465;</a></button></td>
+                {% else %}
+                    <td style="width:10%;font-size:12px;">&nbsp;</td>
+                {% endif %}
             </tr>
         {% empty %}
             <tr>
@@ -17,7 +24,7 @@
             </tr>
         {% endfor %}
     </table>
-   
+    
     <br>
 
     <div class="pagination">

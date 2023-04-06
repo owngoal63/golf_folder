@@ -940,6 +940,13 @@ class ScoreListView(ListView):
         context['groups_which_can_start_rounds'] = list(set(groups_user_is_the_admin) & set(list_of_groups_with_min_two_members))
         return context
 
+class ScoreDeleteView(DeleteView):
+    model = Score
+    success_url = "/golf/list_scores/"
+    template_name = "golf/score_confirm_delete.html"
+    
+
+
     
 @login_required
 def displaymaxhole(request, score_id):
