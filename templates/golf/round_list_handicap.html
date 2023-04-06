@@ -14,7 +14,7 @@
     {% endif %}
     <table class="w3-table w3-bordered">
         <tr>
-            <td style="font-size:11px">Date</td><td style="font-size:11px">Course</td><td style="font-size:11px">Course / Slope Rating</td><td style="font-size:11px">Score</td><td style="font-size:11px">HndCp Diff.</td>
+            <td style="font-size:11px">Date</td><td style="font-size:11px">Course</td><td style="font-size:11px">CRS/SLP Rating</td><td style="font-size:11px">Score</td><td style="font-size:11px">HCP Diff.</td>
         </tr>
         {% for round_details in object %}
             {% if round_details.id in lowest_round_id_list %}
@@ -22,7 +22,7 @@
             {% else %}
                 <tr>
             {% endif %}
-                <td style="font-size:11px">{{ round_details.date|date:"d M y" }}</td><td style="font-size:11px">{{ round_details.course }}</td><td style="font-size:11px">{{ round_details.course.course_rating }} / {{ round_details.course.slope_rating }}</td><td style="font-size:11px">{{ round_details.score }}</td><td style="font-size:11px">{{ round_details.handicap_differential }}</td>
+                <td style="font-size:11px">{{ round_details.date|date:"dMy" }}</td><td style="font-size:11px">{{ round_details.course }}</td><td style="font-size:11px">{{ round_details.course.course_rating }} / {{ round_details.course.slope_rating }}</td><td style="font-size:11px">{{ round_details.score }}</td><td style="font-size:11px">{{ round_details.handicap_differential }}</td>
             </tr>
         {% empty %}
             <li>No rounds yet.</li>
