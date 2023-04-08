@@ -193,6 +193,11 @@
 
         <hr>
         Scorecard&nbsp;({{round_meta.round_id}})
+        {% if 'colourize' not in request.get_full_path %}
+            &nbsp;&nbsp;<a href="colourize/"><button>&#10041</button>
+        {% else %}
+            &nbsp;&nbsp;<a href="/golf/display_max_hole/{{round_meta.round_id}}"><button>&#9100</button>
+        {% endif %}
         <table>
             <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th><th>&nbsp;A&nbsp;</th><th>&nbsp;B&nbsp;</th>
             {% if round_meta.no_of_players > 2 %}

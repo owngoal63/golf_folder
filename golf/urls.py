@@ -44,6 +44,7 @@ urlpatterns = [
     path('list_scores/<int:pk>/delete', ScoreDeleteView.as_view(), name = "scoredelete"),
     path('cardinitial/<int:group>/', login_required(CardInitialView.as_view()), name='cardinitialview'),
     path('trackmatch/<int:score_id>/<int:hole_no>/', trackmatch ,name='trackmatch'),
+    path('trackmatch/<int:score_id>/<int:hole_no>/<str:colourize>/', trackmatch ,name='trackmatch'),
     path('display_max_hole/<int:score_id>/', displaymaxhole, name='displaymaxhole')
 
 ]
