@@ -20,6 +20,9 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 import json
 
+# from rest_framework.response import Response
+from django.http import HttpResponse, JsonResponse
+
 # ~~~~~~~ Course Table CRUD views ~~~~~~~
 
 class CourseAddView(CreateView):
@@ -528,12 +531,17 @@ def compare_and_return_color(par, score):
     else:
         return "#009688"  # background colour
 
-@login_required
-def trackmatch(request, score_id, hole_no, colourize = False):
-    print(colourize)
+# @login_required   ---- Switched off to allow non-authenticated Siri execution
+def trackmatch(request, score_id, hole_no, extraparam = False):
     # Get Functional Parameters and Initaliase variables
-    if colourize == "colourize":
-        colourize = True  
+    if extraparam == "colourize":
+        colourize = True
+    else:
+        colourize = False
+    if extraparam == "Siri":
+        siri = True
+    else:
+        siri = False
     score_instance = Score.objects.get(id = score_id)
     no_of_players = score_instance.no_of_players
     player_hcps = []
@@ -542,7 +550,6 @@ def trackmatch(request, score_id, hole_no, colourize = False):
     player_hcps.append(score_instance.player_c_course_hcp)
     player_hcps.append(score_instance.player_d_course_hcp)
     holes_attr=[]
-    holes_attr2 = []
     running_totals = []
     stableford_dict = {
         "1": 1,
@@ -779,12 +786,32 @@ def trackmatch(request, score_id, hole_no, colourize = False):
     if no_of_players > 3:
         stableford_medal_positions["d"] = positions[3]
 
-
     print(player_dict)
-    print(" ")
+    
+    # Siri Score info functionaility
+    if siri and hole_no > 1:
+        print("Siri mode")
+        return_details = {}
+        return_details["message"] = ""
+        if no_of_players == 2:
+            if player_dict['player1']['running_totals'][3] == "AS":
+                return_details["message"] = f"You are all square through {hole_no - 1} holes. "
+            else:
+                if "Up" in player_dict['player1']['running_totals'][3]:   # Player 1 is up in the matchplay
+                    return_details["message"] = f"Player one is {player_dict['player1']['running_totals'][3]} through {hole_no - 1} holes." 
+                else:   # player 2 is up in the matchplay
+                    return_details["message"] = f"Player two is {player_dict['player2']['running_totals'][3]} through {hole_no - 1} holes."
+        return_details["message"] = return_details["message"] + f" Player one has {player_dict['player1']['running_totals'][2]} points, player 2 has {player_dict['player2']['running_totals'][2]} points."
+        if no_of_players == 3:
+            return_details["message"] = return_details["message"] + f" Player three has {player_dict['player3']['running_totals'][2]} points, through {hole_no - 1} holes."
+        if no_of_players == 4:
+            return_details["message"] = return_details["message"] + f" Player three has {player_dict['player3']['running_totals'][2]} points and player four has {player_dict['player4']['running_totals'][2]} points through {hole_no - 1} holes."
+        if hole_no == 19:
+            return_details["message"] = return_details["message"] + f" Your match at {round_meta['course_name']} is over. Hope you enjoyed it!"
+
+
 
     if request.method == 'POST':
-        print("here")
         # create a form instance and populate it with data from the request:
         if no_of_players == 2:
             form = CardEntryForm(request.POST, player_a="", player_b="")
@@ -794,7 +821,6 @@ def trackmatch(request, score_id, hole_no, colourize = False):
             form = CardEntryForm(request.POST, player_a="", player_b="", player_c="", player_d="")
         # check whether it's valid:
         if form.is_valid():
-            print("here2")
             # Update scores incrementing the model field name by the hole_no each time
             setattr(score_instance, "player_a_s{0}".format(hole_no), form.cleaned_data['player_A'])
             setattr(score_instance, "player_b_s{0}".format(hole_no), form.cleaned_data['player_B'])
@@ -827,9 +853,11 @@ def trackmatch(request, score_id, hole_no, colourize = False):
                 player_d = f"D {str(buddy_queryset[3].buddy_email)[:6]}.. ({score_instance.player_d_course_hcp})"
                 )
 
-    
-
-    return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "stableford_medal_positions": stableford_medal_positions, "form": form})
+    if siri and hole_no > 1:
+        # return Response(return_details)
+        return JsonResponse(return_details)
+    else:
+        return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "stableford_medal_positions": stableford_medal_positions, "form": form})
 
 class CardSetupView2(FormView):
 

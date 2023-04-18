@@ -112,6 +112,7 @@ def getCurrentHole(request,pk):
 
      # Check through the fields to find the first blank against Player A
     hole_id = 19
+    current_hole_id = hole_id    # Default value if loop below does not find None value i.e. Round is finished and Hole is 19th 
     for i in range(1, 19):
         if getattr(score,"player_a_s{0}".format(i)) is None:
             current_hole_id = i
