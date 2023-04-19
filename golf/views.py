@@ -149,7 +149,9 @@ class RoundListHandicapView(ListView):
             diffadjustment_obj = DiffAjustment.objects.filter(num_of_scores = 20 )[0]
         # List that is passed to template with ID's of rounds which make up the handicap
         lowest_round_id_list = []
-        context['player'] = round_obj[0].player if num_score_differentials > 0 else ''
+        # CustomUser.objects.filter(email=round_obj[0].player)[0].firstname
+        # context['player'] = round_obj[0].player if num_score_differentials > 0 else ''
+        context['player'] = CustomUser.objects.filter(email=round_obj[0].player)[0].firstname if num_score_differentials > 0 else ''
 
         if(num_score_differentials < 3):
             context['message'] = 'Minimum of 3 rounds is required to calculate handicap'
@@ -343,86 +345,6 @@ def chart_rounds_graph(request):
         'data': data,
     })
 
-# @login_required
-# def chart_handicap_graph(request):
-#     labels = []
-#     data = []
-#     backgroundcolors = []
-#     defaultColors = [
-#         "#3366CC", "#DC3912", "#FF9900", "#109618", "#990099", "#3B3EAC", "#0099C6",
-#         "#DD4477", "#66AA00", "#B82E2E", "#316395", "#994499", "#22AA99", "#AAAA11",
-#         "#6633CC", "#E67300", "#8B0707", "#329262", "#5574A6", "#651067"
-#         ]
-#     course_colours = dict()
-
-#     # queryset = Round.objects.all().values('date','handicap_differential').filter(player=request.user).order_by('date')
-#     queryset = Round.objects.all().values('date', 'course__name','handicap_differential').filter(player=request.user).order_by('date')
-#     # print(queryset)
-#     queryset_courses = Round.objects.values('course__name').annotate(dcount=Count('course__name')).filter(player=request.user).order_by()
-#     # print(queryset_courses)
-#     for course in enumerate(queryset_courses):
-#         # print(course[0])
-#         # print(course[1].get("course__name"))
-#         course_colours[course[1].get("course__name")] = defaultColors[course[0]]
-#     # print(course_colours)
-
-#     _min = queryset.aggregate(min = Min('handicap_differential'))
-#     _max = queryset.aggregate(max = Max('handicap_differential'))
-#     _avg = queryset.aggregate(avg = Avg('handicap_differential'))
-#     average_handicap = _avg.get("avg")
-#     max_height = max(_min.get("min"), _max.get("max")) - average_handicap
-#     suggested_min = 0-max_height
-#     suggested_max = max_height
-
-#     # Limit to last x rounds
-#     # This is now done in chart.js
-
-#     raw_dict = {
-#         "x": 0,
-#         "y": 0,
-#         "course": ""
-#     }
-
-#     n=0
-#     for entry in queryset:
-#         labels.append(entry['date'])
-#         me = Object()
-#         # me.name = "Onur"
-#         # me.age = 35
-#         # me.dog = Object()
-#         # me.dog.name = "Apollo"
-#         me.x = n
-#         me.y = int(entry['handicap_differential'] - average_handicap)
-#         # me.course = entry['course__name']
-#         raw_dict["x"] = n
-#         raw_dict["y"] = entry['handicap_differential'] - average_handicap
-#         # raw_dict["course"] = entry['course__name']
-#         raw_obj = MyObject(raw_dict)
-#         # print(me)
-#         # print(raw_obj.x)
-#         # print(stop)
-#         # obj_string = "{ x: " + str(n) + ", y: " + str(entry['handicap_differential'] - average_handicap) + ", course: '" + entry['course__name'] + "'}"
-#         # print(raw_obj)
-#         data.append(int(entry['handicap_differential'] - average_handicap))
-#         # data.append(me)
-#         # print(course_colours[entry['course__name']])
-#         backgroundcolors.append(course_colours[entry['course__name']])
-#         # print(entry['course__name'], entry['date'], backgroundcolors[n])
-#         n=n+1
-#     print(data)
-    
-#     return JsonResponse(data={
-#         'labels': labels,
-#         'data': data,
-#         's_min': suggested_min,
-#         's_max': suggested_max,
-#         'average': str(round(average_handicap,2)),
-#         'backgroundcolors': backgroundcolors
-#     })
-
-# @login_required
-# def chart_handicap_page2(request):
-#     return render(request, 'golf/chart_handicap_page2.html')
 
 @login_required
 def chart_handicap_page(request):
@@ -796,17 +718,17 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
         return_details["message"] = ""
         if no_of_players == 2:
             if player_dict['player1']['running_totals'][3] == "AS":
-                return_details["message"] = f"You are all square through {hole_no - 1} holes. "
+                return_details["message"] = f"{player_dict['player1']['firstname']} and {player_dict['player2']['firstname']} are all square through {hole_no - 1} holes. "
             else:
                 if "Up" in player_dict['player1']['running_totals'][3]:   # Player 1 is up in the matchplay
-                    return_details["message"] = f"Player one is {player_dict['player1']['running_totals'][3]} through {hole_no - 1} holes." 
+                    return_details["message"] = f"{player_dict['player1']['firstname']} is {player_dict['player1']['running_totals'][3]} through {hole_no - 1} holes." 
                 else:   # player 2 is up in the matchplay
-                    return_details["message"] = f"Player two is {player_dict['player2']['running_totals'][3]} through {hole_no - 1} holes."
-        return_details["message"] = return_details["message"] + f" Player one has {player_dict['player1']['running_totals'][2]} points, player 2 has {player_dict['player2']['running_totals'][2]} points."
+                    return_details["message"] = f"{player_dict['player2']['firstname']} is {player_dict['player2']['running_totals'][3]} through {hole_no - 1} holes."
+        return_details["message"] = return_details["message"] + f" {player_dict['player1']['firstname']} has {player_dict['player1']['running_totals'][2]} points, {player_dict['player2']['firstname']} has {player_dict['player2']['running_totals'][2]} points."
         if no_of_players == 3:
-            return_details["message"] = return_details["message"] + f" Player three has {player_dict['player3']['running_totals'][2]} points, through {hole_no - 1} holes."
+            return_details["message"] = return_details["message"] + f" {player_dict['player3']['firstname']} has {player_dict['player3']['running_totals'][2]} points, through {hole_no - 1} holes."
         if no_of_players == 4:
-            return_details["message"] = return_details["message"] + f" Player three has {player_dict['player3']['running_totals'][2]} points and player four has {player_dict['player4']['running_totals'][2]} points through {hole_no - 1} holes."
+            return_details["message"] = return_details["message"] + f" {player_dict['player3']['firstname']} has {player_dict['player3']['running_totals'][2]} points and {player_dict['player4']['firstname']} has {player_dict['player4']['running_totals'][2]} points through {hole_no - 1} holes."
         if hole_no == 19:
             return_details["message"] = return_details["message"] + f" Your match at {round_meta['course_name']} is over. Hope you enjoyed it!"
 
