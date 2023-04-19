@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from .serializers import CourseSerializer, ScoreSerializer
 from golf.models import Course, Score
 
+from accounts.models import CustomUser
 
 @api_view(['GET'])
 def django_function(request):
@@ -68,16 +69,6 @@ def getScore(request,pk):
 @api_view(['POST', 'GET'])
 def updateScore(request, pk, hole, a_score, b_score, c_score = 0, d_score = 0):
 
-    player_name= {}
-    player_name["golfuser2@domain.com"] = "Usain"
-    player_name["gordonalindsay@gmail.com"] = "Lindsay"
-    player_name["gordonlindsay@virginmedia.com"] = "Gordon"
-    player_name["golfuser@domain.com"] = "Goffy"
-    player_name["tester@mail.com"] = "Lester"
-    player_name["dmcdmcd@me.com"] = "David"
-    player_name["chrisbalderstone@yahoo.com"] = "Chris"
-
-    # print(pk, hole, a_score, b_score)
     hole_scores = {}
     hole_scores["player_a_s" + str(hole)] = a_score
     hole_scores["player_b_s" + str(hole)] = b_score
@@ -89,26 +80,17 @@ def updateScore(request, pk, hole, a_score, b_score, c_score = 0, d_score = 0):
         serializer.save()
     return_details = {}
     if score.no_of_players == 2:
-        return_details["message"] = f"Hole {str(hole)} updated with {player_name.get(score.player_a.email)}'s score of {str(a_score)} and {player_name.get(score.player_b.email)}'s score of {str(b_score)}."
+        return_details["message"] = f"Hole {str(hole)} updated with {CustomUser.objects.filter(email=score.player_a.email)[0].firstname}'s score of {str(a_score)} and {CustomUser.objects.filter(email=score.player_b.email)[0].firstname}'s score of {str(b_score)}."
     if score.no_of_players == 3:
-        return_details["message"] = f"Hole {str(hole)} updated with {player_name.get(score.player_a.email)}'s score of {str(a_score)}, {player_name.get(score.player_b.email)}'s score of {str(b_score)} and {player_name.get(score.player_c.email)}'s score of {str(c_score)}." 
+        return_details["message"] = f"Hole {str(hole)} updated with {CustomUser.objects.filter(email=score.player_a.email)[0].firstname}'s score of {str(a_score)}, {CustomUser.objects.filter(email=score.player_b.email)[0].firstname}'s score of {str(b_score)} and {CustomUser.objects.filter(email=score.player_c.email)[0].firstname}'s score of {str(c_score)}." 
     if score.no_of_players == 4:
-        return_details["message"] = f"Hole {str(hole)} updated with {player_name.get(score.player_a.email)}'s score of {(a_score)}, {player_name.get(score.player_b.email)}'s score of {(b_score)}, {player_name.get(score.player_c.email)}'s score of {str(c_score)} and {player_name.get(score.player_d.email)}'s score of {str(d_score)}."
+        return_details["message"] = f"Hole {str(hole)} updated with {CustomUser.objects.filter(email=score.player_a.email)[0].firstname}'s score of {(a_score)}, {CustomUser.objects.filter(email=score.player_b.email)[0].firstname}'s score of {(b_score)}, {CustomUser.objects.filter(email=score.player_c.email)[0].firstname}'s score of {str(c_score)} and {CustomUser.objects.filter(email=score.player_d.email)[0].firstname}'s score of {str(d_score)}."
     
     return Response(return_details)
 
 @api_view(['GET'])
 def getCurrentHole(request,pk):
     score = Score.objects.get(id = pk)
-
-    player_name= {}
-    player_name["golfuser2@domain.com"] = "Usain"
-    player_name["gordonalindsay@gmail.com"] = "Lindsay"
-    player_name["gordonlindsay@virginmedia.com"] = "Gordon"
-    player_name["golfuser@domain.com"] = "Goffy"
-    player_name["tester@mail.com"] = "Lester"
-    player_name["dmcdmcd@me.com"] = "David"
-    player_name["chrisbalderstone@yahoo.com"] = "Chris"
 
      # Check through the fields to find the first blank against Player A
     hole_id = 19
@@ -122,12 +104,12 @@ def getCurrentHole(request,pk):
     return_details["current_hole_number"] = current_hole_id
     return_details["no_of_players"] = score.no_of_players
     return_details["course"] = score.course.name
-    return_details["player_a_name"] = player_name.get(score.player_a.email)
-    return_details["player_b_name"] = player_name.get(score.player_b.email)
+    return_details["player_a_name"] = CustomUser.objects.filter(email=score.player_a.email)[0].firstname
+    return_details["player_b_name"] = CustomUser.objects.filter(email=score.player_b.email)[0].firstname
     if score.no_of_players > 2:
-        return_details["player_c_name"] = player_name.get(score.player_c.email)
+        return_details["player_c_name"] = CustomUser.objects.filter(email=score.player_c.email)[0].firstname
     if score.no_of_players > 3:
-        return_details["player_d_name"] = player_name.get(score.player_d.email)
+        return_details["player_d_name"] = CustomUser.objects.filter(email=score.player_d.email)[0].firstname
 
     return Response(return_details)
 

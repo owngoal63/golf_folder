@@ -38,6 +38,7 @@ class CustomUser(AbstractUser):
     username = None
     #username = models.CharField(max_length=50, null=True)
     email = models.EmailField(_('email address'), unique=True)
+    firstname = models.CharField(max_length=30, blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 

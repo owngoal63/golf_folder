@@ -762,6 +762,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
     for count,player in enumerate(buddy_queryset):
         player_details = {}
         player_details["name"] = str(player.buddy_email)
+        player_details["firstname"] = CustomUser.objects.filter(email=player.buddy_email)[0].firstname
         player_details["holes_attr"] = holes_attr[count]
         player_details["running_totals"] = running_totals[count]
         player_dict["player" + str(count + 1)] = player_details
@@ -924,14 +925,17 @@ class CardInitialView(FormView):
         # print(len(match_buddies))
         # for buddy in match_buddies:
         #     print(buddy.buddy_email)
+        # CustomUser.objects.filter(email=str(match_buddies[0])[0].firstname
+        # CustomUser.objects.filter(email=player.buddy_email)[0].firstname
         kwargs['no_of_players'] = len(match_buddies)
-        kwargs['player_a'] = "<p> </p>" + str(match_buddies[0]) + "<br> Course Hcp"
-        kwargs['player_b'] = "<p> </p>" +  str(match_buddies[1]) + "<br> Course Hcp"
+        # kwargs['player_a'] = "<p> </p>" + str(match_buddies[0]) + "<br> Course Hcp"
+        kwargs['player_a'] = "<p> </p>" + str(CustomUser.objects.filter(email=match_buddies[0])[0].firstname) + "<br> Course Hcp"
+        kwargs['player_b'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[1])[0].firstname)) + "<br> Course Hcp"
         if (len(match_buddies) == 3):
-            kwargs['player_c'] = "<p> </p>" +  str(match_buddies[2]) + "<br> Course Hcp"
+            kwargs['player_c'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[2])[0].firstname)) + "<br> Course Hcp"
         if (len(match_buddies) == 4):
-            kwargs['player_c'] = "<p> </p>" +  str(match_buddies[2]) + "<br> Course Hcp"
-            kwargs['player_d'] = "<p> </p>" +  str(match_buddies[3]) + "<br> Course Hcp"
+            kwargs['player_c'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[2])[0].firstname)) + "<br> Course Hcp"
+            kwargs['player_d'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[3])[0].firstname)) + "<br> Course Hcp"
 
         
         return kwargs

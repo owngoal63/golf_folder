@@ -73,7 +73,7 @@
             {% if round_meta.no_of_players == 2 %}<th>MP</th>{% endif %}
             {% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}<th>Score</th>{% endif %}
             <tr>
-                <td>A</td><td>{{player_dict.player1.name|truncatechars:7}}</td>
+                <td>A</td><td>{{player_dict.player1.firstname|truncatechars:7}}</td>
                 <td>{{round_meta.player_a_course_hcp}}</td>
                 <td>{{player_dict.player1.running_totals.0}}/{{player_dict.player1.running_totals.1}}</td>
                 <td bgcolor="{{stableford_medal_positions.a}}"; style="color:#000000">{{player_dict.player1.running_totals.2}}</td>
@@ -84,7 +84,7 @@
                 {% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}<td>{{ form.player_A|as_crispy_field }}</td>{% endif %}
             </tr>
             <tr>
-                <td>B</td><td>{{player_dict.player2.name|truncatechars:7}}</td>
+                <td>B</td><td>{{player_dict.player2.firstname|truncatechars:7}}</td>
                 <td>{{round_meta.player_b_course_hcp}}</td>
                 <td>{{player_dict.player2.running_totals.0}}/{{player_dict.player2.running_totals.1}}</td>
                 <td bgcolor="{{stableford_medal_positions.b}}"; style="color:#000000">{{player_dict.player2.running_totals.2}}</td>
@@ -96,7 +96,7 @@
             </tr>
             {% if round_meta.no_of_players > 2 %}
             <tr>
-                <td>C</td><td>{{player_dict.player3.name|truncatechars:7}}</td>
+                <td>C</td><td>{{player_dict.player3.firstname|truncatechars:7}}</td>
                 <td>{{round_meta.player_c_course_hcp}}</td>
                 <td>{{player_dict.player3.running_totals.0}}/{{player_dict.player3.running_totals.1}}</td>
                 <td bgcolor="{{stableford_medal_positions.c}}"; style="color:#000000">{{player_dict.player3.running_totals.2}}</td>
@@ -108,7 +108,7 @@
             {% endif %}
             {% if round_meta.no_of_players > 3 %}
             <tr>
-                <td>D</td><td>{{player_dict.player4.name|truncatechars:7}}</td>
+                <td>D</td><td>{{player_dict.player4.firstname|truncatechars:7}}</td>
                 <td>{{round_meta.player_d_course_hcp}}</td>
                 <td>{{player_dict.player4.running_totals.0}}/{{player_dict.player4.running_totals.1}}</td>
                 <td bgcolor="{{stableford_medal_positions.d}}"; style="color:#000000">{{player_dict.player4.running_totals.2}}</td>
