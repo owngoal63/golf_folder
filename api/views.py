@@ -100,7 +100,10 @@ def getCurrentHole(request,pk):
             current_hole_id = i
             break
     return_details = {}
-    return_details["message"] = f"Okay. Let's get the scores for hole number {str(current_hole_id)} at {score.course.name}."
+    if current_hole_id > 18:
+        return_details["message"] = f"You have completed the round at {score.course.name}."
+    else:    
+        return_details["message"] = f"Okay. Let's get the scores for hole number {str(current_hole_id)} at {score.course.name}."
     return_details["current_hole_number"] = current_hole_id
     return_details["no_of_players"] = score.no_of_players
     return_details["course"] = score.course.name

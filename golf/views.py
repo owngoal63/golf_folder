@@ -149,8 +149,6 @@ class RoundListHandicapView(ListView):
             diffadjustment_obj = DiffAjustment.objects.filter(num_of_scores = 20 )[0]
         # List that is passed to template with ID's of rounds which make up the handicap
         lowest_round_id_list = []
-        # CustomUser.objects.filter(email=round_obj[0].player)[0].firstname
-        # context['player'] = round_obj[0].player if num_score_differentials > 0 else ''
         context['player'] = CustomUser.objects.filter(email=round_obj[0].player)[0].firstname if num_score_differentials > 0 else ''
 
         if(num_score_differentials < 3):
