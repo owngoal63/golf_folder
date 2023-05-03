@@ -450,6 +450,37 @@ def compare_and_return_color(par, score):
         return "#1E90FF"  # silver
     else:
         return "#009688"  # background colour
+    
+def sort_by_value_and_describe(list_to_sort, sort_by_index):
+    """
+    Sorts a list of paired values based on the value at a specified index and returns a string describing the sorted outcome.
+
+    Args:
+        list_to_sort (list): A list of paired values.
+        sort_by_index (int): The index of the value to sort by.
+
+    Returns:
+        str: A string describing the sorted outcome.
+    """
+    list_length = len(list_to_sort)
+    sorted_list = sorted(list_to_sort, key=lambda x: x[sort_by_index], reverse=True)
+    description = ""
+    for i, pair in enumerate(sorted_list):
+        if i == 0:
+            description += "leading the charge is "
+        elif sorted_list[i - 1][sort_by_index] == pair[sort_by_index]:
+            description += ", tied with "
+        elif i == len(sorted_list) - 1:
+            if list_length > 2:
+                description += "and finally, "
+            else:
+                description += "and trailing is "
+        else:
+            description += ". Next is "
+
+        description += f"{pair[0]} with {pair[1]} points "
+
+    return description
 
 # @login_required   ---- Switched off to allow non-authenticated Siri execution
 def trackmatch(request, score_id, hole_no, extraparam = False):
@@ -722,13 +753,16 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
                     return_details["message"] = f"{player_dict['player1']['firstname']} is {player_dict['player1']['running_totals'][3]} through {hole_no - 1} holes." 
                 else:   # player 2 is up in the matchplay
                     return_details["message"] = f"{player_dict['player2']['firstname']} is {player_dict['player2']['running_totals'][3]} through {hole_no - 1} holes."
-        return_details["message"] = return_details["message"] + f" {player_dict['player1']['firstname']} has {player_dict['player1']['running_totals'][2]} points, {player_dict['player2']['firstname']} has {player_dict['player2']['running_totals'][2]} points."
+        # return_details["message"] = return_details["message"] + f" {player_dict['player1']['firstname']} has {player_dict['player1']['running_totals'][2]} points, {player_dict['player2']['firstname']} has {player_dict['player2']['running_totals'][2]} points."
+            return_details["message"] = return_details["message"] + " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2])], 1)
         if no_of_players == 3:
-            return_details["message"] = return_details["message"] + f" {player_dict['player3']['firstname']} has {player_dict['player3']['running_totals'][2]} points, through {hole_no - 1} holes."
+            # return_details["message"] = return_details["message"] + f" {player_dict['player3']['firstname']} has {player_dict['player3']['running_totals'][2]} points, through {hole_no - 1} holes."
+            return_details["message"] = return_details["message"] + " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2]), (player_dict['player3']['firstname'],player_dict['player3']['running_totals'][2])], 1)
         if no_of_players == 4:
-            return_details["message"] = return_details["message"] + f" {player_dict['player3']['firstname']} has {player_dict['player3']['running_totals'][2]} points and {player_dict['player4']['firstname']} has {player_dict['player4']['running_totals'][2]} points through {hole_no - 1} holes."
+            # return_details["message"] = return_details["message"] + f" {player_dict['player3']['firstname']} has {player_dict['player3']['running_totals'][2]} points and {player_dict['player4']['firstname']} has {player_dict['player4']['running_totals'][2]} points through {hole_no - 1} holes."
+            return_details["message"] = return_details["message"] + " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2]), (player_dict['player3']['firstname'],player_dict['player3']['running_totals'][2]), (player_dict['player4']['firstname'], player_dict['player4']['running_totals'][2])], 1)
         if hole_no == 19:
-            return_details["message"] = return_details["message"] + f" Your match at {round_meta['course_name']} is over. Hope you enjoyed it!"
+            return_details["message"] = return_details["message"] + f". Your match at {round_meta['course_name']} is over. Hope you enjoyed it!"
 
 
 
