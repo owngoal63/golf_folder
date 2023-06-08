@@ -586,10 +586,10 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
             if player_hcps[0] <= 18:
                 for holeSI in holesSI:
                     alt_playerSI.append(1) if holeSI <= player_hcps[0] else alt_playerSI.append(0)
-            if player_hcps[0] > 18 and player_hcps[1] <=36:
+            if player_hcps[0] > 18 and player_hcps[0] <=36:
                 for holeSI in holesSI:
                     alt_playerSI.append(2) if holeSI <= player_hcps[0] - 18 else alt_playerSI.append(1)
-            if player_hcps[0] > 36 and player_hcps[1] <=54:
+            if player_hcps[0] > 36 and player_hcps[0] <=54:
                 for holeSI in holesSI:
                     alt_playerSI.append(3) if holeSI <= player_hcps[0] - 36 else alt_playerSI.append(2)
 
