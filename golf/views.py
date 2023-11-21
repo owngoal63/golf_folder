@@ -19,6 +19,7 @@ from django.http import JsonResponse
 
 from django.contrib.auth.decorators import login_required
 import json
+import datetime
 
 # from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse
@@ -125,79 +126,82 @@ class RoundListHandicapView(ListView):
     # paginate_by = 20  (pagination removed - only show last 20 rounds)
 
     # Filter queryset to show only rounds for this signed in user
-    def get_queryset(self, **kwargs):
-        qs = super().get_queryset(**kwargs)
-        # Filter rounds for user (default) or for player if id passed as parameter (for buddy groups)
-        player_id = self.request.user if len(self.request.GET.keys()) == 0 else self.request.GET.get('p')
-        player_qs = qs.filter(player=player_id)
-        return player_qs
+    # def get_queryset(self, **kwargs):
+    #     qs = super().get_queryset(**kwargs)
+    #     # Filter rounds for user (default) or for player if id passed as parameter (for buddy groups)
+    #     player_id = self.request.user
+    #     if len(self.request.GET.keys()) == 0:
+    #         player_qs = qs.filter(player=player_id)
+    #     else:
+    #         if 'p' in self.request.GET.keys():
+    #             player_id = self.request.GET.get('p')
+    #             player_qs = qs.filter(player=player_id)
+    #         if 'd' in self.request.GET.keys():
+    #             date_parameter = self.request.GET.get('d')
+    #             if date_parameter == '4weeks':
+    #                 date_filter = datetime.datetime.now() - datetime.timedelta(weeks=46)
+    #             if date_parameter == '6months':
+    #                 date_filter = datetime.datetime.now() - datetime.timedelta(weeks=47)
+    #             if date_parameter == '1year':
+    #                 date_filter = datetime.datetime.now() - datetime.timedelta(weeks=48)
+    #             player_qs = qs.filter(player=player_id, date__lte = date_filter)
+    #     # player_qs = qs.filter(player=player_id)
+    #     # print(player_qs)
+    #     return player_qs
 
     # Calculate net_score from round and course join and pass as context to template
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['date_parameter'] = ' Today' # set to empty string as default
+        context['buddy_text'] = '' # set to empty string by default
+        date_parameter = '' # Default set to empty string
+
         # Filter rounds for user (default) or for player if id passed as parameter (for buddy groups)
-        player_id = self.request.user if len(self.request.GET.keys()) == 0 else self.request.GET.get('p')
+        player_id = self.request.user
+        if len(self.request.GET.keys()) == 0:   # No parameters passed
+            round_obj = Round.objects.filter(player = player_id ).order_by('-date')[0:20] # Most recent 20 rounds
+            # pass
+        else:
+            if 'p' in self.request.GET.keys():  # Buddy Player parameter passed
+                player_id = self.request.GET.get('p')
+                round_obj = Round.objects.filter(player = player_id ).order_by('-date')[0:20] # Most recent 20 rounds
+                context['buddy_text'] = 'Your buddy:'
+            if 'd' in self.request.GET.keys():  # Date parameter passed
+                date_parameter = self.request.GET.get('d')
+                if date_parameter == '4weeks':
+                    date_filter = datetime.datetime.now() - datetime.timedelta(weeks=4)
+                if date_parameter == '6months':
+                    date_filter = datetime.datetime.now() - datetime.timedelta(weeks=26)
+                if date_parameter == '1year':
+                    date_filter = datetime.datetime.now() - datetime.timedelta(weeks=52) 
+                    # player_qs = qs.filter(player=player_id, date__lte = date_filter)
+                context['date_parameter'] = f"{date_parameter} Ago"
+                round_obj = Round.objects.filter(player = player_id, date__lte = date_filter ).order_by('-date')[0:20] # Most recent 20 rounds
         # round_obj = self.object
-        round_obj = Round.objects.filter(player = player_id ).order_by('-date')[0:20] # Most recent 20 rounds
+        # round_obj = Round.objects.filter(player = player_id ).order_by('-date')[0:20] # Most recent 20 rounds
+        # print(date_parameter)
         context['object'] = round_obj
         # Determine if weighting factor needs to be applied
-        num_score_differentials = len(Round.objects.filter(player = player_id ))
+        # num_score_differentials = len(Round.objects.filter(player = player_id ))
+        num_score_differentials = len(round_obj)
+        # print("num_score_differentials", num_score_differentials)
         context['total_number_of_rounds'] = num_score_differentials
         if(num_score_differentials >= 3 and num_score_differentials <= 20):
             diffadjustment_obj = DiffAjustment.objects.filter(num_of_scores = num_score_differentials )[0]
         elif(num_score_differentials > 20):
             diffadjustment_obj = DiffAjustment.objects.filter(num_of_scores = 20 )[0]
         # List that is passed to template with ID's of rounds which make up the handicap
-        lowest_round_id_list = []
+        # lowest_round_id_list = []
         context['player'] = CustomUser.objects.filter(email=round_obj[0].player)[0].firstname if num_score_differentials > 0 else ''
 
         if(num_score_differentials < 3):
             context['message'] = 'Minimum of 3 rounds is required to calculate handicap'
 
-        elif(num_score_differentials == 3 or num_score_differentials == 4 or num_score_differentials == 5):
-            round_obj_bylowest = Round.objects.filter(player = player_id ).order_by('handicap_differential')[:1]
-            for r in round_obj_bylowest:
-                lowest_round_id_list.append(r.id)
-            context['calculated_handicap'] = round(round_obj_bylowest[0].handicap_differential + diffadjustment_obj.adjustment,1)
-            context['number_of_lowest_rounds'] = "1"
-            context['lowest_round_id_list'] = lowest_round_id_list
-
-        elif(num_score_differentials == 6 ):
-            round_obj_bylowest = Round.objects.filter(player = player_id ).order_by('handicap_differential')[:diffadjustment_obj.calculation_factor]
-            for r in round_obj_bylowest:
-                lowest_round_id_list.append(r.id)
-            calculated_handicap = round_obj_bylowest.aggregate(Avg('handicap_differential'))
-            context['calculated_handicap'] = round(calculated_handicap.get('handicap_differential__avg') + diffadjustment_obj.adjustment,1)
-            context['number_of_lowest_rounds'] = str(diffadjustment_obj.calculation_factor)
-            context['lowest_round_id_list'] = lowest_round_id_list
-
-        elif(num_score_differentials > 20):
-            lowest_handicap_diff_list = []
-            round_obj_bylowest = Round.objects.filter(player = player_id ).order_by('handicap_differential')
-            stop_loop_at = 8
-            count = 0
-            for r in round_obj_bylowest:
-                print(count)
-                if r in round_obj:
-                    lowest_round_id_list.append(r.id)
-                    lowest_handicap_diff_list.append(r.handicap_differential)
-                    count = count + 1
-                if count == stop_loop_at:
-                    break
-            print(lowest_round_id_list)
-            print(lowest_handicap_diff_list)
-            calculated_handicap = sum(lowest_handicap_diff_list) / len(lowest_handicap_diff_list)
-            context['calculated_handicap'] = round(calculated_handicap,1)
-            context['number_of_lowest_rounds'] = "8"
-            context['lowest_round_id_list'] = lowest_round_id_list
-            context['total_number_of_rounds'] = 20
-
-        else:   # Greater than 6, less than 20
-            round_obj_bylowest = Round.objects.filter(player = player_id ).order_by('handicap_differential')[:diffadjustment_obj.calculation_factor]
-            for r in round_obj_bylowest:
-                lowest_round_id_list.append(r.id)
-            calculated_handicap = round_obj_bylowest.aggregate(Avg('handicap_differential'))
-            context['calculated_handicap'] = round(calculated_handicap.get('handicap_differential__avg'),1)
+        else:   # This is where the magic happens!
+            print("greater than 3")
+            round_obj_bylowest = sorted(round_obj, key=lambda o: o.handicap_differential)[:diffadjustment_obj.calculation_factor]    
+            lowest_round_id_list = [ o.id for o in round_obj_bylowest ]
+            context['calculated_handicap'] = round(sum([i.handicap_differential for i in round_obj_bylowest]) / len(round_obj_bylowest) + diffadjustment_obj.adjustment,1)
             context['number_of_lowest_rounds'] = str(diffadjustment_obj.calculation_factor)
             context['lowest_round_id_list'] = lowest_round_id_list
 

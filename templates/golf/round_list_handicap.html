@@ -5,10 +5,16 @@
 
 {% block content %}
 <div class="w3-card w3-teal w3-padding">
-    <h1 class="w3-large">Round List Handicap:</h1>
-    <p style="font-size:16px">{{ player }}</p>
+        <h1 class="w3-large">Round List Handicap {{date_parameter}}:</h1>
+        {% if total_number_of_rounds >= 3 and buddy_text == "" %}
+            <button><a href="/golf/list_round_handicaps/">Today</a></button>
+            <button><a href="/golf/list_round_handicaps/?d=4weeks">4W Ago</a></button>
+            <button><a href="/golf/list_round_handicaps/?d=6months">6M Ago</a></button>
+            <button><a href="/golf/list_round_handicaps/?d=1year">1Y Ago</a></button>
+        {% endif %}
+    <p style="font-size:16px">{{buddy_text}} {{ player }}</p>
     {% if total_number_of_rounds >= 3 %}
-        <button><a href="{% url 'handicapview' calculated_handicap=calculated_handicap total_number_of_rounds=total_number_of_rounds number_of_lowest_rounds=number_of_lowest_rounds  %}">Calculate Handicap</a></button>
+        <button><a href="{% url 'handicapview' calculated_handicap=calculated_handicap total_number_of_rounds=total_number_of_rounds number_of_lowest_rounds=number_of_lowest_rounds  %}">Show Handicap {{date_parameter}}</a></button>
     {% else %}
         {{ message }}
     {% endif %}
