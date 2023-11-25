@@ -1,0 +1,73 @@
+<!-- templates/golf/stats_detail.html -->
+{% extends "base.html" %}
+
+{% block title %}Golf Course Statistics Detail{% endblock %}
+
+{% block content %}
+
+<style>
+    table, th, td {
+     border: 1px solid white;
+    }
+
+    td {
+        width: 45px;
+        text-align: center;
+    }
+
+    input {max-width: 3em}
+
+    .hole_no {
+        width:30px;
+    }
+
+    .recessed {
+        /* background-color: #fff;  */
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add a box shadow to create the recessed effect */
+        padding: 10px; /* Add some padding for spacing */
+        max-width: 350px;
+    }
+</style>
+
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Your Round Statistics at {{course}}</h1>
+    <table class="w3-table w3-bordered">
+            <tr>
+                <td font-size:12px;>No. of rounds: {{ no_of_rounds }}</td>         
+            </tr>
+            <tr>
+                <td font-size:12px;>Best Score: {{ best_round }}</td>         
+            </tr>
+            <tr>
+                <td font-size:12px;>Worst Score: {{ worst_round }}</td>         
+            </tr>
+            <tr>
+                <td font-size:12px;>Average Score: {{ average_round }}</td>         
+            </tr>
+    </table>
+    <br>
+    {% if no_of_completed_scorecards != "None" %}
+    <h1 class="w3-large">Your Hole Statistics at {{course}}
+        <br> based on {{ no_of_completed_scorecards }} scorecards</h1>
+    
+    <table>
+        <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th><th>&nbsp;Best({{calculated_round_best_total}})&nbsp;</th><th>&nbsp;Worst({{calculated_round_worst_total}})&nbsp;</th><th>&nbsp;Average&nbsp;</th>
+        {% for s in stats_scorecard %}
+        <tr>
+            <td>{{s.0}}</td><td>{{s.1}}</td><td>{{s.2}}</td>
+            {% if s.3 < s.1 %}<td bgcolor="Gold"; style="color:#000000">{{s.3}}</td>{%elif s.3 == s.1  %}<td bgcolor="Silver"; style="color:#000000">{{s.3}}</td>{% else %}<td>{{s.3}}</td>{% endif %}
+            <td>{{s.4}}</td><td>{{s.5|floatformat:2}}</td>
+
+        </tr>
+
+        {% endfor %}
+    </table>    
+    {% else %}
+
+    <h1 class="w3-large">No completed scorecards for {{course}}</h1>
+
+    {% endif %}
+   
+
+{% endblock %}

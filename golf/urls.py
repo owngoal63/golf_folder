@@ -45,6 +45,9 @@ urlpatterns = [
     path('cardinitial/<int:group>/', login_required(CardInitialView.as_view()), name='cardinitialview'),
     path('trackmatch/<int:score_id>/<int:hole_no>/', trackmatch ,name='trackmatch'),
     path('trackmatch/<int:score_id>/<int:hole_no>/<str:extraparam>/', trackmatch ,name='trackmatch'),
-    path('display_max_hole/<int:score_id>/', displaymaxhole, name='displaymaxhole')
+    path('display_max_hole/<int:score_id>/', displaymaxhole, name='displaymaxhole'),
+
+    path('get_course_stats/<int:course_id>/<int:player_id>/', get_course_stats, name='getcoursestats'),
+    path('courses_played/<int:player_id>/', courses_played, name='coursesplayed')
 
 ]

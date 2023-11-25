@@ -1,0 +1,17 @@
+<!-- templates/golf/stats_menu.html -->
+{% extends "base.html" %}
+
+{% block title %}Your Statistics{% endblock %}
+
+{% block content %}
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Your Statistics</h1>
+        {% for round_button in round_buttons %}
+            <button><a href="/golf/get_course_stats/{{round_button.0}}/{{player_id}}/">{{round_button.1}}</a></button><br><br>   
+        {% empty %}
+            No rounds yet
+        {% endfor %}
+    <br>
+
+    
+{% endblock %}
