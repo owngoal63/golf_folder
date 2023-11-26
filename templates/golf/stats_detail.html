@@ -48,11 +48,11 @@
     </table>
     <br>
     {% if no_of_completed_scorecards != "None" %}
-    <h1 class="w3-large">Your Hole Statistics at {{course}}
+    <h1 class="w3-large">Your Hole Stats at {{course}}
         <br> based on {{ no_of_completed_scorecards }} scorecards</h1>
     
     <table>
-        <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th><th>&nbsp;Best({{calculated_round_best_total}})&nbsp;</th><th>&nbsp;Worst({{calculated_round_worst_total}})&nbsp;</th><th>&nbsp;Average&nbsp;</th>
+        <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th><th>&nbsp;Best&nbsp;&nbsp;<br>({{calculated_round_best_total}})</th><th>&nbsp;Worst&nbsp;<br>({{calculated_round_worst_total}})</th><th>&nbsp;Av.&nbsp;</th>
         {% for s in stats_scorecard %}
         <tr>
             <td>{{s.0}}</td><td>{{s.1}}</td><td>{{s.2}}</td>

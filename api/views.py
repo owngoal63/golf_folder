@@ -107,12 +107,21 @@ def getCurrentHole(request,pk):
     return_details["current_hole_number"] = current_hole_id
     return_details["no_of_players"] = score.no_of_players
     return_details["course"] = score.course.name
+    return_details["course_id"] = score.course.id
     return_details["player_a_name"] = CustomUser.objects.filter(email=score.player_a.email)[0].firstname
+    return_details["player_a_id"] = CustomUser.objects.filter(email=score.player_a.email)[0].id
+    return_details["player_a_course_hcp"] = score.player_a_course_hcp
     return_details["player_b_name"] = CustomUser.objects.filter(email=score.player_b.email)[0].firstname
+    return_details["player_b_id"] = CustomUser.objects.filter(email=score.player_b.email)[0].id
+    return_details["player_b_course_hcp"] = score.player_b_course_hcp
     if score.no_of_players > 2:
         return_details["player_c_name"] = CustomUser.objects.filter(email=score.player_c.email)[0].firstname
+        return_details["player_c_id"] = CustomUser.objects.filter(email=score.player_c.email)[0].id
+        return_details["player_c_course_hcp"] = score.player_c_course_hcp
     if score.no_of_players > 3:
         return_details["player_d_name"] = CustomUser.objects.filter(email=score.player_d.email)[0].firstname
+        return_details["player_d_id"] = CustomUser.objects.filter(email=score.player_d.email)[0].id
+        return_details["player_d_course_hcp"] = score.player_d_course_hcp
 
     return Response(return_details)
 

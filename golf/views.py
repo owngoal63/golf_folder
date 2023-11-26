@@ -978,12 +978,17 @@ def courses_played(request, player_id):
 
 
 
-@login_required
-def get_course_stats(request, course_id, player_id):    # Kilkeel = 1 tester = 7
+# @login_required - removed for Siri access
+def get_course_stats(request, course_id, player_id, extraparam = ''):
+    if extraparam[:4] == "Siri":
+        siri = True
+    else:
+        siri = False
     # print(course_id)
     # print(request.user)
     # Get the round object data
     course = Course.objects.get(id = course_id)
+    course_name = course.name
     # print(f"No. of rounds at {course.name} - {rounds.count()}")
     # print(" ")
     # print(f"Best round score {rounds.aggregate(min_value=Min('score'))['min_value']}")
@@ -1080,8 +1085,19 @@ def get_course_stats(request, course_id, player_id):    # Kilkeel = 1 tester = 7
         print("stats_scorecard", stats_scorecard)
         rotated_stats_scorecard = [list(row) for row in zip(*stats_scorecard)]
         print("rotated_stats_scorecard", rotated_stats_scorecard )
-    # return HttpResponse("Done")
-    return render(request, 'golf/stats_detail.html', {"course": course,
+    if siri:
+        print("Siri mode")
+        if len(extraparam) == 5:                    # Hole 1-9
+            current_hole_no = int(extraparam[-1:])
+        else:                                       # Hole 10-18
+            current_hole_no = int(extraparam[-2:])
+        return_details = {}
+        return_details["message"] = ""
+        return_details["message"] = return_details["message"] + f"Your best cumulative score at {course_name} is {calculated_round_best_total} and your worst is {calculated_round_worst_total}. "
+        return_details["message"] = return_details["message"] + f"Hole {current_hole_no} Your best at hole {current_hole_no} is {min(rotated_round_matrix[current_hole_no - 1])}"
+        return JsonResponse(return_details)
+    else:
+        return render(request, 'golf/stats_detail.html', {"course": course,
                                                     "no_of_rounds": rounds.count(),
                                                     "best_round": rounds.aggregate(min_value=Min('score'))['min_value'],
                                                     "calculated_round_best_total": calculated_round_best_total,
