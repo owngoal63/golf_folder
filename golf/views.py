@@ -758,13 +758,24 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
                 else:   # player 2 is up in the matchplay
                     return_details["message"] = f"{player_dict['player2']['firstname']} is {player_dict['player2']['running_totals'][3]} through {hole_no - 1} holes."
         # return_details["message"] = return_details["message"] + f" {player_dict['player1']['firstname']} has {player_dict['player1']['running_totals'][2]} points, {player_dict['player2']['firstname']} has {player_dict['player2']['running_totals'][2]} points."
-            return_details["message"] = return_details["message"] + " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2])], 1)
+            return_details["message"] = return_details["message"] + \
+                f" As we go to hole number {hole_no}, {player_dict['player1']['firstname']} has played a total of {player_dict['player1']['running_totals'][0]} shots and {player_dict['player2']['firstname']} {player_dict['player2']['running_totals'][0]} shots. " \
+                " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), \
+                                                                        (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2])], 1)
         if no_of_players == 3:
             # return_details["message"] = return_details["message"] + f" {player_dict['player3']['firstname']} has {player_dict['player3']['running_totals'][2]} points, through {hole_no - 1} holes."
-            return_details["message"] = return_details["message"] + " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2]), (player_dict['player3']['firstname'],player_dict['player3']['running_totals'][2])], 1)
+            return_details["message"] = return_details["message"] + \
+                f" As we go to hole number {hole_no}, {player_dict['player1']['firstname']} has played a total of {player_dict['player1']['running_totals'][0]} shots, {player_dict['player2']['firstname']} {player_dict['player2']['running_totals'][0]} and {player_dict['player3']['firstname']} {player_dict['player3']['running_totals'][0]}. " \
+                " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), \
+                                                                        (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2]), \
+                                                                        (player_dict['player3']['firstname'],player_dict['player3']['running_totals'][2])], 1)
         if no_of_players == 4:
             # return_details["message"] = return_details["message"] + f" {player_dict['player3']['firstname']} has {player_dict['player3']['running_totals'][2]} points and {player_dict['player4']['firstname']} has {player_dict['player4']['running_totals'][2]} points through {hole_no - 1} holes."
-            return_details["message"] = return_details["message"] + " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2]), (player_dict['player3']['firstname'],player_dict['player3']['running_totals'][2]), (player_dict['player4']['firstname'], player_dict['player4']['running_totals'][2])], 1)
+            return_details["message"] = return_details["message"] + \
+                f" As we go to hole number {hole_no}, {player_dict['player1']['firstname']} has played a total of {player_dict['player1']['running_totals'][0]} shots, {player_dict['player2']['firstname']} {player_dict['player2']['running_totals'][0]}, {player_dict['player3']['firstname']} {player_dict['player3']['running_totals'][0]} and {player_dict['player4']['firstname']} {player_dict['player4']['running_totals'][0]}. " \
+                " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), \
+                                                                        (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2]), \
+                                                                        (player_dict['player3']['firstname'],player_dict['player3']['running_totals'][2]), (player_dict['player4']['firstname'], player_dict['player4']['running_totals'][2])], 1)
         if hole_no == 19:
             return_details["message"] = return_details["message"] + f". Your match at {round_meta['course_name']} is over. Hope you enjoyed it!"
 
