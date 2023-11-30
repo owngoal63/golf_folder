@@ -180,6 +180,10 @@ class Score(models.Model):
     player_d_s16 = models.IntegerField(null=True, blank=True)
     player_d_s17 = models.IntegerField(null=True, blank=True)
     player_d_s18 = models.IntegerField(null=True, blank=True)
+    player_a_score_target = models.IntegerField(null=True, blank=True)
+    player_b_score_target = models.IntegerField(null=True, blank=True)
+    player_c_score_target = models.IntegerField(null=True, blank=True)
+    player_d_score_target = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return '%s %s %s' % (self.date, self.course, self.group)

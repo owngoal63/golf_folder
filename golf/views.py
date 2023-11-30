@@ -925,7 +925,11 @@ class CardInitialView(FormView):
                       player_a_course_hcp = form.cleaned_data['player_A'],
                       player_b_course_hcp = form.cleaned_data['player_B'],
                       player_c_course_hcp = form.cleaned_data['player_C'],
-                      player_d_course_hcp = form.cleaned_data['player_D']
+                      player_d_course_hcp = form.cleaned_data['player_D'],
+                      player_a_score_target = set_player_target_round_score(course_obj.id, CustomUser.objects.get(email = match_buddies[0].buddy_email).id),
+                      player_b_score_target = set_player_target_round_score(course_obj.id, CustomUser.objects.get(email = match_buddies[1].buddy_email).id),
+                      player_c_score_target = set_player_target_round_score(course_obj.id, CustomUser.objects.get(email = match_buddies[2].buddy_email).id) if no_of_players > 2 else 0,
+                      player_d_score_target = set_player_target_round_score(course_obj.id, CustomUser.objects.get(email = match_buddies[3].buddy_email).id) if no_of_players > 3 else 0
                       )
         print(score_instance.id)
         # return super().form_valid(form)
@@ -987,6 +991,33 @@ def courses_played(request, player_id):
 
     return render(request, 'golf/stats_menu.html', {"round_buttons": round_buttons, "player_id": player_id})
 
+def set_player_target_round_score(course_id, player_id):
+    player_obj_id = CustomUser.objects.get(pk = player_id)
+    course = Course.objects.get(id = course_id)
+     # Get target handicap differential
+    last_20_rounds = Round.objects.filter(player = player_obj_id).order_by('-date')[:20]    # Get last 20 rounds ( or less )
+    num_of_rounds_played = len(last_20_rounds)                                              # Actual rounds played
+    if num_of_rounds_played < 3:
+        target_round_score = 0
+    else:
+        if num_of_rounds_played > 20:
+            calculation_factor = 20
+        else:
+            calculation_factor = DiffAjustment.objects.get(num_of_scores = num_of_rounds_played).calculation_factor       # Get relevant diff_adjustment record
+
+        last_20_rounds_list = [r.handicap_differential for r in last_20_rounds]                 # List the hcp differentials
+        print("round_scores", [r.score for r in last_20_rounds] )
+        rounds_that_count = sorted([r.handicap_differential for r in last_20_rounds])[:calculation_factor]  # List of rounds that count
+        target_hcp_differential = sorted(rounds_that_count, reverse=True)[0] - 0.5              # Get the highest hcp differential and subtract 0.5 to get target
+        print("last_20_rounds_list", last_20_rounds_list)
+        print("rounds_that_count", rounds_that_count)
+        # print("sorted best8", sorted(best_8, reverse=True))
+        print("target_hcp_differential", target_hcp_differential )
+
+        target_round_score = ((course.slope_rating / 113) * target_hcp_differential) + course.course_rating
+        print("target_round_score", target_round_score)
+    return target_round_score
+
 
 
 # @login_required - removed for Siri access
@@ -995,20 +1026,10 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
         siri = True
     else:
         siri = False
-    # print(course_id)
-    # print(request.user)
-    # Get the round object data
     course = Course.objects.get(id = course_id)
     course_name = course.name
-    # print(f"No. of rounds at {course.name} - {rounds.count()}")
-    # print(" ")
-    # print(f"Best round score {rounds.aggregate(min_value=Min('score'))['min_value']}")
-    # print(" ")
-    # print(f"Worst round score {rounds.aggregate(max_value=Max('score'))['max_value']}")
-    # print(" ")
-    # print(f"Average round score {round(rounds.aggregate(average_value=Avg('score'))['average_value'],2)}")
-
     player_obj_id = CustomUser.objects.get(pk = player_id)
+
     rounds = Round.objects.filter(course = course, player = player_obj_id)
     print(player_obj_id)
     course_stats = Score.objects.filter(course = course_id)
@@ -1117,5 +1138,6 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
                                                     "average_round": round(rounds.aggregate(average_value=Avg('score'))['average_value'],2),
                                                     "no_of_completed_scorecards": no_of_completed_scorecards,
                                                     "stats_scorecard": rotated_stats_scorecard })
+
 
 
