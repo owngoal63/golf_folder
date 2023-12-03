@@ -486,6 +486,24 @@ def sort_by_value_and_describe(list_to_sort, sort_by_index):
 
     return description
 
+def siri_message_for_shots_left(player_firstname, hole_no, score_target, current_no_shots):
+    if score_target != 0:
+        strokes_left = score_target - current_no_shots
+        if strokes_left > 0:
+            if hole_no > 18:
+                strokes_left_message = f" {player_firstname}, great job! You have beaten your handicap target today by {strokes_left} shots "
+            else:
+                strokes_left_message = f" {player_firstname} you have {strokes_left} shots left to improve your handicap "
+        else:
+            if hole_no > 18:
+                strokes_left_message = f" {player_firstname}, get back to the range! I'm afraid you have not improved your handicap today "
+            else:
+                strokes_left_message = f" {player_firstname} I'm afraid you have 0 shots left to improve your handicap "    
+    else: strokes_left_message = f" {player_firstname} you do not have enough rounds yet for a handicap "
+
+    return strokes_left_message
+
+
 # @login_required   ---- Switched off to allow non-authenticated Siri execution
 def trackmatch(request, score_id, hole_no, extraparam = False):
     # Get Functional Parameters and Initaliase variables
@@ -742,7 +760,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
     if no_of_players > 3:
         stableford_medal_positions["d"] = positions[3]
 
-    print(player_dict)
+    # print(player_dict)
     
     # Siri Score info functionaility
     if siri and hole_no > 1:
@@ -758,24 +776,44 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
                 else:   # player 2 is up in the matchplay
                     return_details["message"] = f"{player_dict['player2']['firstname']} is {player_dict['player2']['running_totals'][3]} through {hole_no - 1} holes."
         # return_details["message"] = return_details["message"] + f" {player_dict['player1']['firstname']} has {player_dict['player1']['running_totals'][2]} points, {player_dict['player2']['firstname']} has {player_dict['player2']['running_totals'][2]} points."
+            holes_left = (18 - hole_no) + 1
+            if holes_left <= 4 and hole_no != 19:
+                strokes_to_target_message = f". With {holes_left} holes to go, {siri_message_for_shots_left(player_dict['player1']['firstname'], hole_no, score_instance.player_a_score_target, player_dict['player1']['running_totals'][0])}. \
+                                                                                {siri_message_for_shots_left(player_dict['player2']['firstname'], hole_no, score_instance.player_b_score_target, player_dict['player2']['running_totals'][0])}"
+            else: strokes_to_target_message = ""
             return_details["message"] = return_details["message"] + \
                 f" As we go to hole number {hole_no}, {player_dict['player1']['firstname']} has played a total of {player_dict['player1']['running_totals'][0]} shots and {player_dict['player2']['firstname']} {player_dict['player2']['running_totals'][0]} shots. " \
                 " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), \
-                                                                        (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2])], 1)
+                                                                        (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2])], 1) + \
+                strokes_to_target_message
         if no_of_players == 3:
-            # return_details["message"] = return_details["message"] + f" {player_dict['player3']['firstname']} has {player_dict['player3']['running_totals'][2]} points, through {hole_no - 1} holes."
+            holes_left = (18 - hole_no) + 1
+            if holes_left <= 4 and hole_no != 19:
+                strokes_to_target_message = f". With {holes_left} holes to go, {siri_message_for_shots_left(player_dict['player1']['firstname'], hole_no, score_instance.player_a_score_target, player_dict['player1']['running_totals'][0])}. \
+                                                                                {siri_message_for_shots_left(player_dict['player2']['firstname'], hole_no, score_instance.player_b_score_target, player_dict['player2']['running_totals'][0])} \
+                                                                                {siri_message_for_shots_left(player_dict['player3']['firstname'], hole_no, score_instance.player_c_score_target, player_dict['player3']['running_totals'][0])}"
+            else: strokes_to_target_message = ""
             return_details["message"] = return_details["message"] + \
                 f" As we go to hole number {hole_no}, {player_dict['player1']['firstname']} has played a total of {player_dict['player1']['running_totals'][0]} shots, {player_dict['player2']['firstname']} {player_dict['player2']['running_totals'][0]} and {player_dict['player3']['firstname']} {player_dict['player3']['running_totals'][0]}. " \
                 " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), \
                                                                         (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2]), \
-                                                                        (player_dict['player3']['firstname'],player_dict['player3']['running_totals'][2])], 1)
+                                                                        (player_dict['player3']['firstname'],player_dict['player3']['running_totals'][2])], 1) + \
+                strokes_to_target_message
         if no_of_players == 4:
-            # return_details["message"] = return_details["message"] + f" {player_dict['player3']['firstname']} has {player_dict['player3']['running_totals'][2]} points and {player_dict['player4']['firstname']} has {player_dict['player4']['running_totals'][2]} points through {hole_no - 1} holes."
+            holes_left = (18 - hole_no) + 1
+            if holes_left <= 4:
+                strokes_to_target_message = f". With {holes_left} holes to go, {siri_message_for_shots_left(player_dict['player1']['firstname'], hole_no, score_instance.player_a_score_target, player_dict['player1']['running_totals'][0])}. \
+                                                                                {siri_message_for_shots_left(player_dict['player2']['firstname'], hole_no, score_instance.player_b_score_target, player_dict['player2']['running_totals'][0])} \
+                                                                                {siri_message_for_shots_left(player_dict['player3']['firstname'], hole_no, score_instance.player_c_score_target, player_dict['player3']['running_totals'][0])} \
+                                                                                {siri_message_for_shots_left(player_dict['player4']['firstname'], hole_no, score_instance.player_d_score_target, player_dict['player4']['running_totals'][0])}"
+            else: strokes_to_target_message = ""                
             return_details["message"] = return_details["message"] + \
                 f" As we go to hole number {hole_no}, {player_dict['player1']['firstname']} has played a total of {player_dict['player1']['running_totals'][0]} shots, {player_dict['player2']['firstname']} {player_dict['player2']['running_totals'][0]}, {player_dict['player3']['firstname']} {player_dict['player3']['running_totals'][0]} and {player_dict['player4']['firstname']} {player_dict['player4']['running_totals'][0]}. " \
                 " In Stableford points, " + sort_by_value_and_describe([(player_dict['player1']['firstname'],player_dict['player1']['running_totals'][2]), \
                                                                         (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2]), \
-                                                                        (player_dict['player3']['firstname'],player_dict['player3']['running_totals'][2]), (player_dict['player4']['firstname'], player_dict['player4']['running_totals'][2])], 1)
+                                                                        (player_dict['player3']['firstname'],player_dict['player3']['running_totals'][2]), \
+                                                                        (player_dict['player4']['firstname'], player_dict['player4']['running_totals'][2])], 1) + \
+                strokes_to_target_message
         if hole_no == 19:
             return_details["message"] = return_details["message"] + f". Your match at {round_meta['course_name']} is over. Hope you enjoyed it!"
 
