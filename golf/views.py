@@ -777,7 +777,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
                     return_details["message"] = f"{player_dict['player2']['firstname']} is {player_dict['player2']['running_totals'][3]} through {hole_no - 1} holes."
         # return_details["message"] = return_details["message"] + f" {player_dict['player1']['firstname']} has {player_dict['player1']['running_totals'][2]} points, {player_dict['player2']['firstname']} has {player_dict['player2']['running_totals'][2]} points."
             holes_left = (18 - hole_no) + 1
-            if holes_left <= 4 and hole_no != 19:
+            if holes_left <= 4:
                 strokes_to_target_message = f". With {holes_left} holes to go, {siri_message_for_shots_left(player_dict['player1']['firstname'], hole_no, score_instance.player_a_score_target, player_dict['player1']['running_totals'][0])}. \
                                                                                 {siri_message_for_shots_left(player_dict['player2']['firstname'], hole_no, score_instance.player_b_score_target, player_dict['player2']['running_totals'][0])}"
             else: strokes_to_target_message = ""
@@ -788,7 +788,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
                 strokes_to_target_message
         if no_of_players == 3:
             holes_left = (18 - hole_no) + 1
-            if holes_left <= 4 and hole_no != 19:
+            if holes_left <= 4:
                 strokes_to_target_message = f". With {holes_left} holes to go, {siri_message_for_shots_left(player_dict['player1']['firstname'], hole_no, score_instance.player_a_score_target, player_dict['player1']['running_totals'][0])}. \
                                                                                 {siri_message_for_shots_left(player_dict['player2']['firstname'], hole_no, score_instance.player_b_score_target, player_dict['player2']['running_totals'][0])} \
                                                                                 {siri_message_for_shots_left(player_dict['player3']['firstname'], hole_no, score_instance.player_c_score_target, player_dict['player3']['running_totals'][0])}"
