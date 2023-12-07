@@ -489,7 +489,7 @@ def sort_by_value_and_describe(list_to_sort, sort_by_index):
 def siri_message_for_shots_left(player_firstname, hole_no, score_target, current_no_shots):
     if score_target != 0:
         strokes_left = score_target - current_no_shots
-        if strokes_left > 0:
+        if strokes_left >= 0:
             if hole_no > 18:
                 strokes_left_message = f" {player_firstname}, great job! You have beaten your handicap target today by {strokes_left} shots "
             else:
