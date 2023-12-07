@@ -31,8 +31,9 @@
 </style>
 
 <div class="w3-card w3-teal w3-padding">
-    <h1 class="w3-large">Your Round Statistics at {{course}}</h1>
-    <table class="w3-table w3-bordered">
+    <h1 class="w3-small">
+    Your Round Statistics at {{course}}
+    <table class="w3-table w3-bordered" style="max-width:400px;">
             <tr>
                 <td font-size:12px;>No. of rounds: {{ no_of_rounds }}</td>         
             </tr>
@@ -48,16 +49,17 @@
     </table>
     <br>
     {% if no_of_completed_scorecards != "None" %}
-    <h1 class="w3-large">Your Hole Stats at {{course}}
-        <br> based on {{ no_of_completed_scorecards }} scorecards</h1>
-    
+    Your Hole Stats at {{course}} based on {{ no_of_completed_scorecards }} scorecards
+        <br>
+    <small>MRR - Most Recent Round</small>
     <table>
-        <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th><th>&nbsp;Best&nbsp;&nbsp;<br>({{calculated_round_best_total}})</th><th>&nbsp;Worst&nbsp;<br>({{calculated_round_worst_total}})</th><th>&nbsp;Av.&nbsp;</th>
+        <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th><th>&nbsp;Best&nbsp;&nbsp;<br>({{calculated_round_best_total}})</th><th>&nbsp;Worst&nbsp;<br>({{calculated_round_worst_total}})</th><th>&nbsp;Av.&nbsp;</th><th>&nbsp;MRR&nbsp;</th>
         {% for s in stats_scorecard %}
         <tr>
             <td>{{s.0}}</td><td>{{s.1}}</td><td>{{s.2}}</td>
             {% if s.3 < s.1 %}<td bgcolor="Gold"; style="color:#000000">{{s.3}}</td>{%elif s.3 == s.1  %}<td bgcolor="Silver"; style="color:#000000">{{s.3}}</td>{% else %}<td>{{s.3}}</td>{% endif %}
             <td>{{s.4}}</td><td>{{s.5|floatformat:2}}</td>
+            {% if s.6 < s.5%}<td bgcolor="Gold"; style="color:#000000">{{s.6}}</td>{% else %}<td>{{s.6}}</td>{% endif %}
 
         </tr>
 
@@ -68,6 +70,8 @@
     <h1 class="w3-large">No completed scorecards for {{course}}</h1>
 
     {% endif %}
+
+</h1>
    
 
 {% endblock %}

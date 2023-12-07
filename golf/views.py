@@ -1073,8 +1073,8 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
     player_obj_id = CustomUser.objects.get(pk = player_id)
 
     rounds = Round.objects.filter(course = course, player = player_obj_id)
-    print(player_obj_id)
-    course_stats = Score.objects.filter(course = course_id)
+    print("stats for ",player_obj_id)
+    course_stats = Score.objects.filter(course = course_id).order_by('-date')
     round_matrix = []
     for round_stat in course_stats:
         round_score = []
@@ -1083,50 +1083,52 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
                 for i in range(1,19):
                    if getattr(round_stat,f"player_a_s18") is not None and getattr(round_stat,f"player_a_s18") != 0: round_score.append(getattr(round_stat,f"player_a_s{i}"))
                 if getattr(round_stat,f"player_a_s18") is not None and getattr(round_stat,f"player_a_s18") != 0: round_matrix.append(round_score)
-            print(round_stat.id, round_stat, "playera", round_score)        
+            # print(round_stat.id, round_stat, "playera", round_score)        
 
         if round_stat.player_b == player_obj_id:
             if round_stat.player_b_s1 is not None and round_stat.player_b_s1 != 0:
                 for i in range(1,19):
                     if getattr(round_stat,f"player_b_s18") is not None and getattr(round_stat,f"player_b_s18") != 0: round_score.append(getattr(round_stat,f"player_b_s{i}"))
                 if getattr(round_stat,f"player_b_s18") is not None and getattr(round_stat,f"player_b_s18") != 0: round_matrix.append(round_score)
-            print(round_stat.id, round_stat, "playerb", round_score)
+            # print(round_stat.id, round_stat, "playerb", round_score)
 
         if round_stat.player_c == player_obj_id:
             if round_stat.player_c_s1 is not None and round_stat.player_c_s1 != 0:
                 for i in range(1,19):
                     if getattr(round_stat,f"player_c_s18") is not None and getattr(round_stat,f"player_c_s18") != 0: round_score.append(getattr(round_stat,f"player_c_s{i}"))
                 if getattr(round_stat,f"player_c_s18") is not None and getattr(round_stat,f"player_c_s18") != 0: round_matrix.append(round_score)
-            print(round_stat.id, round_stat, "playerc", round_score)
+            # print(round_stat.id, round_stat, "playerc", round_score)
 
         if round_stat.player_d == player_obj_id:
             if round_stat.player_d_s1 is not None and round_stat.player_d_s1 != 0:
                 for i in range(1,19):
                     if getattr(round_stat,f"player_d_s18") is not None and getattr(round_stat,f"player_d_s18") != 0: round_score.append(getattr(round_stat,f"player_d_s{i}"))
                 if getattr(round_stat,f"player_d_s18") is not None and getattr(round_stat,f"player_d_s18") != 0: round_matrix.append(round_score)
-            print(round_stat.id, round_stat, "playerd", round_score)
-    print(round_matrix)
+            # print(round_stat.id, round_stat, "playerd", round_score)
+    # print("round_matrix", round_matrix)
+    most_recent_round = round_matrix[0]     # Most recent round completed is the first entry in matrix list
+    # print("most_recent_round", most_recent_round)
     if len(round_matrix) == 0:
-        print(f"No Completed Scorecards for {Course.objects.get(id = course_id)}")
+        # print(f"No Completed Scorecards for {Course.objects.get(id = course_id)}")
         no_of_completed_scorecards = 'None'
         rotated_stats_scorecard = []
         calculated_round_best_total = 0
         calculated_round_worst_total = 0
     else:
         rotated_round_matrix = [list(row) for row in zip(*round_matrix)]
-        print(" ")
-        print(rotated_round_matrix)
-        print(" ")
-        print(rotated_round_matrix[2])
-        print(" ")
-        print("Total number of scorecards",len(round_matrix))
+        # print(" ")
+        # print(rotated_round_matrix)
+        # print(" ")
+        # print(rotated_round_matrix[2])
+        # print(" ")
+        # print("Total number of scorecards",len(round_matrix))
         no_of_completed_scorecards = len(round_matrix)
-        print(" ")
-        print("Hole3 average",sum(rotated_round_matrix[2])/len(rotated_round_matrix[2]))
-        print(" ")
-        print("Hole3 max",max(rotated_round_matrix[2]))
-        print(" ")
-        print("Hole3 min",min(rotated_round_matrix[2]))
+        # print(" ")
+        # print("Hole3 average",sum(rotated_round_matrix[2])/len(rotated_round_matrix[2]))
+        # print(" ")
+        # print("Hole3 max",max(rotated_round_matrix[2]))
+        # print(" ")
+        # print("Hole3 min",min(rotated_round_matrix[2]))
         calculated_round_worst = []
         calculated_round_best = []
         calculated_round_average = []
@@ -1136,11 +1138,11 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
             calculated_round_average.append(sum(rotated_round_matrix[i])/len(rotated_round_matrix[i]))
         calculated_round_best_total = sum(calculated_round_best)
         calculated_round_worst_total = sum(calculated_round_worst)
-        print("calculated_round_worst_total", sum(calculated_round_worst))
-        print(" ")
-        print("calculated_round_best_total", sum(calculated_round_best))
-        print(" ")
-        print("calculated_round_average total", round(sum(calculated_round_average)))
+        # print("calculated_round_worst_total", sum(calculated_round_worst))
+        # print(" ")
+        # print("calculated_round_best_total", sum(calculated_round_best))
+        # print(" ")
+        # print("calculated_round_average total", round(sum(calculated_round_average)))
 
         # Get Course Par and SI
         course_holes = []
@@ -1150,15 +1152,15 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
             course_holes.append(i)
             course_par.append(getattr(course,f"hole{i}par"))
             course_si.append(getattr(course,f"hole{i}SI"))
-        print("course_holes",course_holes )
-        print("course_par", course_par)
-        print("course_si", course_si)
+        # print("course_holes",course_holes )
+        # print("course_par", course_par)
+        # print("course_si", course_si)
 
         # Build the data for the stats scorecard
-        stats_scorecard = [course_holes, course_par, course_si, calculated_round_best, calculated_round_worst, calculated_round_average]
-        print("stats_scorecard", stats_scorecard)
+        stats_scorecard = [course_holes, course_par, course_si, calculated_round_best, calculated_round_worst, calculated_round_average, most_recent_round]
+        # print("stats_scorecard", stats_scorecard)
         rotated_stats_scorecard = [list(row) for row in zip(*stats_scorecard)]
-        print("rotated_stats_scorecard", rotated_stats_scorecard )
+        # print("rotated_stats_scorecard", rotated_stats_scorecard )
     if siri:
         print("Siri mode")
         if len(extraparam) == 5:                    # Hole 1-9
