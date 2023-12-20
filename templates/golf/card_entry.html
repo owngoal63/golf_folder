@@ -185,7 +185,15 @@
         {% if round_meta.last_hole_scored >= 18 %}
         <a href="/golf/trackmatch/{{round_meta.round_id}}/19/"><button class="hole_no">18</button></a>&nbsp;
         {% endif %}
+       
         
+    {% endif %}
+
+    {% if round_meta.last_hole_scored == 18 and user.is_authenticated %}
+    <p> </p>
+    Generate Scorecard Report<br>
+    <button><a href="/golf/trackmatch/{{round_meta.round_id}}/19/Siri/True/You/">To You</a></button>&nbsp;
+    <button><a href="/golf/trackmatch/{{round_meta.round_id}}/19/Siri/True/Group/">To Group</a></button><br>
     {% endif %}
 
 

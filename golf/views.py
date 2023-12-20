@@ -7,6 +7,8 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from random import randrange
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 from .forms import CourseForm, RoundForm, GolfGroupForm, BuddyForm, CardInitialForm, CardEntryForm
 from .models import *
@@ -23,6 +25,13 @@ import datetime
 
 # from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse
+
+# Langchain imports
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts.chat import ChatPromptTemplate
+from langchain.schema import BaseOutputParser
+
+from django.conf import settings
 
 # ~~~~~~~ Course Table CRUD views ~~~~~~~
 
@@ -503,9 +512,39 @@ def siri_message_for_shots_left(player_firstname, hole_no, score_target, current
 
     return strokes_left_message
 
+def llm_translate(input_message):
+
+    api_key = settings.OPEN_AI_KEY
+
+    chat_model = ChatOpenAI(openai_api_key = api_key)
+
+    template = """You are a sarcastic golf commentator. You should paraphrame the text provided, ensuring that you say all the relevent details
+                    but in wording that is sarcastically humourous."""
+    human_template = input_message
+
+    chat_prompt = ChatPromptTemplate.from_messages([
+            ("system", template),
+            ("human", human_template)
+    ])
+
+    messages = chat_prompt.format_messages(problem = human_template)
+    result = chat_model.predict_messages(messages)
+
+    return str(result.content.replace('\n', ' '))
+
+
+def format_firstnames_for_report(names):
+    if len(names) == 2:
+        return f"{names[0]} and {names[1]}"
+    elif len(names) > 2:
+        formatted_names = ", ".join(names[:-1])
+        return f"{formatted_names}, and {names[-1]}"
+    else:
+        return ", ".join(names)
+
 
 # @login_required   ---- Switched off to allow non-authenticated Siri execution
-def trackmatch(request, score_id, hole_no, extraparam = False):
+def trackmatch(request, score_id, hole_no, extraparam = False, makereport = False, towho = "You"):
     # Get Functional Parameters and Initaliase variables
     if extraparam == "colourize":
         colourize = True
@@ -769,9 +808,12 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
     # Siri Score info functionaility
     if siri and hole_no > 1:
         print("Siri mode")
+        player_name_list = []
         return_details = {}
         return_details["message"] = ""
         if no_of_players == 2:
+            player_name_list.append(player_dict['player1']['firstname'])
+            player_name_list.append(player_dict['player2']['firstname'])
             if player_dict['player1']['running_totals'][3] == "AS":
                 return_details["message"] = f"{player_dict['player1']['firstname']} and {player_dict['player2']['firstname']} are all square through {hole_no - 1} holes. "
             else:
@@ -781,7 +823,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
                     return_details["message"] = f"{player_dict['player2']['firstname']} is {player_dict['player2']['running_totals'][3]} through {hole_no - 1} holes."
         # return_details["message"] = return_details["message"] + f" {player_dict['player1']['firstname']} has {player_dict['player1']['running_totals'][2]} points, {player_dict['player2']['firstname']} has {player_dict['player2']['running_totals'][2]} points."
             holes_left = (18 - hole_no) + 1
-            if holes_left <= 4:
+            if holes_left <= 4 and score_instance.player_a_score_target:
                 strokes_to_target_message = f". With {holes_left} holes to go, {siri_message_for_shots_left(player_dict['player1']['firstname'], hole_no, score_instance.player_a_score_target, player_dict['player1']['running_totals'][0])}. \
                                                                                 {siri_message_for_shots_left(player_dict['player2']['firstname'], hole_no, score_instance.player_b_score_target, player_dict['player2']['running_totals'][0])}"
             else: strokes_to_target_message = ""
@@ -791,8 +833,11 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
                                                                         (player_dict['player2']['firstname'],player_dict['player2']['running_totals'][2])], 1) + \
                 strokes_to_target_message
         if no_of_players == 3:
+            player_name_list.append(player_dict['player1']['firstname'])
+            player_name_list.append(player_dict['player2']['firstname'])
+            player_name_list.append(player_dict['player3']['firstname'])
             holes_left = (18 - hole_no) + 1
-            if holes_left <= 4:
+            if holes_left <= 4 and score_instance.player_a_score_target:
                 strokes_to_target_message = f". With {holes_left} holes to go, {siri_message_for_shots_left(player_dict['player1']['firstname'], hole_no, score_instance.player_a_score_target, player_dict['player1']['running_totals'][0])}. \
                                                                                 {siri_message_for_shots_left(player_dict['player2']['firstname'], hole_no, score_instance.player_b_score_target, player_dict['player2']['running_totals'][0])} \
                                                                                 {siri_message_for_shots_left(player_dict['player3']['firstname'], hole_no, score_instance.player_c_score_target, player_dict['player3']['running_totals'][0])}"
@@ -804,8 +849,12 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
                                                                         (player_dict['player3']['firstname'],player_dict['player3']['running_totals'][2])], 1) + \
                 strokes_to_target_message
         if no_of_players == 4:
+            player_name_list.append(player_dict['player1']['firstname'])
+            player_name_list.append(player_dict['player2']['firstname'])
+            player_name_list.append(player_dict['player3']['firstname'])
+            player_name_list.append(player_dict['player4']['firstname'])
             holes_left = (18 - hole_no) + 1
-            if holes_left <= 4:
+            if holes_left <= 4 and score_instance.player_a_score_target:
                 strokes_to_target_message = f". With {holes_left} holes to go, {siri_message_for_shots_left(player_dict['player1']['firstname'], hole_no, score_instance.player_a_score_target, player_dict['player1']['running_totals'][0])}. \
                                                                                 {siri_message_for_shots_left(player_dict['player2']['firstname'], hole_no, score_instance.player_b_score_target, player_dict['player2']['running_totals'][0])} \
                                                                                 {siri_message_for_shots_left(player_dict['player3']['firstname'], hole_no, score_instance.player_c_score_target, player_dict['player3']['running_totals'][0])} \
@@ -819,7 +868,14 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
                                                                         (player_dict['player4']['firstname'], player_dict['player4']['running_totals'][2])], 1) + \
                 strokes_to_target_message
         if hole_no == 19:
-            return_details["message"] = return_details["message"] + f". Your match at {round_meta['course_name']} is over. Hope you enjoyed it!"
+            if makereport:  # Send to ChatGPT for report and email out
+                print("make - report")
+                return_details["message"] = str(llm_translate(return_details["message"] + f". Your match at {round_meta['course_name']} is over. Hope you enjoyed it!"))
+                # return_details["message"] = return_details["message"] + f". Your match at {round_meta['course_name']} is over. Hope you enjoyed it!"
+            else:
+                print("don't make report")
+                return_details["message"] = return_details["message"] + f". Your match at {round_meta['course_name']} is over. Hope you enjoyed it!"
+            
 
 
 
@@ -866,8 +922,47 @@ def trackmatch(request, score_id, hole_no, extraparam = False):
                 )
 
     if siri and hole_no > 1:
-        # return Response(return_details)
-        return JsonResponse(return_details)
+        if makereport:
+            print("send email with report")
+            # print(return_details["message"])
+            # print(format_firstnames_for_report(player_name_list))
+            # print(request.user.email)
+            # print(stop)
+            # Prep Email
+            subject = "Handi Cappy Golf Report"
+            from_email = 'notrelevant@gmail.com'    # This is totally not relevant - uses the email defined in settings
+            # print(score_instance.group)
+            # buddies_for_email = Buddy.objects.filter(group = score_instance.group).values_list('buddy_email', flat=True)
+            buddies_for_email = CustomUser.objects.filter(id__in = Buddy.objects.filter(group = score_instance.group).values_list('buddy_email', flat=True)).values_list('email', flat=True)
+            # print(buddies_for_email2)
+            # to_email = [x for x in buddies_for_email ]
+            if towho == "Group":
+                # to_email = ['gordonlindsay@virginmedia.com']
+                to_email = [x for x in buddies_for_email ] 
+            else:
+                to_email = [str(request.user.email)]     
+            context = {
+                'round_info': f"{round_meta['course_name']}, on {round_meta['round_date'].strftime('%A %d/%b/%Y')} - Players: {format_firstnames_for_report(player_name_list)}",
+                'report': return_details["message"],
+                'your_scorecard_url': f"https://kenton.eu.pythonanywhere.com/golf/trackmatch/{round_meta['round_id']}/19/colourize/"
+            }
+            html_message = render_to_string('email/roundsummary_email.html', context)
+            plain_message = return_details["message"]
+            message = EmailMultiAlternatives(
+                subject = subject,
+                body = plain_message,
+                from_email = from_email,
+                to = to_email
+            )
+            message.attach_alternative(html_message, "text/html")
+            message.send()
+
+            return render(request,"email/email_sent.html", {'email_address': to_email})
+
+            # return HttpResponseRedirect(f'/accounts/sendmail/gordonalindsay@gmail.com/')
+            #return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "stableford_medal_positions": stableford_medal_positions, "form": form})
+        else:
+            return JsonResponse(return_details)
     else:
         return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "stableford_medal_positions": stableford_medal_positions, "form": form})
 
@@ -1096,7 +1191,7 @@ def calculate_stableford_score(strokes, indexes, pars, player_hcp):
         else:
             stableford_points += 0
 
-        print(hole_par, hole_strokes, net_score, stableford_points)
+        # print(hole_par, hole_strokes, net_score, stableford_points)
     return stableford_points
 
 
@@ -1153,7 +1248,7 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
                     score_hcp_matrix.append(round_stat.player_d_course_hcp)
             # print(round_stat.id, round_stat, "playerd", round_score)
     # print("round_matrix", round_matrix)
-    most_recent_round = round_matrix[0]     # Most recent round completed is the first entry in matrix list
+    if len(round_matrix) > 0: most_recent_round = round_matrix[0]     # Most recent round completed is the first entry in matrix list
     # print("most_recent_round", most_recent_round)
     if len(round_matrix) == 0:
         # print(f"No Completed Scorecards for {Course.objects.get(id = course_id)}")
@@ -1205,12 +1300,12 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
         # print(round_matrix)
 
         # Get list of stableford scores
-        stableford_scores = []
-        for count, each_single_round in enumerate(round_matrix):
-            print(each_single_round, course_si, score_hcp_matrix, score_hcp_matrix[count])
-            stableford_scores.append(calculate_stableford_score(each_single_round, course_si, course_par, score_hcp_matrix[count]))
-        print(stableford_scores)
-        print(round(sum(stableford_scores) / len(stableford_scores),2))   
+        # stableford_scores = []
+        # for count, each_single_round in enumerate(round_matrix):
+            # print(each_single_round, course_si, score_hcp_matrix, score_hcp_matrix[count])
+            # stableford_scores.append(calculate_stableford_score(each_single_round, course_si, course_par, score_hcp_matrix[count]))
+        # print(stableford_scores)
+        # print(round(sum(stableford_scores) / len(stableford_scores),2))   
 
         # Build the data for the stats scorecard
         stats_scorecard = [course_holes, course_par, course_si, calculated_round_best, calculated_round_worst, calculated_round_average, most_recent_round]
@@ -1235,7 +1330,6 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
                                                     "calculated_round_best_total": calculated_round_best_total,
                                                     "worst_round": rounds.aggregate(max_value=Max('score'))['max_value'],
                                                     "calculated_round_worst_total": calculated_round_worst_total,
-                                                    "average_stableford_points" : round(sum(stableford_scores) / len(stableford_scores),2),
                                                     "average_round": round(rounds.aggregate(average_value=Avg('score'))['average_value'],2),
                                                     "no_of_completed_scorecards": no_of_completed_scorecards,
                                                     "stats_scorecard": rotated_stats_scorecard })
