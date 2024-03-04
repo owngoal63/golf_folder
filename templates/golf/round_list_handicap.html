@@ -11,8 +11,12 @@
             <button><a href="/golf/list_round_handicaps/?d=4weeks">4W Ago</a></button>
             <button><a href="/golf/list_round_handicaps/?d=6months">6M Ago</a></button>
             <button><a href="/golf/list_round_handicaps/?d=1year">1Y Ago</a></button>
+            <br><br>
+            <button><a href="/golf/list_round_handicaps/?d=YearStart">Start of this Year</a></button>
+            <button><a href="/golf/list_round_handicaps/?d=LastYearStart">Start of last Year</a></button>
         {% endif %}
-    <p style="font-size:16px">{{buddy_text}} {{ player }}</p>
+    <p style="font-size:16px">{{buddy_text}} {{ player }}<br>
+    HCP Range ({{worst_hcp}}: {{worst_hcp_date}} - {{best_hcp}}: {{best_hcp_date}})</p>
     {% if total_number_of_rounds >= 3 %}
         <button><a href="{% url 'handicapview' calculated_handicap=calculated_handicap total_number_of_rounds=total_number_of_rounds number_of_lowest_rounds=number_of_lowest_rounds  %}">Show Handicap {{date_parameter}}</a></button>
     {% else %}

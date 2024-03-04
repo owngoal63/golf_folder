@@ -26,7 +26,7 @@
             labels: data.labels.slice(-20),
             datasets: [
               {
-                label: 'Deviation (+/-) from overall average (' + data.average + ')',
+                label: 'Last 20 Rounds- Deviation (+/-) from overall average (' + data.average + ')',
                 backgroundColor: data.backgroundcolors.slice(-20),
                 borderRadius: 5,
                 data: data.data.slice(-20),
@@ -61,7 +61,7 @@
               },
               title: {
                 display: true,
-                text: 'Deviation (+/-) from overall average (' + data.average + ')',
+                text: 'Last 20 Rounds- Deviation (+/-) from overall average (' + data.average + ')',
                 font: {
                   size: 12
                 }
@@ -76,6 +76,7 @@
 </script>
 
 <br>
-<button><a href="/golf/chart_rounds_page/">Show Rounds Chart</a></button>
+<button style="margin:2px"><a href="/golf/chart_rounds_page/">Historical Rounds Chart</a></button>
+<button style="margin:2px"><a href="/golf/chart_historical_hcp_page/">Historical Handicap Chart</a></button>
 
 {% endblock %}

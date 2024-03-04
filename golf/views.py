@@ -177,14 +177,23 @@ class RoundListHandicapView(ListView):
                 context['buddy_text'] = 'Your buddy:'
             if 'd' in self.request.GET.keys():  # Date parameter passed
                 date_parameter = self.request.GET.get('d')
+                context['date_parameter'] = f"for {date_parameter} Ago"
                 if date_parameter == '4weeks':
                     date_filter = datetime.datetime.now() - datetime.timedelta(weeks=4)
                 if date_parameter == '6months':
                     date_filter = datetime.datetime.now() - datetime.timedelta(weeks=26)
                 if date_parameter == '1year':
-                    date_filter = datetime.datetime.now() - datetime.timedelta(weeks=52) 
+                    date_filter = datetime.datetime.now() - datetime.timedelta(weeks=52)
+                if date_parameter == 'YearStart':
+                    date_filter = datetime.datetime(datetime.datetime.now().year, 1,1)
+                    context['date_parameter'] = "at Start of Year"
+                if date_parameter == 'LastYearStart':
+                    date_filter = datetime.datetime(datetime.datetime.now().year - 1, 1,1)
+                    context['date_parameter'] = "at Start of Last Year"
+
                     # player_qs = qs.filter(player=player_id, date__lte = date_filter)
-                context['date_parameter'] = f"{date_parameter} Ago"
+                # isApple = True if fruit == 'Apple' else False
+                # context['date_parameter'] = "at Start of Year" if date_parameter == "YearStart" or date_parameter == "LastYearStart" else f"{date_parameter} Ago"
                 round_obj = Round.objects.filter(player = player_id, date__lte = date_filter ).order_by('-date')[0:20] # Most recent 20 rounds
         # round_obj = self.object
         # round_obj = Round.objects.filter(player = player_id ).order_by('-date')[0:20] # Most recent 20 rounds
@@ -203,6 +212,24 @@ class RoundListHandicapView(ListView):
         # lowest_round_id_list = []
         context['player'] = CustomUser.objects.filter(email=round_obj[0].player)[0].firstname if num_score_differentials > 0 else ''
 
+        # remember to remove ths !!!!!!!!
+        r = get_list_of_rounds_with_twenty_scores(player_id)
+        # print("no of rounds", len(r))
+        # print("calc factor",diffadjustment_obj.calculation_factor)
+        # print("adjustment", diffadjustment_obj.adjustment)
+        # for x in xx:
+        #     print(calculate_handicap_on_date(x))
+        hcp_history_list = build_handicap_list_over_time(r, player_id)
+        # print(hcp_history_list)
+        # hcp_history_list.reverse()
+        # print(hcp_history_list)
+        worst_hcp = max(hcp_history_list, key=lambda item: item[1])[1]
+        best_hcp = min(hcp_history_list, key=lambda item: item[1])[1]
+        worst_hcp_date = max(hcp_history_list, key=lambda item: item[1])[0]
+        best_hcp_date = min(hcp_history_list, key=lambda item: item[1])[0]
+        print("worst hcp", worst_hcp)
+        print("best", best_hcp)
+
         if(num_score_differentials < 3):
             context['message'] = 'Minimum of 3 rounds is required to calculate handicap'
 
@@ -213,6 +240,10 @@ class RoundListHandicapView(ListView):
             context['calculated_handicap'] = round(sum([i.handicap_differential for i in round_obj_bylowest]) / len(round_obj_bylowest) + diffadjustment_obj.adjustment,1)
             context['number_of_lowest_rounds'] = str(diffadjustment_obj.calculation_factor)
             context['lowest_round_id_list'] = lowest_round_id_list
+            context['worst_hcp'] = worst_hcp
+            context['best_hcp'] = best_hcp
+            context['worst_hcp_date'] = worst_hcp_date
+            context['best_hcp_date'] = best_hcp_date
 
         return context
 
@@ -350,6 +381,30 @@ def chart_rounds_graph(request):
     for entry in queryset:
         labels.append(entry['date'])
         data.append(entry['score'])
+    
+    return JsonResponse(data={
+        'labels': labels,
+        'data': data,
+    })
+
+@login_required
+def chart_historical_hcp_page(request):
+    return render(request, 'golf/chart_historical_hcp_page.html')
+
+
+@login_required
+def chart_historical_hcp_graph(request):
+    labels = []
+    data = []
+
+    player_id = request.user
+    r = get_list_of_rounds_with_twenty_scores(player_id)
+    hcp_history_list = build_handicap_list_over_time(r, player_id)
+    hcp_history_list.reverse()      # Sort oldest to most recent
+
+    for hcp_on_date in hcp_history_list:
+        labels.append(hcp_on_date[0])
+        data.append(hcp_on_date[1])
     
     return JsonResponse(data={
         'labels': labels,
@@ -1333,6 +1388,44 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
                                                     "average_round": round(rounds.aggregate(average_value=Avg('score'))['average_value'],2),
                                                     "no_of_completed_scorecards": no_of_completed_scorecards,
                                                     "stats_scorecard": rotated_stats_scorecard })
+
+
+# Functions to build Handicap Tracking capability
+    
+def get_list_of_rounds_with_twenty_scores(player_id):
+    min_number_of_rounds_required = 3   # Set to 3
+    # Get all the rounds for player sorted by date decending
+    all_round_objs = Round.objects.filter(player = player_id).order_by('-date')
+    oldest_round_to_include = int(all_round_objs.count()) - min_number_of_rounds_required
+    # print(oldest_round_to_include)
+    rounds_list_to_include = []
+    for index, round_obj in enumerate(all_round_objs):
+        # print(index, round_obj.id, round_obj.date, "yes" if oldest_round_to_include >= index else "no")
+        if oldest_round_to_include >= index: rounds_list_to_include.append(round_obj.date)
+    # print("rounds to include", rounds_list_to_include)
+    return rounds_list_to_include
+
+def calculate_handicap_on_date(round_date, player_id):
+    round_obj = Round.objects.filter(player = player_id, date__lte = round_date ).order_by('-date')[0:20] # Most recent 20 rounds
+    num_score_differentials = len(round_obj)
+    if(num_score_differentials >= 3 and num_score_differentials <= 20):
+        diffadjustment_obj = DiffAjustment.objects.filter(num_of_scores = num_score_differentials )[0]
+    elif(num_score_differentials > 20):
+        diffadjustment_obj = DiffAjustment.objects.filter(num_of_scores = 20 )[0]
+    round_obj_bylowest = sorted(round_obj, key=lambda o: o.handicap_differential)[:diffadjustment_obj.calculation_factor]
+    # round_obj_bylowest = sorted(round_obj, key=lambda o: o.handicap_differential)[:8]  
+    # print(round_obj_bylowest)
+    # lowest_round_id_list = [ o.id for o in round_obj_bylowest ]
+    calculated_handicap = round(sum([i.handicap_differential for i in round_obj_bylowest]) / len(round_obj_bylowest) + diffadjustment_obj.adjustment,1)
+    # calculated_handicap = round(sum([i.handicap_differential for i in round_obj_bylowest]) / len(round_obj_bylowest),1)
+    return (round_date, calculated_handicap)
+
+def build_handicap_list_over_time(rounds, player_id):
+    handicap_list_over_time = []
+    for round in rounds:
+        handicap_list_over_time.append(calculate_handicap_on_date(round, player_id))
+    return handicap_list_over_time
+
 
 
 

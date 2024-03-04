@@ -5,7 +5,7 @@
 {% block content %}
 
   <div id="container" style="width: 95%;">
-    <canvas id="chart_rounds_graph" data-url="{% url 'chart_rounds_graph' %}"></canvas>
+    <canvas id="chart_historical_hcp_graph" data-url="{% url 'chart_historical_hcp_graph' %}"></canvas>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -14,7 +14,7 @@
 
     $(function () {
 
-      var $roundsChart = $("#chart_rounds_graph");
+      var $roundsChart = $("#chart_historical_hcp_graph");
       $.ajax({
         url: $roundsChart.data("url"),
         success: function (data) {
@@ -26,8 +26,8 @@
             data: {
               labels: data.labels,
               datasets: [{
-                label: 'Round Score',
-                backgroundColor: '#3f51b5',
+                label: 'Handicap',
+                backgroundColor: '#B22222',
                 data: data.data
               }]          
             },
@@ -38,7 +38,7 @@
               },
               title: {
                 display: true,
-                text: 'Rounds Score Over Time',
+                text: 'Handicap Over Time',
                     font: {
                         size: 40
                     }
@@ -47,7 +47,7 @@
                 yAxes: [{
                             display: true,
                             ticks: {
-                                suggestedMin: 65,
+                                suggestedMin: 0,
                             }
                         }]  
                 }
@@ -63,6 +63,6 @@
 
   <br>
   <button style="margin:2px"><a href="/golf/chart_handicap_page/">Recent Performance Chart</a></button>
-  <button style="margin:2px"><a href="/golf/chart_historical_hcp_page/">Historical Handicap Chart</a></button>
+  <button style="margin:2px"><a href="/golf/chart_rounds_page/">Historical Rounds Chart</a></button>
 
 {% endblock %}
