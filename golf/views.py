@@ -213,7 +213,7 @@ class RoundListHandicapView(ListView):
         context['player'] = CustomUser.objects.filter(email=round_obj[0].player)[0].firstname if num_score_differentials > 0 else ''
 
         # remember to remove ths !!!!!!!!
-        r = get_list_of_rounds_with_twenty_scores(player_id)
+        r = get_list_of_rounds_with_valid_hcp(player_id)
         # print("no of rounds", len(r))
         # print("calc factor",diffadjustment_obj.calculation_factor)
         # print("adjustment", diffadjustment_obj.adjustment)
@@ -398,7 +398,7 @@ def chart_historical_hcp_graph(request):
     data = []
 
     player_id = request.user
-    r = get_list_of_rounds_with_twenty_scores(player_id)
+    r = get_list_of_rounds_with_valid_hcp(player_id)
     hcp_history_list = build_handicap_list_over_time(r, player_id)
     hcp_history_list.reverse()      # Sort oldest to most recent
 
@@ -1392,7 +1392,7 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
 
 # Functions to build Handicap Tracking capability
     
-def get_list_of_rounds_with_twenty_scores(player_id):
+def get_list_of_rounds_with_valid_hcp(player_id):
     min_number_of_rounds_required = 3   # Set to 3
     # Get all the rounds for player sorted by date decending
     all_round_objs = Round.objects.filter(player = player_id).order_by('-date')
