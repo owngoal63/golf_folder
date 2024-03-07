@@ -7,13 +7,15 @@
 <div class="w3-card w3-teal w3-padding">
         <h1 class="w3-large">Round List Handicap {{date_parameter}}:</h1>
         {% if total_number_of_rounds >= 3 and buddy_text == "" %}
-            <button><a href="/golf/list_round_handicaps/">Today</a></button>
-            <button><a href="/golf/list_round_handicaps/?d=4weeks">4W Ago</a></button>
-            <button><a href="/golf/list_round_handicaps/?d=6months">6M Ago</a></button>
-            <button><a href="/golf/list_round_handicaps/?d=1year">1Y Ago</a></button>
-            <br><br>
-            <button><a href="/golf/list_round_handicaps/?d=YearStart">Start of this Year</a></button>
-            <button><a href="/golf/list_round_handicaps/?d=LastYearStart">Start of last Year</a></button>
+            <button style="margin:2px"><a href="/golf/list_round_handicaps/">Today</a></button>
+            <button style="margin:2px"><a href="/golf/list_round_handicaps/?d=4weeks">4W Ago</a></button>
+            <button style="margin:2px"><a href="/golf/list_round_handicaps/?d=6months">6M Ago</a></button>
+            <button style="margin:2px"><a href="/golf/list_round_handicaps/?d=1year">1Y Ago</a></button>
+            <br>
+            <button style="margin:2px"><a href="/golf/list_round_handicaps/?d=YearStart">Start of this Year</a></button>
+            <button style="margin:2px"><a href="/golf/list_round_handicaps/?d=LastYearStart">Start of last Year</a></button>
+            <br>
+            <button style="margin:2px"><a href="/golf/chart_historical_hcp_page/">Historical Handicap Chart</a></button>
         {% endif %}
     <p style="font-size:16px">{{buddy_text}} {{ player }}<br>
     HCP Range ({{worst_hcp}}: {{worst_hcp_date}} - {{best_hcp}}: {{best_hcp_date}})</p>

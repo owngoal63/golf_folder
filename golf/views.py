@@ -33,6 +33,8 @@ from langchain.schema import BaseOutputParser
 
 from django.conf import settings
 
+from collections import defaultdict
+
 # ~~~~~~~ Course Table CRUD views ~~~~~~~
 
 class CourseAddView(CreateView):
@@ -220,7 +222,7 @@ class RoundListHandicapView(ListView):
         # for x in xx:
         #     print(calculate_handicap_on_date(x))
         hcp_history_list = build_handicap_list_over_time(r, player_id)
-        # print(hcp_history_list)
+        print(hcp_history_list)
         # hcp_history_list.reverse()
         # print(hcp_history_list)
         worst_hcp = max(hcp_history_list, key=lambda item: item[1])[1]
@@ -400,9 +402,11 @@ def chart_historical_hcp_graph(request):
     player_id = request.user
     r = get_list_of_rounds_with_valid_hcp(player_id)
     hcp_history_list = build_handicap_list_over_time(r, player_id)
-    hcp_history_list.reverse()      # Sort oldest to most recent
+    # hcp_history_list.reverse()      # Sort oldest to most recent
+    monthly_averages = average_per_month(hcp_history_list)
+    monthly_averages_list = [(k,v) for k,v in sorted(monthly_averages.items())]
 
-    for hcp_on_date in hcp_history_list:
+    for hcp_on_date in monthly_averages_list:
         labels.append(hcp_on_date[0])
         data.append(hcp_on_date[1])
     
@@ -1425,6 +1429,33 @@ def build_handicap_list_over_time(rounds, player_id):
     for round in rounds:
         handicap_list_over_time.append(calculate_handicap_on_date(round, player_id))
     return handicap_list_over_time
+
+def average_per_month(data):
+    monthly_averages = defaultdict(list)
+    
+    # Group data by month
+    for date, value in data:
+        month_key = (date.year, date.month)
+        monthly_averages[month_key].append(value)
+    
+    # Calculate averages for each month
+    result = {}
+    previous_avg = None
+    current_year, current_month = datetime.datetime.now().year, datetime.datetime.now().month
+    for year in range(min(monthly_averages.keys())[0], current_year + 1):
+        end_month = 12 if year < current_year else current_month
+        for month in range(1, end_month + 1):
+            month_key = (year, month)
+            values = monthly_averages.get(month_key, [])
+            if values:
+                avg_value = sum(values) / len(values)
+                result[datetime.date(year, month, 1)] = avg_value
+                previous_avg = avg_value
+            elif previous_avg is not None:
+                result[datetime.date(year, month, 1)] = previous_avg
+                
+    return result
+
 
 
 
