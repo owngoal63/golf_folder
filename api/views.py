@@ -70,6 +70,11 @@ def getScore(request,pk):
 def updateScore(request, pk, hole, a_score, b_score, c_score = 0, d_score = 0):
 
     hole_scores = {}
+    # Workaround applied below to fix Siri problem of not hearing the number 6
+    if a_score == 99: a_score = 6
+    if b_score == 99: b_score = 6
+    if c_score == 99: c_score = 6
+    if d_score == 99: d_score = 6
     hole_scores["player_a_s" + str(hole)] = a_score
     hole_scores["player_b_s" + str(hole)] = b_score
     hole_scores["player_c_s" + str(hole)] = c_score
