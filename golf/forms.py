@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 #from django.views.generic.edit import CreateView
-from .models import Course, Round, GolfGroup, Buddy
+from .models import Course, Round, GolfGroup, Buddy, CustomUser
 from datetime import date
 
 
@@ -123,3 +123,8 @@ class CardEntryForm(forms.Form):
             self.fields['player_D'].disabled = True
     
 
+class UserForm(ModelForm):
+
+    class Meta:
+        model = CustomUser
+        fields = ('firstname', )

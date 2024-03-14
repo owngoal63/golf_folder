@@ -10,7 +10,7 @@ from random import randrange
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-from .forms import CourseForm, RoundForm, GolfGroupForm, BuddyForm, CardInitialForm, CardEntryForm
+from .forms import CourseForm, RoundForm, GolfGroupForm, BuddyForm, CardInitialForm, CardEntryForm, UserForm
 from .models import *
 
 from django.shortcuts import render
@@ -1457,6 +1457,16 @@ def average_per_month(data):
     return result
 
 
+class UserListView(ListView):
+    model = CustomUser
+    # ordering = ['-date']
+    paginate_by = 10
+
+class UserUpdateView(UpdateView):
+    model = CustomUser
+    form_class = UserForm
+    success_url = "/golf/list_users/"
+    template_name = "accounts/user_form.html"
 
 
 

@@ -52,6 +52,10 @@ urlpatterns = [
 
     path('get_course_stats/<int:course_id>/<int:player_id>/', get_course_stats, name='getcoursestats'),
     path('get_course_stats/<int:course_id>/<int:player_id>/<str:extraparam>/', get_course_stats, name='getcoursestats'),
-    path('courses_played/<int:player_id>/', courses_played, name='coursesplayed')
+    path('courses_played/<int:player_id>/', courses_played, name='coursesplayed'),
+
+    path("list_users/", UserListView.as_view(), name = "userlist" ),
+    path("display_user/<int:pk>/update/", UserUpdateView.as_view(), name="userupdate")
+
 
 ]

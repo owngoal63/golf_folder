@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Update User{% endblock %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="w3-card w3-teal w3-padding">
+        <h1 class="w3-large">Update User's first name</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <p> </p>
+        <button type="submit">Update</button>
+
+    </form>
+</div>
+{% endblock %}
