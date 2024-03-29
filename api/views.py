@@ -2,7 +2,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .serializers import CourseSerializer, ScoreSerializer
-from golf.models import Course, Score
+from golf.models import Course, Score, GolfGroup, Buddy
+from golf.views import calculate_handicap_on_date, get_list_of_rounds_with_valid_hcp, build_handicap_list_over_time, average_per_month
 
 from accounts.models import CustomUser
 
@@ -129,4 +130,117 @@ def getCurrentHole(request,pk):
         return_details["player_d_course_hcp"] = score.player_d_course_hcp
 
     return Response(return_details)
+
+@api_view(['GET'])
+def getCurrentHandicap(request,player_id):
+
+    from datetime import date
+
+    today = date.today()
+
+    hcp = calculate_handicap_on_date(today, player_id)
+
+    return_details = {}
+    return_details["hcp"] = f"Your handicap is {str(hcp[1])}"
+
+    return Response(return_details)
+
+@api_view(['GET'])
+def getHistoricalHcp(request, player_id):
+
+    labels = []
+    data = []
+
+    # player_id = request.user
+    r = get_list_of_rounds_with_valid_hcp(player_id)
+    # print(r)
+    hcp_history_list = build_handicap_list_over_time(r, player_id)
+    worst_hcp = max(hcp_history_list, key=lambda item: item[1])[1]
+    best_hcp = min(hcp_history_list, key=lambda item: item[1])[1]
+    # hcp_history_list.reverse()      # Sort oldest to most recent
+    # print(hcp_history_list)
+    monthly_averages = average_per_month(hcp_history_list)
+    monthly_averages_list = [(k,v) for k,v in sorted(monthly_averages.items())]
+    print(monthly_averages)
+    print(monthly_averages_list)
+    # for hcp_on_date in monthly_averages_list:
+    #     labels.append(hcp_on_date[0])
+    #     data.append(hcp_on_date[1])
+
+    return_details = {}
+    return_details["hcp_monthly_averages"] = monthly_averages_list
+    return_details["worst_hcp"] = worst_hcp
+    return_details["best_hcp"] = best_hcp
+
+    return Response(return_details)
+
+
+@api_view(['GET'])
+def getScoreDetails(request, round_id):
+    score = Score.objects.get(id = round_id)
+
+    course_name = Course.objects.get(id = score.course.id).name
+    group_name = GolfGroup.objects.get(id = score.group.id).group_name
+
+    player_list = []
+    player_details = []
+    player_details.append(CustomUser.objects.get(email = score.player_a).firstname)
+    player_details.append(Score.objects.get(id = round_id).player_a_course_hcp)
+    gross_score = 0
+    for i in range(1, 19):  # Loop through 18 score fields and add up the gross score
+        if getattr(score,"player_a_s{0}".format(i)) is not None:
+            gross_score = gross_score + getattr(score,"player_a_s{0}".format(i))
+    player_details.append(gross_score)
+    player_details.append(score.player_a_score_target)
+    player_list.append(player_details)
+    
+    player_details = []
+    player_details.append(CustomUser.objects.get(email = score.player_b).firstname)
+    player_details.append(Score.objects.get(id = round_id).player_b_course_hcp)
+    gross_score = 0
+    for i in range(1, 19):  # Loop through 18 score fields and add up the gross score
+        if getattr(score,"player_b_s{0}".format(i)) is not None:
+            gross_score = gross_score + getattr(score,"player_b_s{0}".format(i))
+    player_details.append(gross_score)
+    player_details.append(score.player_b_score_target)
+    player_list.append(player_details)
+
+    if score.no_of_players > 2:
+        player_details = [] 
+        player_details.append(CustomUser.objects.get(email = score.player_c).firstname)
+        player_details.append(Score.objects.get(id = round_id).player_c_course_hcp)
+        gross_score = 0
+        for i in range(1, 19):  # Loop through 18 score fields and add up the gross score
+            if getattr(score,"player_c_s{0}".format(i)) is not None:
+                gross_score = gross_score + getattr(score,"player_c_s{0}".format(i))
+        player_details.append(gross_score)
+        player_details.append(score.player_c_score_target)
+        player_list.append(player_details)
+
+    if score.no_of_players == 4:
+        player_details = []
+        player_details.append(CustomUser.objects.get(email = score.player_d).firstname)
+        player_details.append(Score.objects.get(id = round_id).player_d_course_hcp)
+        gross_score = 0
+        for i in range(1, 19):  # Loop through 18 score fields and add up the gross score
+            if getattr(score,"player_d_s{0}".format(i)) is not None:
+                gross_score = gross_score + getattr(score,"player_d_s{0}".format(i))
+        player_details.append(gross_score)
+        player_details.append(score.player_d_score_target)
+        player_list.append(player_details)
+
+    return_details = {}
+    return_details["score_id"] = score.id
+    return_details["date"] = score.date
+    return_details["group_name"] = group_name
+    return_details["no_of_players"] = score.no_of_players
+    return_details["course_name"] = course_name
+    return_details["player_details_list"] = player_list
+
+
+
+    return Response(return_details)
+
+
+
 
