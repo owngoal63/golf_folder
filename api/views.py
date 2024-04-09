@@ -178,56 +178,47 @@ def getHistoricalHcp(request, player_id):
 @api_view(['GET'])
 def getScoreDetails(request, round_id):
     score = Score.objects.get(id = round_id)
-
+    no_of_players = score.no_of_players
     course_name = Course.objects.get(id = score.course.id).name
+    course = Course.objects.get(id = score.course.id)
     group_name = GolfGroup.objects.get(id = score.group.id).group_name
-
     player_list = []
-    player_details = []
-    player_details.append(CustomUser.objects.get(email = score.player_a).firstname)
-    player_details.append(Score.objects.get(id = round_id).player_a_course_hcp)
-    gross_score = 0
-    for i in range(1, 19):  # Loop through 18 score fields and add up the gross score
-        if getattr(score,"player_a_s{0}".format(i)) is not None:
-            gross_score = gross_score + getattr(score,"player_a_s{0}".format(i))
-    player_details.append(gross_score)
-    player_details.append(score.player_a_score_target)
-    player_list.append(player_details)
-    
-    player_details = []
-    player_details.append(CustomUser.objects.get(email = score.player_b).firstname)
-    player_details.append(Score.objects.get(id = round_id).player_b_course_hcp)
-    gross_score = 0
-    for i in range(1, 19):  # Loop through 18 score fields and add up the gross score
-        if getattr(score,"player_b_s{0}".format(i)) is not None:
-            gross_score = gross_score + getattr(score,"player_b_s{0}".format(i))
-    player_details.append(gross_score)
-    player_details.append(score.player_b_score_target)
-    player_list.append(player_details)
+    player_letters = ["a", "b", "c", "d"]
 
-    if score.no_of_players > 2:
-        player_details = [] 
-        player_details.append(CustomUser.objects.get(email = score.player_c).firstname)
-        player_details.append(Score.objects.get(id = round_id).player_c_course_hcp)
+    for player in range(0, no_of_players):
+        player_details_dict = {}
+        player_details_dict["firstname"] = CustomUser.objects.get(email = getattr(score,"player_{0}".format(player_letters[player]))).firstname
+        player_course_hcp = getattr(score,"player_{0}_course_hcp".format(player_letters[player]))
+        player_details_dict["course_hcp"] = player_course_hcp
         gross_score = 0
-        for i in range(1, 19):  # Loop through 18 score fields and add up the gross score
-            if getattr(score,"player_c_s{0}".format(i)) is not None:
-                gross_score = gross_score + getattr(score,"player_c_s{0}".format(i))
-        player_details.append(gross_score)
-        player_details.append(score.player_c_score_target)
-        player_list.append(player_details)
+        net_score = 0
+        gross_score_holes_list = []
+        net_score_holes_list = []
+        course_par_holes_list = []
+        course_si_holes_list = []
 
-    if score.no_of_players == 4:
-        player_details = []
-        player_details.append(CustomUser.objects.get(email = score.player_d).firstname)
-        player_details.append(Score.objects.get(id = round_id).player_d_course_hcp)
-        gross_score = 0
-        for i in range(1, 19):  # Loop through 18 score fields and add up the gross score
-            if getattr(score,"player_d_s{0}".format(i)) is not None:
-                gross_score = gross_score + getattr(score,"player_d_s{0}".format(i))
-        player_details.append(gross_score)
-        player_details.append(score.player_d_score_target)
-        player_list.append(player_details)
+        for i in range(1, 19):  # Loop through course details to get par and SI
+            course_par_holes_list.append(getattr(course,"hole{0}par".format(i)))
+            course_si_hole = getattr(course,"hole{0}SI".format(i))
+            course_si_holes_list.append(course_si_hole)
+
+        for i in range(1, 19):  # Loop through 18 score fields, add up the gross score and calculate net score
+            if getattr(score,"player_{0}_s{1}".format(player_letters[player],i)) is not None:
+                gross_score_hole = getattr(score,"player_{0}_s{1}".format(player_letters[player], i))
+                gross_score = gross_score + gross_score_hole
+                gross_score_holes_list.append(gross_score_hole)
+                net_score_hole = gross_score_hole - ( player_course_hcp // 18 + 1 ) if course_si_holes_list[i-1] <= ( player_course_hcp % 18 ) else gross_score_hole - ( player_course_hcp // 18 )
+                net_score = net_score + net_score_hole
+                net_score_holes_list.append(net_score_hole)
+
+        player_details_dict["gross_score"] = gross_score
+        player_details_dict["target_score"] = score.player_b_score_target
+        player_details_dict["net_score"] = net_score
+        player_details_dict["gross_score_holes_list"] = gross_score_holes_list
+        player_details_dict["net_score_holes_list"] = net_score_holes_list
+        player_details_dict["course_par_holes_list"] = course_par_holes_list
+        player_details_dict["course_si_holes_list"] = course_si_holes_list
+        player_list.append(player_details_dict)
 
     return_details = {}
     return_details["score_id"] = score.id
@@ -236,8 +227,6 @@ def getScoreDetails(request, round_id):
     return_details["no_of_players"] = score.no_of_players
     return_details["course_name"] = course_name
     return_details["player_details_list"] = player_list
-
-
 
     return Response(return_details)
 
