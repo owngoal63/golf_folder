@@ -190,6 +190,7 @@ def getScoreDetails(request, round_id):
         player_details_dict["firstname"] = CustomUser.objects.get(email = getattr(score,"player_{0}".format(player_letters[player]))).firstname
         player_course_hcp = getattr(score,"player_{0}_course_hcp".format(player_letters[player]))
         player_details_dict["course_hcp"] = player_course_hcp
+        player_details_dict["target_score"] = getattr(score,"player_{0}_score_target".format(player_letters[player]))
         gross_score = 0
         net_score = 0
         gross_score_holes_list = []
@@ -212,7 +213,6 @@ def getScoreDetails(request, round_id):
                 net_score_holes_list.append(net_score_hole)
 
         player_details_dict["gross_score"] = gross_score
-        player_details_dict["target_score"] = score.player_b_score_target
         player_details_dict["net_score"] = net_score
         player_details_dict["gross_score_holes_list"] = gross_score_holes_list
         player_details_dict["net_score_holes_list"] = net_score_holes_list
