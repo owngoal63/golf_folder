@@ -522,6 +522,19 @@ def compare_and_return_color(par, score):
         return "#1E90FF"  # silver
     else:
         return "#009688"  # background colour
+
+def set_colour_for_handicap_adjustment(par, gross_score, net_score):
+    handicap_adjustment = gross_score - (par + 2 + (gross_score - net_score))
+    if handicap_adjustment > 0:
+        if handicap_adjustment > 2:
+            return "#581845"
+        if handicap_adjustment == 2:
+            return "#A52A2A"
+        if handicap_adjustment == 1:
+            return "#D2691E"
+    else:
+        return "#009688"  # background colour
+    
     
 def sort_by_value_and_describe(list_to_sort, sort_by_index):
     """
@@ -780,7 +793,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
                 '' if round_meta["holes_completed"] < i else net_score,
                 '' if round_meta["holes_completed"] < i else compare_to_par,
                 '' if no_of_players != 2  and round_meta["holes_completed"] < i else outcome,
-                '#009688' if round_meta["holes_completed"] < i or int(net_score - eval("cq.hole" + str(i) + "par")) <= 2 else '#A52A2A',
+                '#009688' if round_meta["holes_completed"] < i else set_colour_for_handicap_adjustment(eval("cq.hole" + str(i) + "par"), int(gross_score), int(net_score)),
                 ),
                 )
 

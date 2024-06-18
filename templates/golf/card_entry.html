@@ -506,10 +506,20 @@
                     {% endif %}
                 </tr>
         </table>
-
+        <br>
+        Gross Score Handicap Adjustments Per Hole
+        <table>
+            <tr>
+                <td bgcolor="#581845">>-2</td>
+                <td bgcolor="#A52A2A">-2</td>
+                <td bgcolor="#D2691E">-1</td>
+                <td>0</td>
+            </tr>
+        </table>
     </h1>  
 
 </div>
+
 {% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}
 <script>
     (function(){
