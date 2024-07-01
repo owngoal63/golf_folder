@@ -187,6 +187,7 @@ def getScoreDetails(request, round_id):
 
     for player in range(0, no_of_players):
         player_details_dict = {}
+        player_details_dict["id"] = CustomUser.objects.get(email = getattr(score,"player_{0}".format(player_letters[player]))).id
         player_details_dict["firstname"] = CustomUser.objects.get(email = getattr(score,"player_{0}".format(player_letters[player]))).firstname
         player_course_hcp = getattr(score,"player_{0}_course_hcp".format(player_letters[player]))
         player_details_dict["course_hcp"] = player_course_hcp
