@@ -12,4 +12,4 @@ class ScoreSerializer(ModelSerializer):
     group = StringRelatedField(many=False)
     class Meta:
         model = Score
-        fields = ['date', 'course', 'group']
+        fields = ['id', 'date', 'course', 'group']
