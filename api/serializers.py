@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, StringRelatedField
 from golf.models import Course, Score
 
 class CourseSerializer(ModelSerializer):
@@ -8,6 +8,8 @@ class CourseSerializer(ModelSerializer):
 
 
 class ScoreSerializer(ModelSerializer):
+    course = StringRelatedField(many=False)
+    group = StringRelatedField(many=False)
     class Meta:
         model = Score
-        fields = '__all__'
+        fields = ['date', 'course', 'group']

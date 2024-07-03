@@ -57,8 +57,9 @@ def deleteCourse(request, pk):
 
 @api_view(['GET'])
 def getScores(request):
-    courses = Score.objects.all()
-    serializer = ScoreSerializer(courses, many=True)
+    scores = Score.objects.order_by('-date').all()[:20]
+    # print(scores)
+    serializer = ScoreSerializer(scores, many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])

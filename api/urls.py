@@ -12,6 +12,7 @@ urlpatterns = [
     path('course/<int:pk>/', getCourse),
 
     # path('score/<int:pk>/update/', updateScore),
+    path('getscores/', getScores),
     path('score/<int:pk>/', getScore),
     path('updatescore/<int:pk>/<int:hole>/<int:a_score>/<int:b_score>/<int:c_score>/<int:d_score>/', updateScore),
     path('getcurrenthole/<int:pk>/', getCurrentHole),
