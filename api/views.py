@@ -185,6 +185,7 @@ def getScoreDetails(request, round_id):
     group_name = GolfGroup.objects.get(id = score.group.id).group_name
     player_list = []
     player_letters = ["a", "b", "c", "d"]
+    current_hole_recorded = 0       # Default condition (completed round) for match no started and last hole completed ( recorded )
 
     for player in range(0, no_of_players):
         player_details_dict = {}
@@ -206,13 +207,26 @@ def getScoreDetails(request, round_id):
             course_si_holes_list.append(course_si_hole)
 
         for i in range(1, 19):  # Loop through 18 score fields, add up the gross score and calculate net score
-            if getattr(score,"player_{0}_s{1}".format(player_letters[player],i)) is not None:
+            course_si_hole = getattr(course,"hole{0}SI".format(i))
+            if getattr(score,"player_{0}_s{1}".format(player_letters[player],i)) is not None:   # This hole's strokes have been recorded
                 gross_score_hole = getattr(score,"player_{0}_s{1}".format(player_letters[player], i))
                 gross_score = gross_score + gross_score_hole
                 gross_score_holes_list.append(gross_score_hole)
                 net_score_hole = gross_score_hole - ( player_course_hcp // 18 + 1 ) if course_si_holes_list[i-1] <= ( player_course_hcp % 18 ) else gross_score_hole - ( player_course_hcp // 18 )
                 net_score = net_score + net_score_hole
                 net_score_holes_list.append(net_score_hole)
+                current_hole_recorded = i    # Take note of last hole played
+            else:                                               # This hole's strokes have not been recorded - get handicap strokes for player at this hole  
+                base_strokes = player_course_hcp // 18
+                remaining_strokes = player_course_hcp % 18
+                extra_stroke = 1 if course_si_hole <= remaining_strokes else 0
+                total_strokes = base_strokes + extra_stroke
+                if total_strokes == 0:
+                    gross_score_holes_list.append('')
+                    net_score_holes_list.append('')
+                else:
+                    gross_score_holes_list.append('*' * total_strokes)
+                    net_score_holes_list.append('')
 
         player_details_dict["gross_score"] = gross_score
         player_details_dict["net_score"] = net_score
@@ -228,9 +242,18 @@ def getScoreDetails(request, round_id):
     return_details["group_name"] = group_name
     return_details["no_of_players"] = score.no_of_players
     return_details["course_name"] = course_name
+    return_details["current_hole_recorded"] = current_hole_recorded
     return_details["player_details_list"] = player_list
 
     return Response(return_details)
+
+
+@api_view(['GET'])
+def getScorecardHeaders(request):
+    scores = Score.objects.order_by('-id').all()[:30]
+    # print(scores)
+    serializer = ScoreSerializer(scores, many=True)
+    return Response(serializer.data)
 
 
 
