@@ -12,4 +12,12 @@ class ScoreSerializer(ModelSerializer):
     group = StringRelatedField(many=False)
     class Meta:
         model = Score
+        fields = '__all__'
+
+# Serlializer for Flet Score Listing
+class ScoreListSerializer(ModelSerializer):
+    course = StringRelatedField(many=False)
+    group = StringRelatedField(many=False)
+    class Meta:
+        model = Score
         fields = ['id', 'date', 'course', 'group']

@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .serializers import CourseSerializer, ScoreSerializer
+from .serializers import CourseSerializer, ScoreSerializer, ScoreListSerializer
 from golf.models import Course, Score, GolfGroup, Buddy
 from golf.views import calculate_handicap_on_date, get_list_of_rounds_with_valid_hcp, build_handicap_list_over_time, average_per_month
 
@@ -196,6 +196,12 @@ def getScoreDetails(request, round_id):
         player_details_dict["target_score"] = getattr(score,"player_{0}_score_target".format(player_letters[player]))
         gross_score = 0
         net_score = 0
+        out_gross_score = 0
+        in_gross_score = 0
+        out_net_score = 0
+        in_net_score = 0
+        out_par_total = 0
+        in_par_total = 0
         gross_score_holes_list = []
         net_score_holes_list = []
         course_par_holes_list = []
@@ -205,6 +211,8 @@ def getScoreDetails(request, round_id):
             course_par_holes_list.append(getattr(course,"hole{0}par".format(i)))
             course_si_hole = getattr(course,"hole{0}SI".format(i))
             course_si_holes_list.append(course_si_hole)
+            if i <= 9: out_par_total = out_par_total + getattr(course,"hole{0}par".format(i))
+            if i > 9: in_par_total = in_par_total + getattr(course,"hole{0}par".format(i))
 
         for i in range(1, 19):  # Loop through 18 score fields, add up the gross score and calculate net score
             course_si_hole = getattr(course,"hole{0}SI".format(i))
@@ -216,7 +224,11 @@ def getScoreDetails(request, round_id):
                 net_score = net_score + net_score_hole
                 net_score_holes_list.append(net_score_hole)
                 current_hole_recorded = i    # Take note of last hole played
-            else:                                               # This hole's strokes have not been recorded - get handicap strokes for player at this hole  
+                if i <= 9: out_gross_score = out_gross_score + int(gross_score_hole)
+                if i > 9: in_gross_score = in_gross_score + int(gross_score_hole)
+                if i <= 9: out_net_score = out_net_score + int(net_score_hole)
+                if i > 9: in_net_score = in_net_score + int(net_score_hole)
+            else:             # This hole's strokes have not been recorded - get handicap strokes for player at this hole  
                 base_strokes = player_course_hcp // 18
                 remaining_strokes = player_course_hcp % 18
                 extra_stroke = 1 if course_si_hole <= remaining_strokes else 0
@@ -228,6 +240,13 @@ def getScoreDetails(request, round_id):
                     gross_score_holes_list.append('*' * total_strokes)
                     net_score_holes_list.append('')
 
+        
+        player_details_dict["out_par_total"] = out_par_total
+        player_details_dict["in_par_total"] = in_par_total
+        player_details_dict["out_gross_score"] = out_gross_score if current_hole_recorded >= 9 else ''
+        player_details_dict["in_gross_score"] = in_gross_score if current_hole_recorded == 18 else ''
+        player_details_dict["out_net_score"] = out_net_score if current_hole_recorded >= 9 else ''
+        player_details_dict["in_net_score"] = in_net_score if current_hole_recorded == 18 else ''
         player_details_dict["gross_score"] = gross_score
         player_details_dict["net_score"] = net_score
         player_details_dict["gross_score_holes_list"] = gross_score_holes_list
@@ -252,7 +271,7 @@ def getScoreDetails(request, round_id):
 def getScorecardHeaders(request):
     scores = Score.objects.order_by('-id').all()[:30]
     # print(scores)
-    serializer = ScoreSerializer(scores, many=True)
+    serializer = ScoreListSerializer(scores, many=True)
     return Response(serializer.data)
 
 
