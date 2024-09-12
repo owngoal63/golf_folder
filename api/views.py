@@ -178,6 +178,17 @@ def getHistoricalHcp(request, player_id):
 
 @api_view(['GET'])
 def getScoreDetails(request, round_id):
+
+    stableford_dict = {
+        "1": 1,
+        "0": 2,
+        "-1": 3,
+        "-2": 4,
+        "-3": 5,
+        "-4": 6,
+        "-5": 7
+    }
+    
     score = Score.objects.get(id = round_id)
     no_of_players = score.no_of_players
     course_name = Course.objects.get(id = score.course.id).name
@@ -202,8 +213,10 @@ def getScoreDetails(request, round_id):
         in_net_score = 0
         out_par_total = 0
         in_par_total = 0
+        stableford_total = 0
         gross_score_holes_list = []
         net_score_holes_list = []
+        stableford_score_holes_list = []
         course_par_holes_list = []
         course_si_holes_list = []
 
@@ -223,6 +236,14 @@ def getScoreDetails(request, round_id):
                 net_score_hole = gross_score_hole - ( player_course_hcp // 18 + 1 ) if course_si_holes_list[i-1] <= ( player_course_hcp % 18 ) else gross_score_hole - ( player_course_hcp // 18 )
                 net_score = net_score + net_score_hole
                 net_score_holes_list.append(net_score_hole)
+                if net_score_hole - getattr(course,"hole{0}par".format(i)) <= 1:
+                    stableford_score = stableford_dict.get(str(net_score_hole - getattr(course,"hole{0}par".format(i))))
+                    stableford_score_holes_list.append(stableford_score)
+                    stableford_total = stableford_total + stableford_score
+                    # print("Stableford Hole",i, net_score_hole, getattr(course,"hole{0}par".format(i)), stableford_dict.get(str(net_score_hole - getattr(course,"hole{0}par".format(i)))), stableford_total )
+                else:
+                    stableford_score_holes_list.append(0)
+                    # print("Stableford Hole",i, net_score_hole, getattr(course,"hole{0}par".format(i)), 0 )
                 current_hole_recorded = i    # Take note of last hole played
                 if i <= 9: out_gross_score = out_gross_score + int(gross_score_hole)
                 if i > 9: in_gross_score = in_gross_score + int(gross_score_hole)
@@ -249,8 +270,10 @@ def getScoreDetails(request, round_id):
         player_details_dict["in_net_score"] = in_net_score if current_hole_recorded == 18 else ''
         player_details_dict["gross_score"] = gross_score
         player_details_dict["net_score"] = net_score
+        player_details_dict["stableford_total"] = stableford_total
         player_details_dict["gross_score_holes_list"] = gross_score_holes_list
         player_details_dict["net_score_holes_list"] = net_score_holes_list
+        player_details_dict["stableford_score_holes_list"] = stableford_score_holes_list
         player_details_dict["course_par_holes_list"] = course_par_holes_list
         player_details_dict["course_si_holes_list"] = course_si_holes_list
         player_list.append(player_details_dict)
