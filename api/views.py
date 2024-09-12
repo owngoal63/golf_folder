@@ -205,6 +205,7 @@ def getScoreDetails(request, round_id):
         player_course_hcp = getattr(score,"player_{0}_course_hcp".format(player_letters[player]))
         player_details_dict["course_hcp"] = player_course_hcp
         player_details_dict["target_score"] = getattr(score,"player_{0}_score_target".format(player_letters[player]))
+        player_details_dict["player_type"] = "Admin" if player == 0 else "Player"
         gross_score = 0
         net_score = 0
         out_gross_score = 0
@@ -276,6 +277,7 @@ def getScoreDetails(request, round_id):
         player_details_dict["stableford_score_holes_list"] = stableford_score_holes_list
         player_details_dict["course_par_holes_list"] = course_par_holes_list
         player_details_dict["course_si_holes_list"] = course_si_holes_list
+
         player_list.append(player_details_dict)
 
     return_details = {}
