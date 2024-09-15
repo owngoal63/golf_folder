@@ -220,6 +220,7 @@ def getScoreDetails(request, round_id):
         stableford_score_holes_list = []
         course_par_holes_list = []
         course_si_holes_list = []
+        matchplay_holes_list= []
 
         for i in range(1, 19):  # Loop through course details to get par and SI
             course_par_holes_list.append(getattr(course,"hole{0}par".format(i)))
@@ -280,6 +281,25 @@ def getScoreDetails(request, round_id):
 
         player_list.append(player_details_dict)
 
+    # Add in Matchplay details when its a two player game
+    matchplay_holes_list_player1 = []
+    matchplay_holes_list_player2 = []
+    if score.no_of_players == 2:
+        for i in range(0, 18):
+            if player_list[0]['net_score_holes_list'][i] == player_list[1]['net_score_holes_list'][i]:  # AS
+                print("AS")
+                matchplay_holes_list_player1.append(0)
+                matchplay_holes_list_player2.append(0)
+            if player_list[0]['net_score_holes_list'][i] > player_list[1]['net_score_holes_list'][i]:   # PLayer2's hole
+                matchplay_holes_list_player1.append(-1)
+                matchplay_holes_list_player2.append(1)
+            if player_list[0]['net_score_holes_list'][i] < player_list[1]['net_score_holes_list'][i]:   # PLayer1's hole
+                matchplay_holes_list_player1.append(1)
+                matchplay_holes_list_player2.append(-1)
+        player_list[0]['matchplay_holes_list'] = matchplay_holes_list_player1
+        player_list[1]['matchplay_holes_list'] = matchplay_holes_list_player2
+    
+
     return_details = {}
     return_details["score_id"] = score.id
     return_details["date"] = score.date
@@ -287,6 +307,9 @@ def getScoreDetails(request, round_id):
     return_details["no_of_players"] = score.no_of_players
     return_details["course_name"] = course_name
     return_details["current_hole_recorded"] = current_hole_recorded
+    if score.no_of_players == 2:
+        return_details["matchplay_status_player1"] = sum(matchplay_holes_list_player1)
+        return_details["matchplay_status_player2"] = sum(matchplay_holes_list_player2)
     return_details["player_details_list"] = player_list
 
     return Response(return_details)
