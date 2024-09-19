@@ -21,6 +21,7 @@ urlpatterns = [
     path('gethistoricalhcp/<int:player_id>/', getHistoricalHcp),
     path('getscorecardheaders/', getScorecardHeaders),
     path('getscoredetails/<int:round_id>/', getScoreDetails),
+    path('getgroups/', getGroups),
 
 
 ]
