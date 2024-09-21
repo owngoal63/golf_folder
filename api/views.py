@@ -1,7 +1,9 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .serializers import CourseSerializer, ScoreSerializer, ScoreListSerializer, GolfGroupSerializer
+from django.db.models import F
+
+from .serializers import CourseSerializer, ScoreSerializer, ScoreListSerializer, GolfGroupSerializer, BuddySerializer
 from golf.models import Course, Score, GolfGroup, Buddy
 from golf.views import calculate_handicap_on_date, get_list_of_rounds_with_valid_hcp, build_handicap_list_over_time, average_per_month
 
@@ -326,6 +328,12 @@ def getScorecardHeaders(request):
 def getGroups(request):
     golfgroups = GolfGroup.objects.order_by('administrator').all()
     serializer = GolfGroupSerializer(golfgroups, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def getBuddys(request, group_id):
+    buddys = Buddy.objects.filter(group_id = group_id).all()
+    serializer = BuddySerializer(buddys, many=True)
     return Response(serializer.data)
 
 
