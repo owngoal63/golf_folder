@@ -14,6 +14,7 @@ urlpatterns = [
     # path('score/<int:pk>/update/', updateScore),
     path('getscores/', getScores),
     path('score/<int:pk>/', getScore),
+    path('createscorecard/<int:group_id>/<int:course_id>/<int:no_of_players>/<int:player_a_id>/<int:player_a_course_hcp>/<int:player_b_id>/<int:player_b_course_hcp>/<int:player_c_id>/<int:player_c_course_hcp>/<int:player_d_id>/<int:player_d_course_hcp>/', CreateScorecard),
     path('updatescore/<int:pk>/<int:hole>/<int:a_score>/<int:b_score>/<int:c_score>/<int:d_score>/', updateScore),
     path('getcurrenthole/<int:pk>/', getCurrentHole),
 

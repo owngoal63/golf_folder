@@ -1215,16 +1215,16 @@ def set_player_target_round_score(course_id, player_id):
             calculation_factor = DiffAjustment.objects.get(num_of_scores = num_of_rounds_played).calculation_factor       # Get relevant diff_adjustment record
 
         last_20_rounds_list = [r.handicap_differential for r in last_20_rounds]                 # List the hcp differentials
-        print("round_scores", [r.score for r in last_20_rounds] )
+        # print("round_scores", [r.score for r in last_20_rounds] )
         rounds_that_count = sorted([r.handicap_differential for r in last_20_rounds])[:calculation_factor]  # List of rounds that count
         target_hcp_differential = sorted(rounds_that_count, reverse=True)[0] - 0.5              # Get the highest hcp differential and subtract 0.5 to get target
-        print("last_20_rounds_list", last_20_rounds_list)
-        print("rounds_that_count", rounds_that_count)
+        # print("last_20_rounds_list", last_20_rounds_list)
+        # print("rounds_that_count", rounds_that_count)
         # print("sorted best8", sorted(best_8, reverse=True))
-        print("target_hcp_differential", target_hcp_differential )
+        # print("target_hcp_differential", target_hcp_differential )
 
         target_round_score = ((course.slope_rating / 113) * target_hcp_differential) + course.course_rating
-        print("target_round_score", target_round_score)
+        # print("target_round_score", target_round_score)
     return target_round_score
 
 def calculate_stableford_score(strokes, indexes, pars, player_hcp):

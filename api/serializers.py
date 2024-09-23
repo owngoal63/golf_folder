@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, StringRelatedField, CharField, EmailField, IntegerField
+from rest_framework.serializers import ModelSerializer, StringRelatedField, CharField, EmailField, IntegerField, PrimaryKeyRelatedField
 from golf.models import Course, Score, GolfGroup, Buddy
 
 class CourseSerializer(ModelSerializer):
@@ -8,8 +8,8 @@ class CourseSerializer(ModelSerializer):
 
 
 class ScoreSerializer(ModelSerializer):
-    course = StringRelatedField(many=False)
-    group = StringRelatedField(many=False)
+    course = StringRelatedField(many=False) # Required for the model lookup
+    group = StringRelatedField(many=False)  # Required for the model lookup
     class Meta:
         model = Score
         fields = '__all__'
@@ -68,4 +68,22 @@ class BuddySerializer(ModelSerializer):
         representation['user_id'] = instance.buddy_email.id
         representation['email'] = instance.buddy_email.email
         representation['firstname'] = instance.buddy_email.firstname
+        return representation
+    
+
+
+class CreateScoreSerializer(ModelSerializer):
+    # course = PrimaryKeyRelatedField(queryset=Course.objects.all(), write_only=True)
+    # group = PrimaryKeyRelatedField(queryset=GolfGroup.objects.all(), write_only=True)
+    course_name = StringRelatedField(source='course', read_only=True)
+    group_name = StringRelatedField(source='group', read_only=True)
+
+    class Meta:
+        model = Score
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # representation['course'] = representation.pop('course_name')
+        # representation['group'] = representation.pop('group_name')
         return representation

@@ -1,11 +1,12 @@
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from django.db.models import F
 
-from .serializers import CourseSerializer, ScoreSerializer, ScoreListSerializer, GolfGroupSerializer, BuddySerializer
+from .serializers import CourseSerializer, ScoreSerializer, ScoreListSerializer, GolfGroupSerializer, BuddySerializer, CreateScoreSerializer
 from golf.models import Course, Score, GolfGroup, Buddy
-from golf.views import calculate_handicap_on_date, get_list_of_rounds_with_valid_hcp, build_handicap_list_over_time, average_per_month
+from golf.views import calculate_handicap_on_date, get_list_of_rounds_with_valid_hcp, build_handicap_list_over_time, average_per_month, set_player_target_round_score
 
 from accounts.models import CustomUser
 
@@ -335,6 +336,44 @@ def getBuddys(request, group_id):
     buddys = Buddy.objects.filter(group_id = group_id).all()
     serializer = BuddySerializer(buddys, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST', 'GET'])
+def CreateScorecard(request, group_id, course_id, no_of_players, player_a_id, player_a_course_hcp, player_b_id, player_b_course_hcp, player_c_id = 0, player_c_course_hcp = 0, player_d_id = 0, player_d_course_hcp = 0 ):
+
+    course_obj = Course.objects.get(id = course_id)
+    group_obj = GolfGroup.objects.get(id = group_id)
+    match_buddies = Buddy.objects.filter(group = group_id)
+
+    request.data["no_of_players"] = no_of_players       # Had to add this due to weird bug that was erronously generating a serializer error
+    
+    Scorecard = Score.objects.create(
+        course = course_obj,
+        group = group_obj,
+        no_of_players = int(no_of_players),
+        player_a = match_buddies[0].buddy_email,
+        player_a_course_hcp = int(player_a_course_hcp),
+        player_b = match_buddies[1].buddy_email,
+        player_b_course_hcp = int(player_b_course_hcp),
+        player_c = match_buddies[2].buddy_email if no_of_players > 2 else match_buddies[0].buddy_email,
+        player_c_course_hcp = int(player_c_course_hcp),
+        player_d = match_buddies[3].buddy_email if no_of_players > 3 else match_buddies[0].buddy_email,
+        player_d_course_hcp = int(player_d_course_hcp),
+        player_a_score_target = set_player_target_round_score(course_id, player_a_id),
+        player_b_score_target = set_player_target_round_score(course_id, player_b_id),
+        player_c_score_target = set_player_target_round_score(course_id, player_c_id) if no_of_players > 2 else 0,
+        player_d_score_target = set_player_target_round_score(course_id, player_d_id) if no_of_players > 3 else 0
+    )
+    serializer = ScoreSerializer(Scorecard, data = request.data)
+    if serializer.is_valid():
+        instance = serializer.save()
+        return Response({
+            "id": instance.id,
+            "message": "Record created successfully",
+            "data": serializer.data},
+            status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
