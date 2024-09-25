@@ -145,6 +145,7 @@ def getCurrentHandicap(request,player_id):
     hcp = calculate_handicap_on_date(today, player_id)
 
     return_details = {}
+    return_details["hcp_num"] = hcp[1]
     return_details["hcp"] = f"Your handicap is {str(hcp[1])}"
 
     return Response(return_details)
