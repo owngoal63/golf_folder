@@ -1429,6 +1429,8 @@ def calculate_handicap_on_date(round_date, player_id):
         diffadjustment_obj = DiffAjustment.objects.filter(num_of_scores = num_score_differentials )[0]
     elif(num_score_differentials > 20):
         diffadjustment_obj = DiffAjustment.objects.filter(num_of_scores = 20 )[0]
+    else:       # Less than 3 rounds so return 0 and exit
+        return (round_date, 0)
     round_obj_bylowest = sorted(round_obj, key=lambda o: o.handicap_differential)[:diffadjustment_obj.calculation_factor]
     # round_obj_bylowest = sorted(round_obj, key=lambda o: o.handicap_differential)[:8]  
     # print(round_obj_bylowest)
