@@ -2,9 +2,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from django.db.models import F
 
-from .serializers import CourseSerializer, ScoreSerializer, ScoreListSerializer, GolfGroupSerializer, BuddySerializer, CreateScoreSerializer
+from django.db.models import F, Q
+
+from .serializers import CourseSerializer, ScoreSerializer, ScoreListSerializer, GolfGroupSerializer, BuddySerializer, UserSerializer, ScoreSerializerExtended
 from golf.models import Course, Score, GolfGroup, Buddy
 from golf.views import calculate_handicap_on_date, get_list_of_rounds_with_valid_hcp, build_handicap_list_over_time, average_per_month, set_player_target_round_score
 
@@ -376,5 +377,28 @@ def CreateScorecard(request, group_id, course_id, no_of_players, player_a_id, pl
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['GET'])
+def getUsers(request):
+    users = CustomUser.objects.filter(is_superuser = False).all()
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def getScorecardHeadersExtended(request):
+    player_id = request.query_params.get('player_id', None)  # Get player_id from query parameters
+    if player_id:
+        player_id = int(player_id)
+        # Filter the Score records based upon no_of_players and where any of the player_a, player_b, player_c, or player_d matches the provided ID
+        scores = Score.objects.filter(
+            Q(no_of_players=2) & (Q(player_a__id=player_id) | Q(player_b__id=player_id)) |
+            Q(no_of_players=3) & (Q(player_a__id=player_id) | Q(player_b__id=player_id) | Q(player_c__id=player_id)) |
+            Q(no_of_players=4) & (Q(player_a__id=player_id) | Q(player_b__id=player_id) | Q(player_c__id=player_id) | Q(player_d__id=player_id))
+        )
+    else:
+        # If no player_id is provided, return all records
+        scores = Score.objects.all()
+    serializer = ScoreSerializerExtended(scores, many=True)
+    return Response(serializer.data)
 
 

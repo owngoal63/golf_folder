@@ -24,6 +24,8 @@ urlpatterns = [
     path('getscoredetails/<int:round_id>/', getScoreDetails),
     path('getgroups/', getGroups),
     path('getbuddys/<int:group_id>/', getBuddys),
+    path('getusers/', getUsers),
+    path('getscorecardheadersextended/', getScorecardHeadersExtended),
 
 
 ]
