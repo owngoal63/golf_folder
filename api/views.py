@@ -394,10 +394,10 @@ def getScorecardHeadersExtended(request):
             Q(no_of_players=2) & (Q(player_a__id=player_id) | Q(player_b__id=player_id)) |
             Q(no_of_players=3) & (Q(player_a__id=player_id) | Q(player_b__id=player_id) | Q(player_c__id=player_id)) |
             Q(no_of_players=4) & (Q(player_a__id=player_id) | Q(player_b__id=player_id) | Q(player_c__id=player_id) | Q(player_d__id=player_id))
-        )
+        ).order_by('-id')[:30]  # Order by id descending and limit to 30 records
     else:
         # If no player_id is provided, return all records
-        scores = Score.objects.all()
+        scores = Score.objects.all().order_by('-id')[:30]  # Order by id descending and limit to 30 records
     serializer = ScoreSerializerExtended(scores, many=True)
     return Response(serializer.data)
 
