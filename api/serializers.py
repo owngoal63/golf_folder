@@ -65,7 +65,7 @@ class ScoreSerializerExtended(ModelSerializer):
 
     class Meta:
         model = Score
-        fields = ['id', 'date', 'course_name', 'no_of_players', 'player_a', 'player_b', 'player_c', 'player_d', 'group']
+        fields = ['id', 'date', 'course_name', 'no_of_players', 'player_a', 'player_b', 'player_c', 'player_d', 'group', 'name']
 
     # Method to get the course name only
     def get_course_name(self, obj):

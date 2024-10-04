@@ -307,6 +307,7 @@ def getScoreDetails(request, round_id):
 
     return_details = {}
     return_details["score_id"] = score.id
+    return_details["name"] = score.name
     return_details["date"] = score.date
     return_details["group_name"] = group_name
     return_details["no_of_players"] = score.no_of_players
@@ -341,7 +342,7 @@ def getBuddys(request, group_id):
 
 
 @api_view(['POST', 'GET'])
-def CreateScorecard(request, group_id, course_id, no_of_players, player_a_id, player_a_course_hcp, player_b_id, player_b_course_hcp, player_c_id = 0, player_c_course_hcp = 0, player_d_id = 0, player_d_course_hcp = 0 ):
+def CreateScorecard(request, group_id, course_id, no_of_players, player_a_id, player_a_course_hcp, player_b_id, player_b_course_hcp, player_c_id = 0, player_c_course_hcp = 0, player_d_id = 0, player_d_course_hcp = 0, name = "No Name" ):
 
     course_obj = Course.objects.get(id = course_id)
     group_obj = GolfGroup.objects.get(id = group_id)
@@ -364,7 +365,8 @@ def CreateScorecard(request, group_id, course_id, no_of_players, player_a_id, pl
         player_a_score_target = set_player_target_round_score(course_id, player_a_id),
         player_b_score_target = set_player_target_round_score(course_id, player_b_id),
         player_c_score_target = set_player_target_round_score(course_id, player_c_id) if no_of_players > 2 else 0,
-        player_d_score_target = set_player_target_round_score(course_id, player_d_id) if no_of_players > 3 else 0
+        player_d_score_target = set_player_target_round_score(course_id, player_d_id) if no_of_players > 3 else 0,
+        name = name
     )
     serializer = ScoreSerializer(Scorecard, data = request.data)
     if serializer.is_valid():
