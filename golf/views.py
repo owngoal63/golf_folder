@@ -652,6 +652,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
     round_meta = {}
     round_meta["round_id"] = score_instance.id
     round_meta["buddy_group"] = score_instance.group
+    round_meta["name"] = score_instance.name
     round_meta["round_admin"] = score_instance.player_a.email
     round_meta["round_date"] = score_instance.date
     round_meta["no_of_players"] = no_of_players

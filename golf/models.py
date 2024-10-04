@@ -183,6 +183,14 @@ class Score(models.Model):
     player_b_score_target = models.IntegerField(null=True, blank=True)
     player_c_score_target = models.IntegerField(null=True, blank=True)
     player_d_score_target = models.IntegerField(null=True, blank=True)
+    name = models.CharField(max_length=255, default='No name')
+
+    # Override the save method
+    def save(self, *args, **kwargs):
+        # If the name field has its default value or is an empty string, set it to the GolfGroup's group_name
+        if self.name == 'No name' or not self.name:
+            self.name = self.group.group_name
+        super().save(*args, **kwargs)  # Call the original save method
 
     def __str__(self):
         return '%s %s %s' % (self.date, self.course, self.group)
