@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.views.decorators.csrf import csrf_exempt
 
 
 from django.db.models import F, Q
@@ -403,4 +404,45 @@ def getScorecardHeadersExtended(request):
     serializer = ScoreSerializerExtended(scores, many=True)
     return Response(serializer.data)
 
+@csrf_exempt  # Disable CSRF for this view
+@api_view(['POST'])
+def createGolfGroup(request, group_name, administrator_id):
+    # Validate the administrator exists
+    try:
+        administrator = CustomUser.objects.get(id=administrator_id)
+    except CustomUser.DoesNotExist:
+        return Response({"error": "Administrator with ID does not exist"}, 
+                        status=status.HTTP_400_BAD_REQUEST)
 
+    # Create a new GolfGroup
+    golf_group = GolfGroup(group_name=group_name, administrator=administrator)
+    golf_group.save()
+
+    # Serialize and return the newly created GolfGroup
+    serializer = GolfGroupSerializer(golf_group)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@csrf_exempt  # Disable CSRF for this view
+@api_view(['POST'])
+def createBuddy(request, user_id, golfgroup_id):
+    # Validate the user exists
+    try:
+        user = CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        return Response({"error": "User with ID does not exist"}, 
+                        status=status.HTTP_400_BAD_REQUEST)
+    
+    # Validate the golfgroup exists
+    try:
+        golfgroup = GolfGroup.objects.get(id=golfgroup_id)
+    except GolfGroup.DoesNotExist:
+        return Response({"error": "GolfGroup with ID does not exist"}, 
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    # Create a new GolfGroup
+    buddy = Buddy(group=golfgroup, buddy_email=user)
+    buddy.save()
+
+    # Serialize and return the newly created GolfGroup
+    serializer = BuddySerializer(buddy)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)

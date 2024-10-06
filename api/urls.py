@@ -26,6 +26,7 @@ urlpatterns = [
     path('getbuddys/<int:group_id>/', getBuddys),
     path('getusers/', getUsers),
     path('getscorecardheadersextended/', getScorecardHeadersExtended),
-
+    path('creategolfgroup/<str:group_name>/<int:administrator_id>/', createGolfGroup),
+    path('createbuddy/<int:user_id>/<int:golfgroup_id>/', createBuddy),
 
 ]
