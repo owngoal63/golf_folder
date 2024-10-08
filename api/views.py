@@ -200,6 +200,7 @@ def getScoreDetails(request, round_id):
     course_name = Course.objects.get(id = score.course.id).name
     course = Course.objects.get(id = score.course.id)
     group_name = GolfGroup.objects.get(id = score.group.id).group_name
+    admin_id = GolfGroup.objects.get(id = score.group.id).administrator.id
     player_list = []
     player_letters = ["a", "b", "c", "d"]
     current_hole_recorded = 0       # Default condition (completed round) for match no started and last hole completed ( recorded )
@@ -311,6 +312,7 @@ def getScoreDetails(request, round_id):
     return_details["name"] = score.name
     return_details["date"] = score.date
     return_details["group_name"] = group_name
+    return_details["admin_id"] = admin_id
     return_details["no_of_players"] = score.no_of_players
     return_details["course_name"] = course_name
     return_details["current_hole_recorded"] = current_hole_recorded
