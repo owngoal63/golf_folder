@@ -39,8 +39,22 @@ class CustomUser(AbstractUser):
     #username = models.CharField(max_length=50, null=True)
     email = models.EmailField(_('email address'), unique=True)
     firstname = models.CharField(max_length=30, blank=True)
+    surname = models.CharField(max_length=60, blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+
+    PLAYER_TYPE_CHOICES = [
+        ('REGULAR', 'Regular'),
+        ('GUEST', 'Guest'),
+        ('SINGLE', 'Single'),
+    ]
+    
+    player_type = models.CharField(
+        max_length=20,  
+        choices=PLAYER_TYPE_CHOICES,
+        default='REGULAR',
+    )
+
 
     objects = UserManager()
 
