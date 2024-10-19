@@ -338,6 +338,12 @@ def getGroups(request):
     return Response(serializer.data)
 
 @api_view(['GET'])
+def getGroupsByAdmin(request, administrator):
+    golfgroups = GolfGroup.objects.order_by('administrator').filter(administrator__id = administrator)
+    serializer = GolfGroupSerializer(golfgroups, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
 def getBuddys(request, group_id):
     buddys = Buddy.objects.filter(group_id = group_id).all()
     serializer = BuddySerializer(buddys, many=True)
