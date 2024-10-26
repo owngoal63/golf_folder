@@ -394,6 +394,12 @@ def getUsers(request):
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def getUser(request, user_id):
+    user = CustomUser.objects.filter(id = user_id).all()
+    serializer = UserSerializer(user, many=True)
+    return Response(serializer.data)
+
 
 @api_view(['GET'])
 def getScorecardHeadersExtended(request):
