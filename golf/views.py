@@ -1097,24 +1097,30 @@ class CardInitialView(FormView):
     #     return context
 
     def get_form_kwargs(self):
+        from datetime import date
+        today = date.today()
         kwargs = super(CardInitialView, self).get_form_kwargs()
         # golf_group_obj = GolfGroup.objects.filter(id = self.kwargs.get("group") )
         match_buddies = Buddy.objects.filter(group = self.kwargs.get("group") )
         # print(match_buddies)
         # print(len(match_buddies))
-        # for buddy in match_buddies:
-        #     print(buddy.buddy_email)
+        buddy_hcps = []         # list of player handicaps to pass to data entry page
+        for buddy in match_buddies:
+            # print(buddy.buddy_email, buddy.buddy_email.id, calculate_handicap_on_date(today, buddy.buddy_email.id)[1] )
+            # buddy_hcps.append(buddy.id)
+            buddy_hcps.append(calculate_handicap_on_date(today, buddy.buddy_email.id)[1])
+        # print("Buddy hcps", buddy_hcps)
         # CustomUser.objects.filter(email=str(match_buddies[0])[0].firstname
         # CustomUser.objects.filter(email=player.buddy_email)[0].firstname
         kwargs['no_of_players'] = len(match_buddies)
         # kwargs['player_a'] = "<p> </p>" + str(match_buddies[0]) + "<br> Course Hcp"
-        kwargs['player_a'] = "<p> </p>" + str(CustomUser.objects.filter(email=match_buddies[0])[0].firstname) + "<br> Course Hcp"
-        kwargs['player_b'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[1])[0].firstname)) + "<br> Course Hcp"
+        kwargs['player_a'] = "<p> </p>" + str(CustomUser.objects.filter(email=match_buddies[0])[0].firstname) + " (" + str(buddy_hcps[0]) + ")<br> Course Hcp"
+        kwargs['player_b'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[1])[0].firstname)) +  " (" + str(buddy_hcps[1]) + ")<br> Course Hcp"
         if (len(match_buddies) == 3):
-            kwargs['player_c'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[2])[0].firstname)) + "<br> Course Hcp"
+            kwargs['player_c'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[2])[0].firstname)) +  " (" + str(buddy_hcps[2]) + ")<br> Course Hcp"
         if (len(match_buddies) == 4):
-            kwargs['player_c'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[2])[0].firstname)) + "<br> Course Hcp"
-            kwargs['player_d'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[3])[0].firstname)) + "<br> Course Hcp"
+            kwargs['player_c'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[2])[0].firstname)) +  " (" + str(buddy_hcps[2]) + ")<br> Course Hcp"
+            kwargs['player_d'] = "<p> </p>" +  str(str(CustomUser.objects.filter(email=match_buddies[3])[0].firstname)) +  " (" + str(buddy_hcps[3]) + ")<br> Course Hcp"
 
         
         return kwargs
