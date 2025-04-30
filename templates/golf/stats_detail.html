@@ -53,10 +53,11 @@
         <br>
     <small>MRR - Most Recent Round</small>
     <table>
-        <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th><th>&nbsp;Best&nbsp;&nbsp;<br>({{calculated_round_best_total}})</th><th>&nbsp;Worst&nbsp;<br>({{calculated_round_worst_total}})</th><th>&nbsp;Av.&nbsp;</th><th>&nbsp;MRR&nbsp;</th>
+        <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;<br>Crs/Per</th><th>&nbsp;Best&nbsp;&nbsp;<br>({{calculated_round_best_total}})</th><th>&nbsp;Worst&nbsp;<br>({{calculated_round_worst_total}})</th><th>&nbsp;Av.&nbsp;</th><th>&nbsp;MRR&nbsp;</th>
         {% for s in stats_scorecard %}
         <tr>
-            <td>{{s.0}}</td><td>{{s.1}}</td><td>{{s.2}}</td>
+            <td>{{s.0}}</td><td>{{s.1}}</td>
+            <td {% if s.2 == s.7 %}style="background-color: gold; color:#000000"{% elif s.2|add:"-5" > s.7 or s.7|add:"-5" > s.2 %}style="background-color: red;"{% endif %}>{{s.2}}/{{s.7}}</td>
             {% if s.3 < s.1 %}<td bgcolor="Gold"; style="color:#000000">{{s.3}}</td>{%elif s.3 == s.1  %}<td bgcolor="Silver"; style="color:#000000">{{s.3}}</td>{% else %}<td>{{s.3}}</td>{% endif %}
             <td>{{s.4}}</td><td>{{s.5|floatformat:2}}</td>
             {% if s.6 < s.5%}<td bgcolor="Gold"; style="color:#000000">{{s.6}}</td>

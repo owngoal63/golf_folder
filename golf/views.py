@@ -1376,7 +1376,31 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
         # print("course_holes",course_holes )
         # print("course_par", course_par)
         # print("course_si", course_si)
+        # print("calculated round average", calculated_round_average)
         # print(round_matrix)
+
+        ## Code for Personal SI
+
+        # Calculate differences between player's average and course par
+        differences = [round(avg - par, 1) for avg, par in zip(calculated_round_average, course_par)]
+
+        # Create list of (hole_number, difference) tuples
+        indexed_differences = [(i+1, diff) for i, diff in enumerate(differences)]
+
+        # Sort by difficulty (higher difference = more difficult = lower SI)
+        # For ties, earlier holes in the original list get lower SI
+        sorted_by_difficulty = sorted(indexed_differences, key=lambda x: (-x[1], x[0]))
+
+        # Assign stroke index values (1-18) based on sorted difficulty
+        personal_si = [0] * 18
+        for i, (hole_num, _) in enumerate(sorted_by_difficulty):
+            personal_si[hole_num-1] = i+1  # i+1 gives values 1-18, hole_num-1 adjusts for 0-based indexing
+
+        # print("Differences by hole:", differences)
+        # print("Personal Stroke Index:", personal_si)
+
+        ## End of code for Persoanl SI
+
 
         # Get list of stableford scores
         # stableford_scores = []
@@ -1387,9 +1411,10 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
         # print(round(sum(stableford_scores) / len(stableford_scores),2))   
 
         # Build the data for the stats scorecard
-        stats_scorecard = [course_holes, course_par, course_si, calculated_round_best, calculated_round_worst, calculated_round_average, most_recent_round]
+        stats_scorecard = [course_holes, course_par, course_si, calculated_round_best, calculated_round_worst, calculated_round_average, most_recent_round, personal_si]
         # print("stats_scorecard", stats_scorecard)
         rotated_stats_scorecard = [list(row) for row in zip(*stats_scorecard)]
+        # print(rotated_stats_scorecard)
         # print("rotated_stats_scorecard", rotated_stats_scorecard )
     if siri:
         print("Siri mode")
