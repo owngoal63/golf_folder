@@ -337,6 +337,15 @@ class BuddyListView(ListView):
         group_administrator_obj = GolfGroup.objects.filter(id=self.kwargs.get("group"), administrator = self.request.user )
         context['user_is_administrator'] = group_administrator_obj
         return context
+    
+class BuddyListAllView(ListView):
+    model = CustomUser
+    template_name = 'golf/user_list.html'
+    context_object_name = 'users'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return CustomUser.objects.filter(player_type='REGULAR')
 
 class BuddyUpdateView(UpdateView):
     model = Buddy

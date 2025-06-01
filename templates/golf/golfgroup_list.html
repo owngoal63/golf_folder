@@ -8,18 +8,16 @@
     {% if groups_user_is_in.all %}
         <h1 class="w3-large">Golf Groups you are a member of</h1>
     {% endif %}
-    <table class="w3-table w3-bordered">
-            {% for groups_in in groups_user_is_in %}
-                <tr>
-                    <td style="width:70%">{{ groups_in.group_name }}</td><td style="width:30%;"><button><a href="/golf/list_buddies/{{ groups_in.id }}/">Buddies</a></button></td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td>You are not currently in any groups.</td>
-                </tr>
+    <form>
+        <select onchange="window.location.href='/golf/list_buddies/' + this.value">
+            <option value="">Select buddy group...</option>
+            {% for group in groups_user_is_in %}
+                <option value="{{ group.id }}">{{ group.group_name }}</option>
             {% endfor %}
-        </table>
-        <br>
+        </select>
+    </form>
+
+    <br>
     
     {% if object_list.all %}
     <h1 class="w3-large">Golf Groups you administer</h1>

@@ -29,6 +29,7 @@ urlpatterns = [
 
     path("add_buddy/<int:group>/", login_required(BuddyAddView.as_view()), name="addbuddy"),
     path("list_buddies/<int:group>/", login_required(BuddyListView.as_view()), name = "buddylist" ),
+    path("list_buddies_all/", login_required(BuddyListAllView.as_view()), name = "buddylistall" ),
     path("display_buddy/<int:group>/<int:pk>/update/", login_required(BuddyUpdateView.as_view()), name="buddyupdate"),
     path("display_buddy/<int:group>/<int:pk>/delete/", login_required(BuddyDeleteView.as_view()), name="buddydelete"),
 
