@@ -32,7 +32,7 @@
 
 <div class="w3-card w3-teal w3-padding">
     <h1 class="w3-small">
-    Your Round Statistics at {{course}}
+    Round Statistics at {{course}}
     <table class="w3-table w3-bordered" style="max-width:400px;">
             <tr>
                 <td font-size:12px;>No. of rounds: {{ no_of_rounds }}</td>         
@@ -49,7 +49,8 @@
     </table>
     <br>
     {% if no_of_completed_scorecards != "None" %}
-    Your Hole Stats at {{course}} based on {{ no_of_completed_scorecards }} scorecards
+    <button><a href="/golf/get_course_stats/{{course_id}}/{{player_id}}/Detailed">Show Detailed Hole Stats</a></button><br>
+    High Level Hole Stats at {{course}} based on {{ no_of_completed_scorecards }} scorecards
         <br>
     <small>MRR - Most Recent Round</small>
     <table>

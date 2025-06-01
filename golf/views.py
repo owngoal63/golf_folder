@@ -1280,6 +1280,10 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
         siri = True
     else:
         siri = False
+    if extraparam[:8] == "Detailed":
+        detailed_stats = True
+    else:
+        detailed_stats = False
     course = Course.objects.get(id = course_id)
     course_name = course.name
     player_obj_id = CustomUser.objects.get(pk = player_id)
@@ -1338,7 +1342,7 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
     else:
         rotated_round_matrix = [list(row) for row in zip(*round_matrix)]
         # print(" ")
-        # print(rotated_round_matrix)
+        print(rotated_round_matrix)
         # print(" ")
         # print(rotated_round_matrix[2])
         # print(" ")
@@ -1408,14 +1412,79 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
             # print(each_single_round, course_si, score_hcp_matrix, score_hcp_matrix[count])
             # stableford_scores.append(calculate_stableford_score(each_single_round, course_si, course_par, score_hcp_matrix[count]))
         # print(stableford_scores)
-        # print(round(sum(stableford_scores) / len(stableford_scores),2))   
+        # print(round(sum(stableford_scores) / len(stableford_scores),2)) 
+        
+        if extraparam[:8] == "Detailed":
+            # Get the Detailed Hole Stats (No. of Eagles, Birdies etc.)
+            # Initialize lists for each score type
+            eagles = [0] * 18
+            birdies = [0] * 18
+            pars_count = [0] * 18
+            bogeys = [0] * 18
+            double_bogeys = [0] * 18
+            triple_bogeys = [0] * 18
+            disasters = [0] * 18
 
-        # Build the data for the stats scorecard
-        stats_scorecard = [course_holes, course_par, course_si, calculated_round_best, calculated_round_worst, calculated_round_average, most_recent_round, personal_si]
-        # print("stats_scorecard", stats_scorecard)
-        rotated_stats_scorecard = [list(row) for row in zip(*stats_scorecard)]
-        # print(rotated_stats_scorecard)
-        # print("rotated_stats_scorecard", rotated_stats_scorecard )
+            # Initialize total counters
+            total_eagles = 0
+            total_birdies = 0
+            total_pars = 0
+            total_bogeys = 0
+            total_double_bogeys = 0
+            total_triple_bogeys = 0
+            total_disasters = 0
+
+            for hole_idx in range(18):
+                hole_par = course_par[hole_idx]
+                
+                # For each hole, get the 5 rounds/players
+                for round_idx in range(len(rotated_round_matrix[hole_idx])):
+                    score = rotated_round_matrix[hole_idx][round_idx]
+                    diff = score - hole_par
+                    
+                    if diff == -2:
+                        eagles[hole_idx] += 1
+                        total_eagles += 1
+                    elif diff == -1:
+                        birdies[hole_idx] += 1
+                        total_birdies += 1
+                    elif diff == 0:
+                        pars_count[hole_idx] += 1
+                        total_pars += 1
+                    elif diff == 1:
+                        bogeys[hole_idx] += 1
+                        total_bogeys += 1
+                    elif diff == 2:
+                        double_bogeys[hole_idx] += 1
+                        total_double_bogeys += 1
+                    elif diff == 3:
+                        triple_bogeys[hole_idx] += 1
+                        total_triple_bogeys += 1
+                    elif diff > 3:  # Worse than triple bogey = disaster
+                        disasters[hole_idx] += 1
+                        total_disasters += 1
+
+
+            print("Eagles:", eagles, total_eagles)
+            print("Birdies:", birdies, total_birdies)
+            print("Pars:", pars_count, total_pars)
+            print("bogeys:", bogeys, total_bogeys)
+            print("doubles:", double_bogeys, total_double_bogeys)
+            print("triples:", triple_bogeys, total_triple_bogeys)
+            print("disasters:", disasters, total_disasters)
+
+            hole_score_type_total_list = [total_eagles, total_birdies, total_pars, total_bogeys, total_double_bogeys, total_triple_bogeys, total_disasters]
+
+            detailed_hole_breakdown = [course_holes, course_par, course_si, eagles, birdies, pars_count, bogeys, double_bogeys, triple_bogeys, disasters]
+            rotated_detailed_hole_breakdown = [list(row) for row in zip(*detailed_hole_breakdown)]
+
+        else:
+            # Build the data for the high level stats scorecard
+            stats_scorecard = [course_holes, course_par, course_si, calculated_round_best, calculated_round_worst, calculated_round_average, most_recent_round, personal_si]
+            # print("stats_scorecard", stats_scorecard)
+            rotated_stats_scorecard = [list(row) for row in zip(*stats_scorecard)]
+            # print(rotated_stats_scorecard)
+            # print("rotated_stats_scorecard", rotated_stats_scorecard )
     if siri:
         print("Siri mode")
         if len(extraparam) == 5:                    # Hole 1-9
@@ -1427,6 +1496,20 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
         return_details["message"] = return_details["message"] + f"Your best cumulative score at {course_name} is {calculated_round_best_total} and your worst is {calculated_round_worst_total}. "
         return_details["message"] = return_details["message"] + f"Hole {current_hole_no} Your best at hole {current_hole_no} is {min(rotated_round_matrix[current_hole_no - 1])}"
         return JsonResponse(return_details)
+    elif detailed_stats:
+        return render(request, 'golf/stats_detail2.html', {"course": course,
+                                                    "no_of_rounds": rounds.count(),
+                                                    "best_round": rounds.aggregate(min_value=Min('score'))['min_value'],
+                                                    "calculated_round_best_total": calculated_round_best_total,
+                                                    "worst_round": rounds.aggregate(max_value=Max('score'))['max_value'],
+                                                    "calculated_round_worst_total": calculated_round_worst_total,
+                                                    "average_round": round(rounds.aggregate(average_value=Avg('score'))['average_value'],2),
+                                                    "no_of_completed_scorecards": no_of_completed_scorecards,
+                                                    "hole_score_type_total_list": hole_score_type_total_list,
+                                                    "rotated_detailed_hole_breakdown": rotated_detailed_hole_breakdown,
+                                                    "course_id": course_id,
+                                                    "player_id": player_id })
+
     else:
         return render(request, 'golf/stats_detail.html', {"course": course,
                                                     "no_of_rounds": rounds.count(),
@@ -1436,7 +1519,9 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
                                                     "calculated_round_worst_total": calculated_round_worst_total,
                                                     "average_round": round(rounds.aggregate(average_value=Avg('score'))['average_value'],2),
                                                     "no_of_completed_scorecards": no_of_completed_scorecards,
-                                                    "stats_scorecard": rotated_stats_scorecard })
+                                                    "stats_scorecard": rotated_stats_scorecard,
+                                                    "course_id": course_id,
+                                                    "player_id": player_id })
 
 
 # Functions to build Handicap Tracking capability

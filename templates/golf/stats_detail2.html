@@ -1,0 +1,108 @@
+<!-- templates/golf/stats_detail.html -->
+{% extends "base.html" %}
+
+{% block title %}Golf Course Statistics Detail2{% endblock %}
+
+{% block content %}
+
+<style>
+    table, th, td {
+     border: 1px solid white;
+    }
+
+    td {
+        width: 45px;
+        text-align: center;
+    }
+
+    input {max-width: 3em}
+
+    .hole_no {
+        width:30px;
+    }
+
+    .recessed {
+        /* background-color: #fff;  */
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add a box shadow to create the recessed effect */
+        padding: 10px; /* Add some padding for spacing */
+        max-width: 350px;
+    }
+</style>
+
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-small">
+    Round Performance Statistics at {{course}}
+    <table class="w3-table w3-bordered" style="max-width:400px;">
+            {% if no_of_completed_scorecards == "None" %}
+                <tr>
+                    <td font-size:12px;>No. of rounds: {{ no_of_rounds }}</td>         
+                </tr>
+                <tr>
+                    <td font-size:12px;>Best Score: {{ best_round }}</td>         
+                </tr>
+                <tr>
+                    <td font-size:12px;>Worst Score: {{ worst_round }}</td>         
+                </tr>
+                <tr>
+                    <td font-size:12px;>Average Score: {{ average_round }}</td>         
+                </tr>
+            {% else %}
+                <tr>
+                    <td font-size:12px;>
+                        Eagles: {{ hole_score_type_total_list.0 }}
+                    </td>
+                    <td font-size:12px;>
+                        Birdies: {{ hole_score_type_total_list.1 }}
+                    </td>
+                    <td font-size:12px;>
+                        Pars: {{ hole_score_type_total_list.2 }}
+                    </td>
+                </tr>
+                <tr>
+                    <td font-size:12px;>
+                        Bogeys: {{ hole_score_type_total_list.3 }}
+                    </td>
+                    <td font-size:12px;>
+                        Doubles: {{ hole_score_type_total_list.4 }}
+                    </td>
+                    <td font-size:12px;>
+                        Triples: {{ hole_score_type_total_list.5 }}
+                    </td>
+                </tr>
+                <tr>    
+                    <td font-size:12px; colspan="3">
+                        Disasters: {{ hole_score_type_total_list.6 }}
+                    </td>         
+                </tr>
+            {% endif %}
+    </table>
+    <br>
+    {% if no_of_completed_scorecards != "None" %}
+    <button><a href="/golf/get_course_stats/{{course_id}}/{{player_id}}/">Show Summary Hole Stats</a></button><br>
+    Hole Performance Stats at {{course}} based on {{ no_of_completed_scorecards }} scorecards
+        <br>
+    <table>
+        <th>Hole</th><th>Eg</th><th>&nbsp;Bd&nbsp;</th><th>&nbsp;Pr&nbsp;</th><th>&nbsp;Bg&nbsp;</th><th>&nbsp;Db&nbsp;</th><th>&nbsp;Tr&nbsp;</th><th>&nbsp;Dis&nbsp;</th>
+        {% for s in rotated_detailed_hole_breakdown %}
+        <tr>
+            <td>{{s.0}}</td>
+            <td>{{ s.3|default:"&nbsp;"|safe }}</td><td>{{ s.4|default:"&nbsp;"|safe }}</td><td>{{ s.5|default:"&nbsp;"|safe }}</td>
+            <td>{{ s.6|default:"&nbsp;"|safe }}</td><td>{{ s.7|default:"&nbsp;"|safe }}</td><td>{{ s.8|default:"&nbsp;"|safe }}</td>
+            <td>{{ s.9|default:"&nbsp;"|safe }}</td>
+
+            
+        </tr>
+
+        {% endfor %}
+    </table>    
+    {% else %}
+
+    <h1 class="w3-large">No completed scorecards for {{course}}</h1>
+
+    {% endif %}
+
+</h1>
+   
+
+{% endblock %}
