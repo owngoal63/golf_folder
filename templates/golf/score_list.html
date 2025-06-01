@@ -44,10 +44,26 @@
             {% endif %}
         </span>
     </div>
+    <hr>
     <p> </p>
     {% for group in groups_which_can_start_rounds %}
-        <a href="/golf/cardinitial/{{ group.id }}/"><button>New Scorecard: {{group.group_name}}</button></a><p> </p>
+        {% if group.favourite %}
+            <a href="/golf/cardinitial/{{ group.id }}/"><button>New Scorecard: {{group.group_name}}</button></a><p> </p>
+        {% endif %}
     {% endfor %}
+
+    Non-favourite Groups<br>
+    <form>
+        <select onchange="window.location.href='/golf/cardinitial/' + this.value">
+            <option value="">Select buddy group...</option>
+            {% for group in groups_which_can_start_rounds %}
+            {% if not group.favourite %}
+                <option value="{{ group.id }}">{{ group.group_name }}</option>
+            {% endif %}
+            {% endfor %}
+        </select>
+    </form>
+
 </div>
 
 {% endblock %}

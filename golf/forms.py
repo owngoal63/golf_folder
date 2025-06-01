@@ -25,7 +25,7 @@ class GolfGroupForm(ModelForm):
 
     class Meta:
         model = GolfGroup
-        fields = ('group_name',)
+        fields = ('group_name','favourite')
 
 class BuddyForm(ModelForm):
 

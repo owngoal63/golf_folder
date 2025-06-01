@@ -23,10 +23,11 @@
     
     {% if object_list.all %}
     <h1 class="w3-large">Golf Groups you administer</h1>
+    &nbsp;&nbsp;(Favourite - Yes/No)<br><br>
     <table class="w3-table w3-bordered">
         {% for group in object_list %}
             <tr>
-                <td style="width:70%"><a href="/golf/display_golf_group/{{ group.id }}/">{{ group.group_name }}</a></td><td style="width:30%;"><button><a href="/golf/list_buddies/{{ group.id }}/">Buddies</a></button></td>
+                <td style="width:70%"><a href="/golf/display_golf_group/{{ group.id }}/">{{ group.group_name }} | {{group.favourite|yesno:"Yes,No"}}</a></td><td style="width:30%;"><button><a href="/golf/list_buddies/{{ group.id }}/">Buddies</a></button></td>
             </tr>
         {% empty %}
             <tr>
