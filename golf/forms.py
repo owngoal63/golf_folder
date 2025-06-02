@@ -127,4 +127,4 @@ class UserForm(ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ('firstname', )
+        fields = ('firstname', 'surname', 'player_type' )
