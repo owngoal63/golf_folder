@@ -346,6 +346,18 @@ class BuddyListAllView(ListView):
 
     def get_queryset(self):
         return CustomUser.objects.filter(player_type='REGULAR')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        from datetime import date
+        today = date.today()
+        
+        # Add today's handicap to each user object
+        for user in context['users']:
+            user.handicap = calculate_handicap_on_date(today, user.id)[1]
+            
+        return context
 
 class BuddyUpdateView(UpdateView):
     model = Buddy
