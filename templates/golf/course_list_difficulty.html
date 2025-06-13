@@ -1,0 +1,41 @@
+<!-- templates/golf/course_list_difficulty.html -->
+{% extends "base.html" %}
+
+{% block title %}Course List by Difficulty{% endblock %}
+
+{% block content %}
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Course List by Difficulty</h1>
+    <table class="w3-table w3-bordered">
+        {% for course in object_list %}
+            <div>
+                <h6>{{ course.name }}+-</h6>
+                <p>Par: {{ course.par }} | Rating: {{ course.course_rating }} | Slope: {{ course.slope_rating }}</p>
+                <hr>
+            </div>
+        {% empty %}
+            <li>No courses yet.</li>
+        {% endfor %}
+    </table>
+    <br>
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; First</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+   
+</div>
+{% endblock %}

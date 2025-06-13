@@ -1,5 +1,6 @@
 # golf/views.py
-from django.db.models import Avg, Min, Max, Count
+from django.db.models import Avg, Min, Max, Count, F
+from django.db.models.functions import Round as DBRound
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
@@ -57,6 +58,20 @@ class CourseListView(ListView):
     model = Course
     ordering = ['name']
     paginate_by = 10
+
+class CourseListDifficultyView(ListView):
+    model = Course
+    paginate_by = 10
+    ordering = ['-slope_rating']
+    template_name = 'golf/course_list_difficulty.html'
+
+    # def get_queryset(self):
+    #     return Course.objects.annotate(
+    #         difficulty=DBRound(
+    #             (F('course_rating') - F('par')) + (F('slope_rating') - 113) / 10.0,
+    #             1
+    #         )
+    #     ).order_by('difficulty')  # Hardest first, use 'difficulty' for easiest first
 
 class CourseDeleteView(DeleteView):
     model = Course
@@ -1608,7 +1623,6 @@ def average_per_month(data):
                 result[datetime.date(year, month, 1)] = previous_avg
                 
     return result
-
 
 class UserListView(ListView):
     model = CustomUser
