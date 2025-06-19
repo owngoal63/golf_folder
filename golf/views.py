@@ -62,16 +62,29 @@ class CourseListView(ListView):
 class CourseListDifficultyView(ListView):
     model = Course
     paginate_by = 10
-    ordering = ['-slope_rating']
+    # ordering = ['-slope_rating']
     template_name = 'golf/course_list_difficulty.html'
 
-    # def get_queryset(self):
-    #     return Course.objects.annotate(
-    #         difficulty=DBRound(
-    #             (F('course_rating') - F('par')) + (F('slope_rating') - 113) / 10.0,
-    #             1
-    #         )
-    #     ).order_by('difficulty')  # Hardest first, use 'difficulty' for easiest first
+    def get_queryset(self):
+
+        stats = Course.objects.aggregate(
+            min_course_rating=Min('course_rating'),
+            max_course_rating=Max('course_rating'),
+            min_slope_rating=Min('slope_rating'),
+            max_slope_rating=Max('slope_rating')
+        )
+
+        # Difficulty Calculation - First Normalise the Course and Slope rating based upon the min and max values of the courses on the database. Then split the ratio of the calculation 50:50
+        # CR_norm = (CR - stats["min_course_rating"]) / (stats["max_course_rating"] - stats["min_course_rating"])
+        # SR_norm = (SR - stats["min_slope_rating"]) / (stats["max_slope_rating"] - stats["min_slope_rating"])
+        # difficulty  = (0.5 * CR_norm) + (0.5 * SR_norm)
+        # difficulty  = (0.5 * (CR - stats["min_course_rating"]) / (stats["max_course_rating"] - stats["min_course_rating"])) + (0.5 * (SR - stats["min_slope_rating"]) / (stats["max_slope_rating"] - stats["min_slope_rating"]))
+
+        # print(stats)
+        return Course.objects.annotate(
+            difficulty  = DBRound((0.5 * (F('course_rating') - stats["min_course_rating"]) / (stats["max_course_rating"] - stats["min_course_rating"])) +
+              (0.5 * (F('slope_rating') - stats["min_slope_rating"]) / (stats["max_slope_rating"] - stats["min_slope_rating"])) , 2)
+        ).order_by('-difficulty')  # Hardest first, use 'difficulty' for easiest first
 
 class CourseDeleteView(DeleteView):
     model = Course
@@ -1325,7 +1338,7 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
     player_obj_id = CustomUser.objects.get(pk = player_id)
 
     rounds = Round.objects.filter(course = course, player = player_obj_id)
-    print("stats for ",player_obj_id)
+    # print("stats for ",player_obj_id)
     course_stats = Score.objects.filter(course = course_id).order_by('-date')
     round_matrix = []
     score_hcp_matrix = []
@@ -1378,7 +1391,7 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
     else:
         rotated_round_matrix = [list(row) for row in zip(*round_matrix)]
         # print(" ")
-        print(rotated_round_matrix)
+        # print(rotated_round_matrix)
         # print(" ")
         # print(rotated_round_matrix[2])
         # print(" ")
@@ -1438,6 +1451,36 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
 
         # print("Differences by hole:", differences)
         # print("Personal Stroke Index:", personal_si)
+        # print("Course Stroke Index:", course_si)
+
+
+        si_differences = [personal_si[i] - course_si[i] for i in range(len(personal_si))]
+
+        # Find max difference
+        max_diff = max(si_differences)
+        max_indices = [i for i, diff in enumerate(si_differences) if diff == max_diff]
+
+        # If tie, get index with lowest csi value
+        if len(max_indices) > 1:
+            max_index = min(max_indices, key=lambda i: course_si[i])
+        else:
+            max_index = max_indices[0]
+
+        # Find min difference
+        min_diff = min(si_differences)
+        min_indices = [i for i, diff in enumerate(si_differences) if diff == min_diff]
+
+        # If tie, get index with highest csi value
+        if len(min_indices) > 1:
+            min_index = max(min_indices, key=lambda i: course_si[i])
+        else:
+            min_index = min_indices[0]
+
+        # print(f"Max difference: {max_diff} at index {max_index}")
+        # print(f"Min difference: {min_diff} at index {min_index}")
+        cursed_hole = min_index + 1
+        hero_hole = max_index + 1
+        
 
         ## End of code for Persoanl SI
 
@@ -1501,13 +1544,13 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
                         total_disasters += 1
 
 
-            print("Eagles:", eagles, total_eagles)
-            print("Birdies:", birdies, total_birdies)
-            print("Pars:", pars_count, total_pars)
-            print("bogeys:", bogeys, total_bogeys)
-            print("doubles:", double_bogeys, total_double_bogeys)
-            print("triples:", triple_bogeys, total_triple_bogeys)
-            print("disasters:", disasters, total_disasters)
+            # print("Eagles:", eagles, total_eagles)
+            # print("Birdies:", birdies, total_birdies)
+            # print("Pars:", pars_count, total_pars)
+            # print("bogeys:", bogeys, total_bogeys)
+            # print("doubles:", double_bogeys, total_double_bogeys)
+            # print("triples:", triple_bogeys, total_triple_bogeys)
+            # print("disasters:", disasters, total_disasters)
 
             hole_score_type_total_list = [total_eagles, total_birdies, total_pars, total_bogeys, total_double_bogeys, total_triple_bogeys, total_disasters]
 
@@ -1557,7 +1600,9 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
                                                     "no_of_completed_scorecards": no_of_completed_scorecards,
                                                     "stats_scorecard": rotated_stats_scorecard,
                                                     "course_id": course_id,
-                                                    "player_id": player_id })
+                                                    "player_id": player_id,
+                                                    "cursed_hole": cursed_hole,
+                                                    "hero_hole": hero_hole })
 
 
 # Functions to build Handicap Tracking capability
