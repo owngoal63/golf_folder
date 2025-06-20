@@ -1456,6 +1456,10 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
 
         si_differences = [personal_si[i] - course_si[i] for i in range(len(personal_si))]
 
+        ## End of code for Persoanl SI
+
+        # Bandit and Cured hole functionaility
+
         # Find max difference
         max_diff = max(si_differences)
         max_indices = [i for i, diff in enumerate(si_differences) if diff == max_diff]
@@ -1479,10 +1483,10 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
         # print(f"Max difference: {max_diff} at index {max_index}")
         # print(f"Min difference: {min_diff} at index {min_index}")
         cursed_hole = min_index + 1
-        hero_hole = max_index + 1
-        
+        bandit_hole = max_index + 1
 
-        ## End of code for Persoanl SI
+        # End of Bandit and Cured hole functionaility
+        
 
 
         # Get list of stableford scores
@@ -1602,7 +1606,7 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
                                                     "course_id": course_id,
                                                     "player_id": player_id,
                                                     "cursed_hole": cursed_hole,
-                                                    "hero_hole": hero_hole })
+                                                    "bandit_hole": bandit_hole })
 
 
 # Functions to build Handicap Tracking capability
