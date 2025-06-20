@@ -127,7 +127,7 @@
 
     </form>
 
-    {% if request.user.email != round_meta.round_admin %}
+    <!-- {% if request.user.email != round_meta.round_admin %}
 
         {% if round_meta.last_hole_scored >= 1 %}
         <a href="/golf/trackmatch/{{round_meta.round_id}}/2/"><button class="hole_no">1</button></a>&nbsp;
@@ -187,7 +187,7 @@
         {% endif %}
        
         
-    {% endif %}
+    {% endif %} -->
 
     {% if round_meta.last_hole_scored == 18 and user.is_authenticated %}
     <p> </p>
