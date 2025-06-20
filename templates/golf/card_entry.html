@@ -34,19 +34,35 @@
 </style>
 
 {% load crispy_forms_tags %}
+
 <div class="w3-card w3-teal w3-padding">
     <h1 class="w3-small">
+        
 
+  <a href="/golf/display_max_hole/{{round_meta.round_id}}/">
+            <div class="recessed">
 
-        <div class="recessed">
-        <a href="/golf/display_max_hole/{{round_meta.round_id}}/">
+    <table style="border:0 !important; table-layout: auto !important; width: 330px;">
+        <tr>
+            <td style="border: none !important; text-align: left !important; white-space: nowrap;">
+                {{round_meta.course_name}}&nbsp;&nbsp;{{round_meta.course_par}} / {{round_meta.course_rating}} / {{round_meta.slope_rating}}
+            </td>
+            <td rowspan="2" style="border: none !important; text-align: right !important;">
+                <svg class="refresh-icon" viewBox="0 0 16 16" width="30" height="30" fill="white">
+                    <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                </svg>
+            </td>
+        <tr>
+            <td style="border: none !important; text-align: left !important; white-space: nowrap;">
+                {{round_meta.round_date}}&nbsp;&nbsp;{{round_meta.name}}
+            </td>
+        </tr>
+        </tr>
+    </table>
 
-    
-    {{round_meta.course_name}}&nbsp;&nbsp;{{round_meta.course_par}} / {{round_meta.course_rating}} / {{round_meta.slope_rating}}<br>
-    {{round_meta.round_date}}&nbsp;&nbsp;{{round_meta.name}}<br>
-
-
-        </a></div>
+</div>
+        </a>
 
     <br>
    
