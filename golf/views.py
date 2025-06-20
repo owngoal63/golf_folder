@@ -575,14 +575,14 @@ def compare_and_return_color(par, score):
 def set_colour_for_handicap_adjustment(par, gross_score, net_score):
     handicap_adjustment = gross_score - (par + 2 + (gross_score - net_score))
     if handicap_adjustment > 0:
-        if handicap_adjustment > 2:
-            return "#581845"
-        if handicap_adjustment == 2:
-            return "#A52A2A"
-        if handicap_adjustment == 1:
-            return "#D2691E"
+       if handicap_adjustment > 2:
+           return ("#581845", 3)
+       if handicap_adjustment == 2:
+           return ("#A52A2A", handicap_adjustment)
+       if handicap_adjustment == 1:
+           return ("#D2691E", handicap_adjustment)
     else:
-        return "#009688"  # background colour
+        return ("#009688", 0)  # background colour
     
     
 def sort_by_value_and_describe(list_to_sort, sort_by_index):
@@ -822,7 +822,8 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
             # hole_obj structure
             # hole_no, par, SI, Strokes, Gross (or *), Net, Compare Net to Par, Match Play Outcome, BG Colour set by compare and return function or just on net double bogey check
             # print(colourize)
-            if colourize: 
+            if colourize:
+                color_adjustment_and_score_adjustment = ('#009688', 0) if round_meta["holes_completed"] < i else set_colour_for_handicap_adjustment(eval("cq.hole" + str(i) + "par"), int(gross_score), int(net_score))
                 hole_obj = hole_obj + ((
                     i,
                     eval("cq.hole" + str(i) + "par"),
@@ -831,10 +832,12 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
                     '' if round_meta["holes_completed"] < i else net_score,
                     '' if round_meta["holes_completed"] < i else compare_to_par,
                     '' if no_of_players != 2  and round_meta["holes_completed"] < i else outcome,
-                    '#009688' if round_meta["holes_completed"] < i else compare_and_return_color(eval("cq.hole" + str(i) + "par"), int(net_score)),
+                    color_adjustment_and_score_adjustment[0],
+                    color_adjustment_and_score_adjustment[1],
                     ),
                     )
             else:
+                color_adjustment_and_score_adjustment = ('#009688', 0) if round_meta["holes_completed"] < i else set_colour_for_handicap_adjustment(eval("cq.hole" + str(i) + "par"), int(gross_score), int(net_score))
                 hole_obj = hole_obj + ((
                 i,
                 eval("cq.hole" + str(i) + "par"),
@@ -843,20 +846,24 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
                 '' if round_meta["holes_completed"] < i else net_score,
                 '' if round_meta["holes_completed"] < i else compare_to_par,
                 '' if no_of_players != 2  and round_meta["holes_completed"] < i else outcome,
-                '#009688' if round_meta["holes_completed"] < i else set_colour_for_handicap_adjustment(eval("cq.hole" + str(i) + "par"), int(gross_score), int(net_score)),
+                color_adjustment_and_score_adjustment[0],
+                color_adjustment_and_score_adjustment[1],
                 ),
                 )
 
         holes_attr.append(hole_obj)
         # print(hole_obj)
 
-        # Get Gross, Net, Stableford, out_nine and in_nine running totals
-        gross, net, stableford, out_nine_gross, out_nine_net, in_nine_gross, in_nine_net = 0, 0, 0, 0, 0, 0, 0
+        # Get Gross, Net, Stableford, out_nine, in_nine and adjusted_score running totals
+        gross, net, stableford, out_nine_gross, out_nine_net, in_nine_gross, in_nine_net, adjusted_score = 0, 0, 0, 0, 0, 0, 0, 0
         player_match_play = 0
 
         for i in range(1, round_meta["holes_completed"] + 1):
             gross += getattr(score_instance,"player_{0}_s{1}".format(p_letter, i))
             net += getattr(score_instance,"player_{0}_s{1}".format(p_letter, i)) - playerSI[i-1]
+            adjusted_score += hole_obj[i-1][9]
+            adjusted_gross = gross - adjusted_score
+            # print(adjusted_score, adjusted_gross)
             if i < 10:
                 out_nine_gross = gross
                 out_nine_net = net
@@ -890,7 +897,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
 
 
         running_totals.append((
-            (gross, net, stableford, player_match_play_text, box_bk_colour, out_nine_gross, out_nine_net, in_nine_gross, in_nine_net)
+            (gross, net, stableford, player_match_play_text, box_bk_colour, out_nine_gross, out_nine_net, in_nine_gross, in_nine_net, adjusted_gross)
             )
         )
 
@@ -1086,6 +1093,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
         else:
             return JsonResponse(return_details)
     else:
+        # print(player_dict)
         return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "stableford_medal_positions": stableford_medal_positions, "form": form})
 
 class CardSetupView2(FormView):

@@ -505,6 +505,21 @@
                     {% endif %}
                     {% endif %}
                 </tr>
+
+                {% if round_meta.hole_no == 19 %}
+                    <tr></tr><tr></tr>
+                    <tr>
+                        <td colspan="3">Adjusted Gross</td>
+                        <td>{{player_dict.player1.running_totals.9}}</td>
+                        <td>{{player_dict.player2.running_totals.9}}</td>
+                        {% if round_meta.no_of_players > 2 %}
+                            <td>{{player_dict.player3.running_totals.9}}</td>
+                        {% endif %}
+                        {% if round_meta.no_of_players > 3 %}
+                            <td>{{player_dict.player4.running_totals.9}}</td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
         </table>
         <br>
         Gross Score Handicap Adjustments Per Hole
