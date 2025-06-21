@@ -536,6 +536,50 @@ def chart_handicap_graph(request):
 def make_stars(num):
     return "*" * num
 
+def find_best_hole(golf_data):
+    all_performances = []
+    player_best = {}
+    
+    # Extract all performances and track each player's best
+    for player_key, player_data in golf_data.items():
+        firstname = player_data['firstname']
+        player_performances = []
+        
+        for hole_data in player_data['holes_attr']:
+            hole_num = hole_data[0]      # Position 0: hole number
+            par = hole_data[1]           # Position 1: par
+            stroke_index = hole_data[2]  # Position 2: stroke index  
+            gross_score = hole_data[4]   # Position 4: gross score
+            
+            score_vs_par = gross_score - par
+            
+            performance = {
+                'player': firstname,
+                'hole': hole_num,
+                'score_vs_par': score_vs_par,
+                'stroke_index': stroke_index,
+                'gross_score': gross_score,
+                'par': par
+            }
+            
+            all_performances.append(performance)
+            player_performances.append(performance)
+        
+        # Find this player's best hole
+        player_performances.sort(key=lambda x: (x['score_vs_par'], x['stroke_index']))
+        player_best[firstname] = player_performances[0]
+    
+    # Find overall winner
+    all_performances.sort(key=lambda x: (x['score_vs_par'], x['stroke_index']))
+    overall_winner = all_performances[0]
+    
+    return {
+        'overall_winner': overall_winner,
+        'player_best_holes': player_best
+    }
+
+
+
 def calculate_positions(numbers_list):
     sorted_numbers = sorted(numbers_list, reverse=True)
     positions = []
@@ -1094,6 +1138,32 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
             return JsonResponse(return_details)
     else:
         # print(player_dict)
+        # Best holes by player and Bandit of the day.
+        golf_terminology = {
+            -3: "an Albatross", 
+            -2: "an Eagle",
+            -1: "a Birdie",
+            0: "a Par",
+            1: "a Bogey",
+            2: "a Double Bogey",
+            3: "a Triple Bogey",
+            4: "a Quadruple Bogey",
+            5: "a Quintuple Bogey",
+            6: "a Sextuple Bogey",
+            7: "a Septuple Bogey",
+            8: "a Octuple Bogey"
+        }
+        result = find_best_hole(player_dict)
+        # print("OVERALL WINNER:")
+        winner = result['overall_winner']
+        # print(f"{winner['player']} scored {winner['score_vs_par']} vs par on hole {winner['hole']}")
+        round_meta["bandit_of_the_day"] = f"{winner['player']} scored {golf_terminology[winner['score_vs_par']]} on hole {winner['hole']}" 
+        # print("\nEACH PLAYER'S BEST HOLE:")
+        round_meta["player_best_hole"] = []
+        for player, best in result['player_best_holes'].items():
+            # print(f"{player}: {best['score_vs_par']} vs par on hole {best['hole']} (score: {best['gross_score']}, par: {best['par']})")
+            round_meta["player_best_hole"].append(best['hole'])
+        # print(round_meta["player_best_hole"])
         return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "stableford_medal_positions": stableford_medal_positions, "form": form})
 
 class CardSetupView2(FormView):
