@@ -1436,6 +1436,10 @@ def calculate_stableford_score(strokes, indexes, pars, player_hcp):
 
 # @login_required - removed for Siri access
 def get_course_stats(request, course_id, player_id, extraparam = ''):
+    # Initialise the stats best/worse hole variables ( to avoid crash when there are stats for the round but not the scorecard )
+    cursed_hole = 0
+    bandit_hole = 0
+    
     if extraparam[:4] == "Siri":
         siri = True
     else:
