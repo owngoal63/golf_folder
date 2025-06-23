@@ -101,11 +101,24 @@ class RoundAddView(CreateView):
     def form_valid(self, RoundForm):
         # Default the currently signed in user as the Round->player value on update
         RoundForm.instance.player = self.request.user
+        # Check for duplicate record
+        duplicate_exists = Round.objects.filter(
+            player=RoundForm.instance.player,
+            date=RoundForm.instance.date,
+            course=RoundForm.instance.course
+        ).exists()
+
+        if duplicate_exists:
+            print('A round for this player, date, and course already exists. Will not add.')
+            return self.form_invalid(RoundForm)
+        
         # Update net_score value
         net_score = RoundForm.instance.score - RoundForm.instance.course.par
         RoundForm.instance.net_score = "+" + str(net_score) if net_score > 0 else str(net_score) 
+        
         # Update handicap_differential value
         RoundForm.instance.handicap_differential = round((RoundForm.instance.score - RoundForm.instance.course.course_rating) * 113 / RoundForm.instance.course.slope_rating, 1)
+        
         return super().form_valid(RoundForm)
 
 class RoundListView(ListView):
