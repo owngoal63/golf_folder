@@ -496,10 +496,12 @@ def chart_handicap_graph(request):
     coursesplayed = []
     coursesplayedcolor = []
     defaultColors = [
-        "#3366CC", "#DC3912", "#FF9900", "#109618", "#990099", "#3B3EAC", "#0099C6",
-        "#DD4477", "#66AA00", "#B82E2E", "#316395", "#994499", "#22AA99", "#AAAA11",
-        "#6633CC", "#E67300", "#8B0707", "#329262", "#5574A6", "#651067"
-        ]
+    "#3366CC", "#DC3912", "#FF9900", "#109618", "#990099", "#3B3EAC", "#0099C6",
+    "#DD4477", "#66AA00", "#B82E2E", "#316395", "#994499", "#22AA99", "#AAAA11",
+    "#6633CC", "#E67300", "#8B0707", "#329262", "#5574A6", "#651067",
+    "#FF6B35", "#2E8B57", "#9370DB", "#CD853F", "#4682B4", "#D2691E", 
+    "#8FBC8F", "#DA70D6", "#20B2AA", "#F4A460"
+    ]
     course_colours = dict()
 
     # queryset = Round.objects.all().values('date','handicap_differential').filter(player=request.user).order_by('date')
@@ -1439,7 +1441,7 @@ def get_course_stats(request, course_id, player_id, extraparam = ''):
     # Initialise the stats best/worse hole variables ( to avoid crash when there are stats for the round but not the scorecard )
     cursed_hole = 0
     bandit_hole = 0
-    
+
     if extraparam[:4] == "Siri":
         siri = True
     else:
