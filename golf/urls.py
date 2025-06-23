@@ -57,7 +57,7 @@ urlpatterns = [
     path('courses_played/<int:player_id>/', courses_played, name='coursesplayed'),
 
     path("list_users/", UserListView.as_view(), name = "userlist" ),
-    path("display_user/<int:pk>/update/", UserUpdateView.as_view(), name="userupdate")
+    path("display_user/<int:pk>/update/", UserUpdateView.as_view(), name="userupdate"),
 
-
+    path('create_round_records/<int:score_id>/', create_rounds_view, name='create_rounds')
 ]

@@ -578,6 +578,19 @@ def find_best_hole(golf_data):
         'player_best_holes': player_best
     }
 
+def get_adjusted_scores_string(data):
+    scores = []
+    
+    # Check each player in order
+    for i in range(1, 5):  # player1 to player4
+        player_key = f'player{i}'
+        if player_key in data:
+            # Get the 10th entry (index 9) from running_totals
+            adjusted_score = data[player_key]['running_totals'][9]
+            scores.append(str(adjusted_score))
+    
+    return ','.join(scores)
+
 
 
 def calculate_positions(numbers_list):
@@ -740,6 +753,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
 
     cq = Course.objects.all().get(id = score_instance.course.id)      
     buddy_queryset = Buddy.objects.all().filter(group = score_instance.group)
+    adjusted_gross = 0
 
     # Set Round Meta Parameters for passing to form
     round_meta = {}
@@ -768,6 +782,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
     round_meta["outpar"] = cq.hole1par + cq.hole2par + cq.hole3par + cq.hole4par + cq.hole5par + cq.hole6par + cq.hole7par + cq.hole8par + cq.hole9par
     round_meta["inpar"] = cq.hole10par + cq.hole11par + cq.hole12par + cq.hole13par + cq.hole14par + cq.hole15par + cq.hole16par + cq.hole17par + cq.hole18par
     round_meta["totalpar"] = round_meta["outpar"] + round_meta["inpar"]
+    round_meta["scores_posted"] = score_instance.scores_posted
 
     if score_instance.player_a_s18 is not None:     # Is the Match Completed
         round_meta["match_status"] = "Completed"
@@ -1138,32 +1153,37 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
             return JsonResponse(return_details)
     else:
         # print(player_dict)
-        # Best holes by player and Bandit of the day.
-        golf_terminology = {
-            -3: "an Albatross", 
-            -2: "an Eagle",
-            -1: "a Birdie",
-            0: "a Par",
-            1: "a Bogey",
-            2: "a Double Bogey",
-            3: "a Triple Bogey",
-            4: "a Quadruple Bogey",
-            5: "a Quintuple Bogey",
-            6: "a Sextuple Bogey",
-            7: "a Septuple Bogey",
-            8: "a Octuple Bogey"
-        }
-        result = find_best_hole(player_dict)
-        # print("OVERALL WINNER:")
-        winner = result['overall_winner']
-        # print(f"{winner['player']} scored {winner['score_vs_par']} vs par on hole {winner['hole']}")
-        round_meta["bandit_of_the_day"] = f"{winner['player']} scored {golf_terminology[winner['score_vs_par']]} on hole {winner['hole']}" 
-        # print("\nEACH PLAYER'S BEST HOLE:")
-        round_meta["player_best_hole"] = []
-        for player, best in result['player_best_holes'].items():
-            # print(f"{player}: {best['score_vs_par']} vs par on hole {best['hole']} (score: {best['gross_score']}, par: {best['par']})")
-            round_meta["player_best_hole"].append(best['hole'])
-        # print(round_meta["player_best_hole"])
+        # Best holes by player and Bandit of the day ( only calculate on completion of round).
+        if hole_no > 18:
+            golf_terminology = {
+                -3: "an Albatross", 
+                -2: "an Eagle",
+                -1: "a Birdie",
+                0: "a Par",
+                1: "a Bogey",
+                2: "a Double Bogey",
+                3: "a Triple Bogey",
+                4: "a Quadruple Bogey",
+                5: "a Quintuple Bogey",
+                6: "a Sextuple Bogey",
+                7: "a Septuple Bogey",
+                8: "a Octuple Bogey"
+            }
+            result = find_best_hole(player_dict)
+            # print("OVERALL WINNER:")
+            winner = result['overall_winner']
+            # print(f"{winner['player']} scored {winner['score_vs_par']} vs par on hole {winner['hole']}")
+            round_meta["bandit_of_the_day"] = f"{winner['player']} scored {golf_terminology[winner['score_vs_par']]} on hole {winner['hole']}" 
+            # print("\nEACH PLAYER'S BEST HOLE:")
+            round_meta["player_best_hole"] = []
+            for player, best in result['player_best_holes'].items():
+                # print(f"{player}: {best['score_vs_par']} vs par on hole {best['hole']} (score: {best['gross_score']}, par: {best['par']})")
+                round_meta["player_best_hole"].append(best['hole'])
+            # print(round_meta["player_best_hole"])
+
+            # Create a string for the adjusted scores - to be used in the page button <a href=> tag
+            round_meta["adjusted_scores_string"] = get_adjusted_scores_string(player_dict)
+            # print(round_meta["adjusted_scores_string"])
         return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "stableford_medal_positions": stableford_medal_positions, "form": form})
 
 class CardSetupView2(FormView):
@@ -1761,6 +1781,76 @@ class UserUpdateView(UpdateView):
     form_class = UserForm
     success_url = "/golf/list_users/"
     template_name = "accounts/user_form.html"
+
+# Functions to do automatic posting of adjusted_scores from a Scorecard to the Round table
+def create_rounds_view(request, score_id):
+    try:
+        # Get scores from query params: ?scores=82,79,95
+        scores_param = request.GET.get('scores', '')
+        score_list = [int(score) for score in scores_param.split(',') if score]
+        rounds = create_round_records(score_id, *score_list)
+        # Update scores_posted to True
+        Score.objects.filter(id=score_id).update(scores_posted=True)
+        return render(request, 'golf/scores_posted_success.html')
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+    
+def create_round_records(score_id, *adjusted_scores):
+    # Convert to list and integers
+    adjusted_scores = [int(score) for score in adjusted_scores]
+    
+    # Get the Score record
+    score = Score.objects.get(id=score_id)
+    
+    # Get course data for calculations
+    course = score.course
+    par = course.par
+    course_rating = course.course_rating
+    slope_rating = course.slope_rating
+    
+    # Get players based on no_of_players
+    players = []
+    for i in range(score.no_of_players):
+        if i == 0 and score.player_a:
+            players.append(score.player_a)
+        elif i == 1 and score.player_b:
+            players.append(score.player_b)
+        elif i == 2 and score.player_c:
+            players.append(score.player_c)
+        elif i == 3 and score.player_d:
+            players.append(score.player_d)
+    
+    # Create Round records
+    rounds_created = []
+    for i, player in enumerate(players):
+        # Check if player is REGULAR type - ignore the "SINGLE" useforsingleround@one.com user record
+        if player.player_type == 'REGULAR':
+            # Calculate net_score
+            net_score_value = adjusted_scores[i] - par
+            net_score = "+" + str(net_score_value) if net_score_value > 0 else str(net_score_value)
+            
+            # Calculate handicap_differential
+            handicap_diff = round((adjusted_scores[i] - course_rating) * 113 / slope_rating, 1)
+            
+            # Create Round record
+            round_record = Round.objects.create(
+                player=player,
+                date=score.date,
+                course=score.course,
+                score=adjusted_scores[i],
+                net_score=net_score,
+                handicap_differential=handicap_diff
+            )
+            rounds_created.append(round_record)
+
+            # print("player", player)
+            # print("date", score.date)
+            # print("course", course)
+            # print("score", adjusted_scores[i])
+            # print("net", net_score)
+            # print("handicap_diff",handicap_diff) 
+    
+    return rounds_created
 
 
 

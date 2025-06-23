@@ -206,12 +206,14 @@
     {% endif %} -->
 
         <!-- <hr> -->
+        <br>
         Scorecard&nbsp;({{round_meta.round_id}})
-        {% if 'colourize' not in request.get_full_path %}
+        <!-- {% if 'colourize' not in request.get_full_path %}
             &nbsp;&nbsp;<a href="colourize/"><button>&#10041</button>
         {% else %}
             &nbsp;&nbsp;<a href="/golf/display_max_hole/{{round_meta.round_id}}"><button>&#9100</button>
-        {% endif %}
+        {% endif %} -->
+        
         <table>
             <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th><th>&nbsp;A&nbsp;</th><th>&nbsp;B&nbsp;</th>
             {% if round_meta.no_of_players > 2 %}
@@ -322,7 +324,7 @@
                 {% endif %}
             </tr>
 
-            <tr><td bgcolor="DarkSlateGray">Out</td><td bgcolor="DarkSlateGray">{{round_meta.outpar}}</td><td style="border: none !important;">&nbsp;</td>
+            <tr><td {% if round_meta.hole_no > 9 %}bgcolor="DarkSlateGray"{% endif %}>Out</td><td {% if round_meta.hole_no > 9 %}bgcolor="DarkSlateGray"{% endif %}>{{round_meta.outpar}}</td><td style="border: none !important;">&nbsp;</td>
                 {% if round_meta.hole_no > 9 %}
                 <td bgcolor="DarkSlateGray">{{player_dict.player1.running_totals.5}}/{{player_dict.player1.running_totals.6}}</td>
                     {% else %}
@@ -453,7 +455,7 @@
             </tr>
                 
 
-            <tr><td bgcolor="DarkSlateGray">In</td><td bgcolor="DarkSlateGray">{{round_meta.inpar}}</td><td style="border: none !important;">&nbsp;</td>
+            <tr><td {% if round_meta.hole_no == 19 %}bgcolor="DarkSlateGray"{% endif %}>In</td><td {% if round_meta.hole_no == 19 %} bgcolor="DarkSlateGray"{% endif %}>{{round_meta.inpar}}</td><td style="border: none !important;">&nbsp;</td>
                 {% if round_meta.hole_no == 19 %}
                 <td bgcolor="DarkSlateGray">{{player_dict.player1.running_totals.7}}/{{player_dict.player1.running_totals.8}}</td>
                     {% else %}
@@ -485,7 +487,7 @@
                 <tr>
                 </tr>
 
-            <tr><td bgcolor="Black">Total</td><td bgcolor="Black">{{round_meta.totalpar}}</td><td style="border: none !important;">&nbsp;</td>
+            <tr><td {% if round_meta.hole_no == 19 %}bgcolor="Black"{% endif %}>Total</td><td {% if round_meta.hole_no == 19 %}bgcolor="Black"{% endif %}>{{round_meta.totalpar}}</td><td style="border: none !important;">&nbsp;</td>
                 {% if round_meta.hole_no == 19 %}
                 <td bgcolor="Black">{{player_dict.player1.running_totals.0}}/{{player_dict.player1.running_totals.1}}</td>
                     {% else %}
@@ -525,7 +527,7 @@
                             <td bgcolor="DarkSlateGray">{{player_dict.player4.running_totals.9}}</td>
                         {% endif %}
                     </tr>
-                    <tr></tr><tr></tr>
+                    <!-- <tr></tr><tr></tr> -->
                     <tr>
                         <td bgcolor="DarkSlateGray" colspan="3">Best Hole Today</td>
                         <td bgcolor="DarkSlateGray">{{round_meta.player_best_hole.0}}</td>
@@ -537,7 +539,7 @@
                             <td bgcolor="DarkSlateGray">{{round_meta.player_best_hole.3}}</td>
                         {% endif %}
                     </tr>
-                     <tr></tr><tr></tr>
+                     <!-- <tr></tr><tr></tr> -->
                     <tr>
                         <td bgcolor="DarkSlateGray" colspan="20">Today's Bandit: {{round_meta.bandit_of_the_day}}</td>
                     </tr>
@@ -553,6 +555,10 @@
                 <td>0</td>
             </tr>
         </table>
+        {% if round_meta.hole_no == 19 and request.user.email == round_meta.round_admin and not round_meta.scores_posted %}
+            <br>
+            <button><a href="/golf/create_round_records/{{round_meta.round_id}}/?scores={{round_meta.adjusted_scores_string}}">Update Rounds for All Players</a></button>&nbsp;
+        {% endif %}
     </h1>
     {% if round_meta.last_hole_scored == 18 and user.is_authenticated %}
         <p> </p>

@@ -185,6 +185,7 @@ class Score(models.Model):
     player_c_score_target = models.IntegerField(null=True, blank=True)
     player_d_score_target = models.IntegerField(null=True, blank=True)
     name = models.CharField(max_length=255, default='No name')
+    scores_posted = models.BooleanField(default=False)
 
     # Override the save method
     def save(self, *args, **kwargs):
