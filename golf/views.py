@@ -14,7 +14,7 @@ from django.template.loader import render_to_string
 from .forms import CourseForm, RoundForm, GolfGroupForm, BuddyForm, CardInitialForm, CardEntryForm, UserForm
 from .models import *
 
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 # from django.db.models import Sum
 from django.http import JsonResponse
 # from django.db.models import F, Func, Value, CharField
@@ -1870,6 +1870,133 @@ def create_round_records(score_id, *adjusted_scores):
             # print("handicap_diff",handicap_diff) 
     
     return rounds_created
+
+
+def card_individual(request, score_id, player_id=None):
+    # Get the score record
+    score = get_object_or_404(Score, id=score_id)
+    course = score.course
+    
+    # Build hole par and SI data
+    hole_pars = [getattr(course, f'hole{i}par') for i in range(1, 19)]
+    hole_sis = [getattr(course, f'hole{i}SI') for i in range(1, 19)]
+    
+    # Build all players info (no scores) based on no_of_players
+    all_players = []
+    for i, player in enumerate(['a', 'b', 'c', 'd']):
+        if i < score.no_of_players:  # Only include based on no_of_players
+            player_obj = getattr(score, f'player_{player}')
+            if player_obj:
+                all_players.append({
+                    'firstname': player_obj.firstname,
+                    'id': player_obj.id,
+                    'player_letter': player
+                })
+    
+    # Build all player scores and totals
+    all_player_scores = []
+    all_player_score_totals = []
+    
+    for i, player in enumerate(['a', 'b', 'c', 'd']):
+        if i < score.no_of_players:
+            player_obj = getattr(score, f'player_{player}')
+            if player_obj:
+                scores = [getattr(score, f'player_{player}_s{i}') for i in range(1, 19)]
+                
+                # Create tuples with score and highlight class
+                score_tuples = []
+                for hole_idx, player_score in enumerate(scores):
+                    if player_score is not None and player_score != 0:
+                        hole_par = getattr(course, f'hole{hole_idx + 1}par')
+                        if player_score < hole_par:
+                            highlight_class = "highlight-circle"
+                        elif player_score > hole_par:
+                            highlight_class = "highlight-square"
+                        else:
+                            highlight_class = "highlight-none"
+                        score_tuples.append((player_score, highlight_class))
+                    else:
+                        score_tuples.append(("", "highlight-none"))
+                
+                all_player_scores.append(score_tuples)
+                
+                # Calculate totals for this player
+                valid_scores = [s for s in scores if s is not None]
+                front_nine = [s for s in scores[:9] if s is not None]
+                back_nine = [s for s in scores[9:] if s is not None]
+                
+                all_player_score_totals.append({
+                    'front_nine': sum(front_nine),
+                    'back_nine': sum(back_nine),
+                    'total': sum(valid_scores)
+                })
+                
+                # Calculate over/under par string
+                total_score = sum(valid_scores)
+                par_difference = total_score - course.par
+                if par_difference > 0:
+                    over_under_par = f"+{par_difference}"
+                elif par_difference < 0:
+                    over_under_par = str(par_difference)  # Already has minus sign
+                else:
+                    over_under_par = "Level"
+                
+                all_player_score_totals[-1]['over_under_par'] = over_under_par
+    
+    # Set legacy variables for backward compatibility
+    player_scores = [t[0] for t in all_player_scores[0]] if all_player_scores else []
+    player_score_totals = all_player_score_totals[0] if all_player_score_totals else {}
+    
+    holes_data = {
+        'pars': hole_pars,
+        'sis': hole_sis
+    }
+    
+    # Calculate totals for each player
+    player_totals = {}
+    for player in ['a', 'b', 'c', 'd']:
+        player_obj = getattr(score, f'player_{player}')
+        if player_obj:  # Only calculate if player exists
+            total_score = sum(
+                getattr(score, f'player_{player}_s{hole}') or 0 
+                for hole in range(1, 19)
+            )
+            player_totals[f'player_{player}'] = {
+                'name': player_obj.get_full_name() or player_obj.username,
+                'handicap': getattr(score, f'player_{player}_course_hcp'),
+                'total_score': total_score,
+                'target': getattr(score, f'player_{player}_score_target')
+            }
+    
+    context = {
+        'score': score,
+        'score_id': score.id,
+        'course': course,
+        'holes_data': holes_data,
+        'player_scores': player_scores,
+        'player_score_totals': player_score_totals,
+        'all_player_scores': all_player_scores,
+        'all_player_score_totals': all_player_score_totals,
+        'all_players': all_players,
+        'number_of_players': score.no_of_players,
+        'player_totals': player_totals,
+        'front_nine_par': sum(getattr(course, f'hole{i}par') for i in range(1, 10)),
+        'back_nine_par': sum(getattr(course, f'hole{i}par') for i in range(10, 19)),
+        'total_par': course.par
+    }
+
+    # print(score)
+    # print(course)
+    # print(holes_data)
+    # print(player_scores)
+    # print(player_score_totals)
+    # print(all_player_scores)
+    # print(all_player_score_totals)
+
+    # print(all_players)
+    # print(player_totals)
+    
+    return render(request, 'golf/card_individual.html', context)
 
 
 

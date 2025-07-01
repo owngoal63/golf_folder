@@ -1,0 +1,763 @@
+<!-- templates/golf/card_individual.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golf Scorecard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            /* Approximating the green grass background from the image */
+            background-color: #1a4314; /* Dark green */
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .scorecard-container {
+            background-color: #212121; /* Very dark gray, almost black, for the scorecard */
+            border-radius: 0.5rem; /* Rounded corners for the main container */
+            overflow: hidden; /* Ensures rounded corners apply to content */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+            display: flex; /* Use flexbox for the main layout */
+            flex-direction: column; /* Main container always columns */
+            max-width: 100%; /* Ensure it fits smaller screens */
+            width: fit-content; /* Adjust width to content based on content area */
+        }
+
+        /* Container for tables and summary panel to control row/column layout */
+        .content-area {
+            display: flex;
+            flex-direction: column; /* Default to column for small screens */
+            flex-grow: 1; /* Allows it to take available space */
+        }
+
+        @media (min-width: 768px) {
+            .content-area {
+                flex-direction: row; /* Row layout for larger screens */
+            }
+        }
+
+        /* Base styles for table cells */
+        .scorecard-table th, .scorecard-table td {
+            padding: 0.75rem 0.5rem; /* Padding for cells */
+            text-align: center;
+            color: #ffffff; /* White text */
+            font-weight: 600; /* Semi-bold */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle white border */
+            border-right: 1px solid rgba(255, 255, 255, 0.1); /* Subtle white border */
+            white-space: nowrap; /* Prevent numbers from wrapping */
+        }
+
+        .scorecard-table th:last-child, .scorecard-table td:last-child {
+            border-right: none; /* No right border on the last column */
+        }
+        .scorecard-table tr:last-child td {
+            border-bottom: none; /* No bottom border on the last row */
+        }
+
+        /* Specific styles for HOLE row header */
+        .scorecard-table th:first-child {
+             text-align: left;
+             padding-left: 1.5rem;
+             border-right: 1px solid rgba(255, 255, 255, 0.2); /* Slightly stronger border for HOLE column */
+        }
+        .scorecard-table td:first-child {
+             text-align: left;
+             padding-left: 1.5rem;
+             border-right: 1px solid rgba(255, 255, 255, 0.2); /* Slightly stronger border for first data column */
+        }
+
+        /* Fixed width for numeric columns to ensure uniformity */
+        .scorecard-table th:not(:first-child),
+        .scorecard-table td:not(:first-child) {
+            width: 4.0rem; /* Increased width to accommodate 'FRONT' and 'BACK' better */
+            max-width: 4.0rem; /* Ensure it doesn't expand beyond this */
+        }
+
+        /* Style for highlighted numbers (circles and squares) */
+        .highlight-circle, .highlight-square {
+            display: inline-flex; /* Use inline-flex for centering content */
+            align-items: center;
+            justify-content: center;
+            width: 1.75rem; /* w-7 */
+            height: 1.75rem; /* h-7 */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 700; /* bold */
+            color: #ffffff;
+            border: 2px solid #fbbf24; /* Amber-400 for the yellow border */
+        }
+
+        .highlight-circle {
+            border-radius: 9999px; /* rounded-full */
+        }
+
+        .highlight-square {
+            border-radius: 0.25rem; /* rounded-md or sm */
+        }
+
+        .summary-panel {
+            min-width: 150px; /* Adjust as needed */
+            background-color: #2f2f2f; /* Slightly lighter dark gray for summary */
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            text-align: center;
+            border-radius: 0 0.5rem 0.5rem 0; /* Rounded corners on right side for larger screens */
+        }
+
+        @media (max-width: 767px) {
+            .summary-panel {
+                border-radius: 0 0 0.5rem 0.5rem; /* Rounded corners on bottom for smaller screens */
+            }
+        }
+
+        .summary-panel .label {
+            font-size: 0.875rem; /* text-sm */
+            color: #a0a0a0; /* Lighter gray for labels */
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .summary-panel .value {
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 700; /* bold */
+            color: #ffffff;
+            line-height: 1; /* Adjust line height to prevent too much space */
+        }
+
+        .summary-panel .score-diff {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700; /* bold */
+            color: #fbbf24; /* Amber-400 for the negative score */
+            margin-top: 1rem;
+        }
+
+        .summary-item {
+            margin-bottom: 1.5rem; /* Space between summary items */
+        }
+        .summary-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Styles for new elements - Adjusted for smaller header */
+        .course-header {
+            width: 100%;
+            padding: 0.75rem 0; /* Reduced padding */
+            text-align: center;
+            background-color: #212121; /* Match scorecard background */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .course-name {
+            font-size: 1.5rem; /* Slightly reduced font size */
+            font-weight: 700; /* bold */
+            color: #ffffff;
+            margin-bottom: 0.5rem; /* Reduced margin */
+        }
+
+        .player-tabs-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.35rem; /* Reduced gap between tabs */
+            margin-bottom: 0.75rem; /* Reduced margin */
+            padding: 0 1rem; /* Horizontal padding for tabs */
+            flex-wrap: wrap; /* Allow tabs to wrap on smaller screens */
+        }
+
+        .player-tab {
+            background-color: #3a3a3a; /* Darker gray for inactive tabs */
+            color: #ffffff;
+            padding: 0.4rem 0.8rem; /* Reduced padding */
+            border-radius: 0.25rem; /* Slightly rounded tabs */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            border: 1px solid transparent; /* Default border */
+            font-size: 0.8rem; /* Slightly reduced font size */
+        }
+
+        .player-tab:hover {
+            background-color: #4a4a4a; /* Lighter hover background */
+            transform: translateY(-1px); /* Slight lift on hover */
+        }
+
+        .player-tab.active {
+            background-color: #fbbf24; /* Amber-400 for active tab */
+            color: #212121; /* Dark text for active tab */
+            border-color: #fbbf24; /* Matching border color */
+        }
+
+        .current-player-display {
+            width: 100%;
+            text-align: center;
+            padding-bottom: 0.75rem; /* Reduced padding */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #212121;
+        }
+
+        #current-player-name {
+            font-size: 1.25rem; /* Slightly reduced font size */
+            font-weight: 600; /* semi-bold */
+            color: #fbbf24; /* Amber-300 */
+        }
+
+        /* Styles for player layers */
+        .player-scorecard-layer {
+            display: none; /* Hidden by default */
+            flex-direction: column; /* Content inside layer will be column on small screens */
+            flex-grow: 1;
+        }
+
+        .player-scorecard-layer.active {
+            display: flex; /* Show active layer */
+        }
+
+        @media (min-width: 768px) {
+            .player-scorecard-layer.active {
+                flex-direction: row; /* Content inside layer will be row on large screens */
+            }
+        }
+
+        /* Back button specific styles */
+        .back-button {
+            position: absolute;
+            top: 0.75rem; /* Aligned with the top padding of the header */
+            left: 1rem; /* Padding from the left edge */
+            background-color: #3a3a3a; /* Match inactive tab background */
+            color: #ffffff;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem; /* Space between arrow and text */
+        }
+
+        .back-button:hover {
+            background-color: #4a4a4a;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="scorecard-container">
+        <!-- Course Name & Player Display (Always at top, full width) -->
+        <div class="course-header">
+            <button class="back-button" onclick="history.back()">
+                &larr; Back
+            </button>
+            <h2 class="course-name">{{course}}</h2>
+            <div class="player-tabs-container">
+                <button class="player-tab" data-player="{{all_players.0.firstname}}">{{all_players.0.firstname}}</button>
+                <button class="player-tab" data-player="{{all_players.1.firstname}}">{{all_players.1.firstname}}</button>
+                {% if number_of_players > 2 %}
+                    <button class="player-tab" data-player="{{all_players.2.firstname}}">{{all_players.2.firstname}}</button>
+                {% endif %}
+                {% if number_of_players > 3 %}
+                    <button class="player-tab" data-player="{{all_players.3.firstname}}">{{all_players.3.firstname}}</button>
+                {% endif %}
+            </div>
+            <div class="current-player-display">
+                <h3 id="current-player-name"></h3>
+            </div>
+        </div>
+
+        <!-- Main Content Area - Contains all player layers -->
+        <div class="content-area">
+            <!-- First Player Scorecard Layer -->
+            <div class="player-scorecard-layer" data-player="{{all_players.0.firstname}}">
+                <div class="scorecard-table flex-grow">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th>HOLE</th>
+                                <th>1</th>
+                                <th>2</th>
+                                <th>3</th>
+                                <th>4</th>
+                                <th>5</th>
+                                <th>6</th>
+                                <th>7</th>
+                                <th>8</th>
+                                <th>9</th>
+                                <th>OUT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PAR</td>
+                                <td>{{holes_data.pars.0}}</td>
+                                <td>{{holes_data.pars.1}}</td>
+                                <td>{{holes_data.pars.2}}</td>
+                                <td>{{holes_data.pars.3}}</td>
+                                <td>{{holes_data.pars.4}}</td>
+                                <td>{{holes_data.pars.5}}</td>
+                                <td>{{holes_data.pars.6}}</td>
+                                <td>{{holes_data.pars.7}}</td>
+                                <td>{{holes_data.pars.8}}</td>
+                                <td>{{front_nine_par}}</td>
+                            </tr>
+                            <tr>
+                                <td>SCORE</td>
+                                <td><div class="{{ all_player_scores.0.0.1 }}">{{ all_player_scores.0.0.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.1.1 }}">{{ all_player_scores.0.1.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.2.1 }}">{{ all_player_scores.0.2.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.3.1 }}">{{ all_player_scores.0.3.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.4.1 }}">{{ all_player_scores.0.4.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.5.1 }}">{{ all_player_scores.0.5.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.6.1 }}">{{ all_player_scores.0.6.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.7.1 }}">{{ all_player_scores.0.7.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.8.1 }}">{{ all_player_scores.0.8.0 }}</div></td>
+                                <td>{{ all_player_score_totals.0.front_nine }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="w-full border-collapse mt-4">
+                        <thead>
+                            <tr>
+                                <th>HOLE</th>
+                                <th>10</th>
+                                <th>11</th>
+                                <th>12</th>
+                                <th>13</th>
+                                <th>14</th>
+                                <th>15</th>
+                                <th>16</th>
+                                <th>17</th>
+                                <th>18</th>
+                                <th>BACK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PAR</td>
+                                <td>{{holes_data.pars.9}}</td>
+                                <td>{{holes_data.pars.10}}</td>
+                                <td>{{holes_data.pars.11}}</td>
+                                <td>{{holes_data.pars.12}}</td>
+                                <td>{{holes_data.pars.13}}</td>
+                                <td>{{holes_data.pars.14}}</td>
+                                <td>{{holes_data.pars.15}}</td>
+                                <td>{{holes_data.pars.16}}</td>
+                                <td>{{holes_data.pars.17}}</td>
+                                <td>{{back_nine_par}}</td>
+                            </tr>
+                            <tr>
+                                <td>SCORE</td>
+                                <td><div class="{{ all_player_scores.0.9.1 }}">{{ all_player_scores.0.9.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.10.1 }}">{{ all_player_scores.0.10.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.11.1 }}">{{ all_player_scores.0.11.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.12.1 }}">{{ all_player_scores.0.12.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.13.1 }}">{{ all_player_scores.0.13.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.14.1 }}">{{ all_player_scores.0.14.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.15.1 }}">{{ all_player_scores.0.15.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.16.1 }}">{{ all_player_scores.0.16.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.0.17.1 }}">{{ all_player_scores.0.17.0 }}</div></td>
+                                <td>{{ all_player_score_totals.0.back_nine }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="summary-panel">
+                    <div class="summary-item">
+                        <div class="label">PAR</div>
+                        <div class="value">{{ total_par }}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">TOTAL</div>
+                        <div class="value">{{ all_player_score_totals.0.total }}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="score-diff" style="color: #fbbf24;">{{ all_player_score_totals.0.over_under_par }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Player Scorecard Layer -->
+            <div class="player-scorecard-layer" data-player="{{all_players.1.firstname}}">
+                <div class="scorecard-table flex-grow">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th>HOLE</th>
+                                <th>1</th>
+                                <th>2</th>
+                                <th>3</th>
+                                <th>4</th>
+                                <th>5</th>
+                                <th>6</th>
+                                <th>7</th>
+                                <th>8</th>
+                                <th>9</th>
+                                <th>OUT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PAR</td>
+                                <td>{{holes_data.pars.0}}</td>
+                                <td>{{holes_data.pars.1}}</td>
+                                <td>{{holes_data.pars.2}}</td>
+                                <td>{{holes_data.pars.3}}</td>
+                                <td>{{holes_data.pars.4}}</td>
+                                <td>{{holes_data.pars.5}}</td>
+                                <td>{{holes_data.pars.6}}</td>
+                                <td>{{holes_data.pars.7}}</td>
+                                <td>{{holes_data.pars.8}}</td>
+                                <td>{{front_nine_par}}</td>
+                            </tr>
+                            <tr>
+                                <td>SCORE</td>
+                                <td><div class="{{ all_player_scores.1.0.1 }}">{{ all_player_scores.1.0.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.1.1 }}">{{ all_player_scores.1.1.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.2.1 }}">{{ all_player_scores.1.2.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.3.1 }}">{{ all_player_scores.1.3.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.4.1 }}">{{ all_player_scores.1.4.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.5.1 }}">{{ all_player_scores.1.5.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.6.1 }}">{{ all_player_scores.1.6.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.7.1 }}">{{ all_player_scores.1.7.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.8.1 }}">{{ all_player_scores.1.8.0 }}</div></td>
+                                <td>{{ all_player_score_totals.1.front_nine }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="w-full border-collapse mt-4">
+                        <thead>
+                            <tr>
+                                <th>HOLE</th>
+                                <th>10</th>
+                                <th>11</th>
+                                <th>12</th>
+                                <th>13</th>
+                                <th>14</th>
+                                <th>15</th>
+                                <th>16</th>
+                                <th>17</th>
+                                <th>18</th>
+                                <th>BACK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PAR</td>
+                                <td>{{holes_data.pars.9}}</td>
+                                <td>{{holes_data.pars.10}}</td>
+                                <td>{{holes_data.pars.11}}</td>
+                                <td>{{holes_data.pars.12}}</td>
+                                <td>{{holes_data.pars.13}}</td>
+                                <td>{{holes_data.pars.14}}</td>
+                                <td>{{holes_data.pars.15}}</td>
+                                <td>{{holes_data.pars.16}}</td>
+                                <td>{{holes_data.pars.17}}</td>
+                                <td>{{back_nine_par}}</td>
+                            </tr>
+                            <tr>
+                                <td>SCORE</td>
+                                <td><div class="{{ all_player_scores.1.9.1 }}">{{ all_player_scores.1.9.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.10.1 }}">{{ all_player_scores.1.10.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.11.1 }}">{{ all_player_scores.1.11.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.12.1 }}">{{ all_player_scores.1.12.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.13.1 }}">{{ all_player_scores.1.13.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.14.1 }}">{{ all_player_scores.1.14.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.15.1 }}">{{ all_player_scores.1.15.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.16.1 }}">{{ all_player_scores.1.16.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.1.17.1 }}">{{ all_player_scores.1.17.0 }}</div></td>
+                                <td>{{ all_player_score_totals.1.back_nine }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="summary-panel">
+                    <div class="summary-item">
+                        <div class="label">PAR</div>
+                        <div class="value">{{ total_par }}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">TOTAL</div>
+                        <div class="value">{{ all_player_score_totals.1.total }}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="score-diff" style="color: #fbbf24;;">{{ all_player_score_totals.1.over_under_par }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Third Player Scorecard Layer -->
+            <div class="player-scorecard-layer" data-player="{{all_players.2.firstname}}">
+                <div class="scorecard-table flex-grow">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th>HOLE</th>
+                                <th>1</th>
+                                <th>2</th>
+                                <th>3</th>
+                                <th>4</th>
+                                <th>5</th>
+                                <th>6</th>
+                                <th>7</th>
+                                <th>8</th>
+                                <th>9</th>
+                                <th>OUT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PAR</td>
+                                <td>{{holes_data.pars.0}}</td>
+                                <td>{{holes_data.pars.1}}</td>
+                                <td>{{holes_data.pars.2}}</td>
+                                <td>{{holes_data.pars.3}}</td>
+                                <td>{{holes_data.pars.4}}</td>
+                                <td>{{holes_data.pars.5}}</td>
+                                <td>{{holes_data.pars.6}}</td>
+                                <td>{{holes_data.pars.7}}</td>
+                                <td>{{holes_data.pars.8}}</td>
+                                <td>{{front_nine_par}}</td>
+                            </tr>
+                            <tr>
+                                <td>SCORE</td>
+                                <td><div class="{{ all_player_scores.2.0.1 }}">{{ all_player_scores.2.0.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.1.1 }}">{{ all_player_scores.2.1.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.2.1 }}">{{ all_player_scores.2.2.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.3.1 }}">{{ all_player_scores.2.3.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.4.1 }}">{{ all_player_scores.2.4.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.5.1 }}">{{ all_player_scores.2.5.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.6.1 }}">{{ all_player_scores.2.6.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.7.1 }}">{{ all_player_scores.2.7.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.8.1 }}">{{ all_player_scores.2.8.0 }}</div></td>
+                                <td>{{ all_player_score_totals.2.front_nine }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="w-full border-collapse mt-4">
+                        <thead>
+                            <tr>
+                                <th>HOLE</th>
+                                <th>10</th>
+                                <th>11</th>
+                                <th>12</th>
+                                <th>13</th>
+                                <th>14</th>
+                                <th>15</th>
+                                <th>16</th>
+                                <th>17</th>
+                                <th>18</th>
+                                <th>BACK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PAR</td>
+                                <td>{{holes_data.pars.9}}</td>
+                                <td>{{holes_data.pars.10}}</td>
+                                <td>{{holes_data.pars.11}}</td>
+                                <td>{{holes_data.pars.12}}</td>
+                                <td>{{holes_data.pars.13}}</td>
+                                <td>{{holes_data.pars.14}}</td>
+                                <td>{{holes_data.pars.15}}</td>
+                                <td>{{holes_data.pars.16}}</td>
+                                <td>{{holes_data.pars.17}}</td>
+                                <td>{{back_nine_par}}</td>
+                            </tr>
+                            <tr>
+                                <td>SCORE</td>
+                                <td><div class="{{ all_player_scores.2.9.1 }}">{{ all_player_scores.2.9.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.10.1 }}">{{ all_player_scores.2.10.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.11.1 }}">{{ all_player_scores.2.11.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.12.1 }}">{{ all_player_scores.2.12.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.13.1 }}">{{ all_player_scores.2.13.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.14.1 }}">{{ all_player_scores.2.14.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.15.1 }}">{{ all_player_scores.2.15.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.16.1 }}">{{ all_player_scores.2.16.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.2.17.1 }}">{{ all_player_scores.2.17.0 }}</div></td>
+                                <td>{{ all_player_score_totals.2.back_nine }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="summary-panel">
+                    <div class="summary-item">
+                        <div class="label">PAR</div>
+                        <div class="value">{{ total_par }}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">TOTAL</div>
+                        <div class="value">{{ all_player_score_totals.2.total }}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="score-diff" style="color: #fbbf24;;">{{ all_player_score_totals.2.over_under_par }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fourth Player Scorecard Layer -->
+            <div class="player-scorecard-layer" id="diana-scorecard-layer" data-player="{{all_players.3.firstname}}">
+                <div class="scorecard-table flex-grow">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th>HOLE</th>
+                                <th>1</th>
+                                <th>2</th>
+                                <th>3</th>
+                                <th>4</th>
+                                <th>5</th>
+                                <th>6</th>
+                                <th>7</th>
+                                <th>8</th>
+                                <th>9</th>
+                                <th>OUT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PAR</td>
+                                <td>{{holes_data.pars.0}}</td>
+                                <td>{{holes_data.pars.1}}</td>
+                                <td>{{holes_data.pars.2}}</td>
+                                <td>{{holes_data.pars.3}}</td>
+                                <td>{{holes_data.pars.4}}</td>
+                                <td>{{holes_data.pars.5}}</td>
+                                <td>{{holes_data.pars.6}}</td>
+                                <td>{{holes_data.pars.7}}</td>
+                                <td>{{holes_data.pars.8}}</td>
+                                <td>{{front_nine_par}}</td>
+                            </tr>
+                            <tr>
+                                <td>SCORE</td>
+                                <td><div class="{{ all_player_scores.3.0.1 }}">{{ all_player_scores.3.0.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.1.1 }}">{{ all_player_scores.3.1.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.2.1 }}">{{ all_player_scores.3.2.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.3.1 }}">{{ all_player_scores.3.3.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.4.1 }}">{{ all_player_scores.3.4.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.5.1 }}">{{ all_player_scores.3.5.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.6.1 }}">{{ all_player_scores.3.6.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.7.1 }}">{{ all_player_scores.3.7.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.8.1 }}">{{ all_player_scores.3.8.0 }}</div></td>
+                                <td>{{ all_player_score_totals.3.front_nine }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="w-full border-collapse mt-4">
+                        <thead>
+                            <tr>
+                                <th>HOLE</th>
+                                <th>10</th>
+                                <th>11</th>
+                                <th>12</th>
+                                <th>13</th>
+                                <th>14</th>
+                                <th>15</th>
+                                <th>16</th>
+                                <th>17</th>
+                                <th>18</th>
+                                <th>BACK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PAR</td>
+                                <td>{{holes_data.pars.9}}</td>
+                                <td>{{holes_data.pars.10}}</td>
+                                <td>{{holes_data.pars.11}}</td>
+                                <td>{{holes_data.pars.12}}</td>
+                                <td>{{holes_data.pars.13}}</td>
+                                <td>{{holes_data.pars.14}}</td>
+                                <td>{{holes_data.pars.15}}</td>
+                                <td>{{holes_data.pars.16}}</td>
+                                <td>{{holes_data.pars.17}}</td>
+                                <td>{{back_nine_par}}</td>
+                            </tr>
+                            <tr>
+                                <td>SCORE</td>
+                                <td><div class="{{ all_player_scores.3.9.1 }}">{{ all_player_scores.3.9.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.10.1 }}">{{ all_player_scores.3.10.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.11.1 }}">{{ all_player_scores.3.11.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.12.1 }}">{{ all_player_scores.3.12.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.13.1 }}">{{ all_player_scores.3.13.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.14.1 }}">{{ all_player_scores.3.14.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.15.1 }}">{{ all_player_scores.3.15.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.16.1 }}">{{ all_player_scores.3.16.0 }}</div></td>
+                                <td><div class="{{ all_player_scores.3.17.1 }}">{{ all_player_scores.3.17.0 }}</div></td>
+                                <td>{{ all_player_score_totals.3.back_nine }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="summary-panel">
+                    <div class="summary-item">
+                        <div class="label">PAR</div>
+                        <div class="value">{{ total_par }}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">TOTAL</div>
+                        <div class="value">{{ all_player_score_totals.3.total }}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="score-diff" style="color: #fbbf24;">{{ all_player_score_totals.3.over_under_par }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const playerTabs = document.querySelectorAll('.player-tab');
+            const currentPlayerNameDisplay = document.getElementById('current-player-name');
+            const playerScorecardLayers = document.querySelectorAll('.player-scorecard-layer');
+
+            // Function to set the active tab and show the corresponding player layer
+            const setActivePlayerTab = (playerName) => {
+                // Update active tab styling
+                playerTabs.forEach(tab => {
+                    if (tab.dataset.player === playerName) {
+                        tab.classList.add('active');
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                });
+
+                // Update displayed player name
+                currentPlayerNameDisplay.textContent = `${playerName}'s Scorecard`;
+
+                // Show/hide player scorecard layers
+                playerScorecardLayers.forEach(layer => {
+                    if (layer.dataset.player === playerName) {
+                        layer.classList.add('active'); // This will set display: flex
+                    } else {
+                        layer.classList.remove('active'); // This will set display: none
+                    }
+                });
+            };
+
+            // Initial load: Set Alice as active and show her scores
+            setActivePlayerTab('{{all_players.0.firstname}}');
+
+            // Add click event listeners to tabs
+            playerTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    setActivePlayerTab(tab.dataset.player);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

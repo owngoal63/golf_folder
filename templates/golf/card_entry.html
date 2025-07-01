@@ -207,7 +207,8 @@
 
         <!-- <hr> -->
         <br>
-        Scorecard&nbsp;({{round_meta.round_id}})
+        <a href="/golf/card_individual/{{round_meta.round_id}}/"><button>Individual Scorecards&nbsp;({{round_meta.round_id}})</button></a>
+        
         <!-- {% if 'colourize' not in request.get_full_path %}
             &nbsp;&nbsp;<a href="colourize/"><button>&#10041</button>
         {% else %}
@@ -567,7 +568,7 @@
             <button><a href="/golf/trackmatch/{{round_meta.round_id}}/19/Siri/True/Group/">To Group</a></button><br>
         </h1>
 
-    {% endif %}  
+    {% endif %}
 
 </div>
 
