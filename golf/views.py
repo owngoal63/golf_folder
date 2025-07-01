@@ -1992,7 +1992,7 @@ def card_individual(request, score_id, player_id=None):
     # print(holes_data)
     # print(player_scores)
     # print(player_score_totals)
-    print(all_player_scores)
+    # print(all_player_scores)
     # print(all_player_score_totals)
 
     # print(all_players)
