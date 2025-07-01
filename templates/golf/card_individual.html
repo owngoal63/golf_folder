@@ -29,6 +29,9 @@
             flex-direction: column; /* Main container always columns */
             max-width: 100%; /* Ensure it fits smaller screens */
             width: fit-content; /* Adjust width to content based on content area */
+            /* Adjusted for scaling the entire scorecard */
+            transform: scale(0.9); /* Scale down to 90% */
+            transform-origin: center; /* Scale from the center */
         }
 
         /* Container for tables and summary panel to control row/column layout */
@@ -102,6 +105,12 @@
             border-radius: 0.25rem; /* rounded-md or sm */
         }
 
+        /* New style for double box */
+        .highlight-double-square {
+            border-radius: 0.25rem; /* Match square for consistency */
+            box-shadow: 0 0 0 4px #fbbf24; /* Outer border effect */
+        }
+
         .summary-panel {
             min-width: 150px; /* Adjust as needed */
             background-color: #2f2f2f; /* Slightly lighter dark gray for summary */
@@ -154,6 +163,7 @@
             text-align: center;
             background-color: #212121; /* Match scorecard background */
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative; /* Needed for absolute positioning of back button */
         }
 
         .course-name {
@@ -250,6 +260,7 @@
             transform: translateY(-1px);
         }
     </style>
+
 </head>
 <body>
     <div class="scorecard-container">

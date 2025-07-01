@@ -1910,8 +1910,10 @@ def card_individual(request, score_id, player_id=None):
                         hole_par = getattr(course, f'hole{hole_idx + 1}par')
                         if player_score < hole_par:
                             highlight_class = "highlight-circle"
-                        elif player_score > hole_par:
+                        elif player_score == hole_par + 1:
                             highlight_class = "highlight-square"
+                        elif player_score > hole_par + 1:
+                            highlight_class = "highlight-double-square"
                         else:
                             highlight_class = "highlight-none"
                         score_tuples.append((player_score, highlight_class))
@@ -1990,7 +1992,7 @@ def card_individual(request, score_id, player_id=None):
     # print(holes_data)
     # print(player_scores)
     # print(player_score_totals)
-    # print(all_player_scores)
+    print(all_player_scores)
     # print(all_player_score_totals)
 
     # print(all_players)
