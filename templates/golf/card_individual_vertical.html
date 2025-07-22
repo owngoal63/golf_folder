@@ -1,0 +1,297 @@
+<!-- templates/golf/card_individual_vertical.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Golf Scorecard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a4314; /* Dark green background */
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center; /* Keep horizontal centering */
+            align-items: flex-start; /* Align items to the top */
+            height: 100vh; /* Use height instead of min-height for consistent padding behavior */
+            padding: 1rem; /* Revert body padding to default, use margin-top on box */
+            box-sizing: border-box;
+        }
+
+        .scorecard-box {
+            background-color: #212121; /* Dark background for the box */
+            border-radius: 0.5rem; /* Rounded corners */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Subtle shadow */
+            padding: 0.75rem; /* Reduced overall padding inside the box */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: fit-content; /* Adjust width to content */
+            min-width: 180px; /* Slightly reduced min-width */
+            /* Removed transform: scale() */
+            margin-top: 10px; /* Directly control distance from top of the body */
+        }
+
+        .scorecard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 0.75rem; /* Reduced margin */
+            padding-bottom: 0.4rem; /* Reduced padding */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem; /* Reduced gap */
+        }
+
+        .player-logo {
+            width: 1.8rem; /* Reduced size */
+            height: 1.8rem; /* Reduced size */
+            background-color: #fbbf24; /* Yellow circle background */
+            border-radius: 9999px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem; /* Reduced font size */
+            font-weight: bold;
+            color: #000000; /* Black text for logo */
+        }
+
+        .player-name {
+            color: #ffffff;
+            font-size: 1.1rem; /* Reduced font size */
+            font-weight: 700;
+        }
+
+        .total-score {
+            background-color: #dc3545; /* Red background for total score */
+            color: #ffffff;
+            padding: 0.2rem 0.6rem; /* Reduced padding */
+            border-radius: 0.2rem; /* Reduced border-radius */
+            font-weight: 700;
+            font-size: 1.1rem; /* Reduced font size */
+        }
+
+        .score-columns {
+            display: flex;
+            gap: 0;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .score-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem; /* Reduced gap */
+            padding: 0 0.4rem; /* Reduced padding */
+        }
+
+        /* Vertical line between columns */
+        .score-column:first-child {
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .column-label {
+            color: #a0a0a0; /* Light grey for labels */
+            font-size: 0.8rem; /* Reduced font size */
+            font-weight: 600;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 0.4rem; /* Reduced margin */
+        }
+
+        /* Base style for all score items */
+        .score-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem; /* Reduced size */
+            height: 2rem; /* Reduced size */
+            font-size: 0.9rem; /* Reduced font size */
+            font-weight: 700;
+            border-radius: 9999px;
+            border: 2px solid transparent;
+            box-sizing: border-box;
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Score-specific styles */
+        .score-worse-than-double-bogey {
+            background-color: #0056b3;
+            color: #ffffff;
+        }
+
+        .score-double-bogey {
+            background-color: #0056b3;
+            color: #ffffff;
+        }
+
+        .score-eagle {
+            background-color: #ffc107;
+            color: #000000;
+        }
+
+        .score-par {
+            background-color: #ffffff;
+            color: #a0a0a0;
+        }
+
+        .score-birdie {
+            background-color: #dc3545;
+            color: #ffffff;
+        }
+
+        .score-bogey {
+            background-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .score-not-played {
+            background-color: transparent;
+            color: #a0a0a0;
+            border: none;
+            border-radius: 0;
+            font-weight: 400;
+            width: 2rem; /* Adjusted to new score-item size */
+            height: 2rem; /* Adjusted to new score-item size */
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Double circle effect for scores worse than double bogey */
+        .score-worse-than-double-bogey.double-circle {
+            box-shadow: 0 0 0 3px #0056b3; /* Adjusted shadow spread */
+            background-clip: padding-box;
+        }
+
+        .score-total-container {
+            margin-top: 0.4rem; /* Reduced margin */
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.4rem 0; /* Reduced padding */
+        }
+
+        .score-total-circle {
+            background-color: transparent;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            border-radius: 9999px;
+            width: 2rem; /* Adjusted to new score-item size */
+            height: 2rem; /* Adjusted to new score-item size */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.9rem; /* Reduced font size */
+        }
+
+        .score-total-no-circle {
+            background-color: transparent; /* No fill */
+            color: #a0a0a0; /* Grey text */
+            border: none; /* No border */
+            border-radius: 0; /* No border-radius (no circle) */
+            width: 2rem; /* Match other score items */
+            height: 2rem; /* Match other score items */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.9rem; /* Reduced font size */
+        }
+
+        .today-total {
+            color: #ffffff;
+            font-size: 1rem; /* Reduced font size */
+            font-weight: 700;
+            margin-top: 0.75rem; /* Reduced margin */
+            padding-top: 0.4rem; /* Reduced padding */
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Back button specific styles */
+        .back-button {
+            position: absolute;
+            top: 0.75rem; /* Aligned with the top padding of the header */
+            left: 1rem; /* Padding from the left edge */
+            background-color: #3a3a3a; /* Match inactive tab background */
+            color: #ffffff;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem; /* Space between arrow and text */
+        }
+
+        .back-button:hover {
+            background-color: #4a4a4a;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="scorecard-box">
+        <button class="back-button" onclick="history.back()">
+                &larr; Back
+            </button>
+        <div class="scorecard-header">
+            <div class="player-info">
+                 <span class="player-name">{{player_name}}</span>
+            </div>
+            <div class="total-score">{{ overall_vs_par }}</div>
+        </div>
+
+        <div class="score-columns">
+            <div class="score-column">
+                <span class="column-label">Front 9</span>
+                <div class="{{front_nine.0.1}}">{{front_nine.0.0}}</div>
+                <div class="{{front_nine.1.1}}">{{front_nine.1.0}}</div>
+                <div class="{{front_nine.2.1}}">{{front_nine.2.0}}</div>
+                <div class="{{front_nine.3.1}}">{{front_nine.3.0}}</div>
+                <div class="{{front_nine.4.1}}">{{front_nine.4.0}}</div>
+                <div class="{{front_nine.5.1}}">{{front_nine.5.0}}</div>
+                <div class="{{front_nine.6.1}}">{{front_nine.6.0}}</div>
+                <div class="{{front_nine.7.1}}">{{front_nine.7.0}}</div>
+                <div class="{{front_nine.8.1}}">{{front_nine.8.0}}</div>
+                <div class="score-total-container">
+                    <div class="{{front_nine_total.0}}">{{front_nine_total.1}}</div>
+                </div>
+            </div>
+
+            <div class="score-column">
+                <span class="column-label">Back 9</span>
+                <div class="{{back_nine.0.1}}">{{back_nine.0.0}}</div>
+                <div class="{{back_nine.1.1}}">{{back_nine.1.0}}</div>
+                <div class="{{back_nine.2.1}}">{{back_nine.2.0}}</div>
+                <div class="{{back_nine.3.1}}">{{back_nine.3.0}}</div>
+                <div class="{{back_nine.4.1}}">{{back_nine.4.0}}</div>
+                <div class="{{back_nine.5.1}}">{{back_nine.5.0}}</div>
+                <div class="{{back_nine.6.1}}">{{back_nine.6.0}}</div>
+                <div class="{{back_nine.7.1}}">{{back_nine.7.0}}</div>
+                <div class="{{back_nine.8.1}}">{{back_nine.8.0}}</div>
+                <div class="score-total-container">
+                    <div class="{{back_nine_total.0}}">{{back_nine_total.1}}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="today-total">{{running_total.0}}: {{running_total.1}}</div>
+    </div>
+</body>
+</html>

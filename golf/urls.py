@@ -62,4 +62,5 @@ urlpatterns = [
     path('create_round_records/<int:score_id>/', create_rounds_view, name='create_rounds'),
 
     path('card_individual/<int:score_id>/', card_individual, name='card_individual'),
+    path('card_individual_vertical/<int:score_id>/<int:player_id>/', card_individual_vertical, name='card_individual_vertical'),
 ]

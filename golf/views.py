@@ -982,6 +982,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
         player_details = {}
         player_details["name"] = str(player.buddy_email)
         player_details["firstname"] = CustomUser.objects.filter(email=player.buddy_email)[0].firstname
+        player_details["player_id"] = CustomUser.objects.filter(email=player.buddy_email)[0].id
         player_details["holes_attr"] = holes_attr[count]
         player_details["running_totals"] = running_totals[count]
         player_dict["player" + str(count + 1)] = player_details
@@ -1199,6 +1200,7 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
             # Create a string for the adjusted scores - to be used in the page button <a href=> tag
             round_meta["adjusted_scores_string"] = get_adjusted_scores_string(player_dict)
             # print(round_meta["adjusted_scores_string"])
+        # print(player_dict)
         return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "stableford_medal_positions": stableford_medal_positions, "form": form})
 
 class CardSetupView2(FormView):
@@ -2001,4 +2003,123 @@ def card_individual(request, score_id, player_id=None):
     return render(request, 'golf/card_individual.html', context)
 
 
-
+def card_individual_vertical(request, score_id, player_id):
+    # Get the score record
+    score = get_object_or_404(Score, id=score_id)
+    course = score.course
+    
+    # Find the specified player
+    selected_player = None
+    for player in ['a', 'b', 'c', 'd']:
+        player_obj = getattr(score, f'player_{player}')
+        if player_obj and player_obj.id == player_id:
+            selected_player = player
+            break
+    
+    if not selected_player:
+        # If player not found, default to player_a
+        selected_player = 'a'
+    
+    # Get player scores
+    player_scores = [getattr(score, f'player_{selected_player}_s{i}') for i in range(1, 19)]
+    
+    def get_score_descriptor(player_score, hole_par):
+        if player_score is None or player_score == 0:
+            return (hole_par, "score-item score-not-played")
+        
+        difference = player_score - hole_par
+        if difference <= -2:
+            return (player_score, "score-item score-eagle")
+        elif difference == -1:
+            return (player_score, "score-item score-birdie")
+        elif difference == 0:
+            return (player_score, "score-item score-par")
+        elif difference == 1:
+            return (player_score, "score-item score-bogey")
+        elif difference == 2:
+            return (player_score, "score-item score-double-bogey")
+        else:
+            return (player_score, "score-item score-worse-than-double-bogey double-circle")
+    
+    # Build front nine (holes 1-9)
+    front_nine = []
+    for hole in range(1, 10):
+        hole_par = getattr(course, f'hole{hole}par')
+        player_score = player_scores[hole - 1]
+        front_nine.append(get_score_descriptor(player_score, hole_par))
+    
+    # Build back nine (holes 10-18)
+    back_nine = []
+    for hole in range(10, 19):
+        hole_par = getattr(course, f'hole{hole}par')
+        player_score = player_scores[hole - 1]
+        back_nine.append(get_score_descriptor(player_score, hole_par))
+    
+    # Get player info
+    player_obj = getattr(score, f'player_{selected_player}')
+    
+    # Calculate overall total vs par
+    valid_scores = []
+    valid_pars = []
+    
+    for hole in range(1, 19):
+        player_score = player_scores[hole - 1]
+        if player_score is not None and player_score != 0:
+            valid_scores.append(player_score)
+            valid_pars.append(getattr(course, f'hole{hole}par'))
+    
+    total_score = sum(valid_scores)
+    total_par = sum(valid_pars)
+    par_difference = total_score - total_par
+    
+    if par_difference == 0:
+        overall_vs_par = "-"
+    elif par_difference > 0:
+        overall_vs_par = f"+{par_difference}"
+    else:
+        overall_vs_par = str(par_difference)  # Already has minus sign
+    
+    # Calculate front nine total
+    front_nine_scores = player_scores[:9]
+    front_nine_completed = all(score is not None and score != 0 for score in front_nine_scores)
+    front_nine_par = sum(getattr(course, f'hole{i}par') for i in range(1, 10))
+    
+    if front_nine_completed:
+        front_nine_total = ("score-total-circle", sum(front_nine_scores))
+    else:
+        front_nine_total = ("score-total-no-circle", front_nine_par)
+    
+    # Calculate back nine total
+    back_nine_scores = player_scores[9:]
+    back_nine_completed = all(score is not None and score != 0 for score in back_nine_scores)
+    back_nine_par = sum(getattr(course, f'hole{i}par') for i in range(10, 19))
+    
+    if back_nine_completed:
+        back_nine_total = ("score-total-circle", sum(back_nine_scores))
+    else:
+        back_nine_total = ("score-total-no-circle", back_nine_par)
+    
+    # Calculate running score total
+    round_completed = all(score is not None and score != 0 for score in player_scores)
+    current_total = sum(score for score in player_scores if score is not None and score != 0)
+    
+    if round_completed:
+        running_total = ("Today", current_total)
+    else:
+        running_total = ("Score", current_total)
+    
+    context = {
+        'score': score,
+        'course': course,
+        'front_nine': front_nine,
+        'back_nine': back_nine,
+        'front_nine_total': front_nine_total,
+        'back_nine_total': back_nine_total,
+        'running_total': running_total,
+        'player_name': player_obj.firstname if player_obj else '',
+        'player_id': player_id,
+        'score_id': score.id,
+        'overall_vs_par': overall_vs_par
+    }
+    
+    return render(request, 'golf/card_individual_vertical.html', context)
