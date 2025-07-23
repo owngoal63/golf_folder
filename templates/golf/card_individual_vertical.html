@@ -43,6 +43,14 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        /* New container for player info and course name */
+        .header-left-section {
+            display: flex;
+            flex-direction: column; /* Stack player info and course name vertically */
+            align-items: center; /* Center horizontally within this section */
+            flex-grow: 1; /* Allow it to take available space for centering */
+        }
+
         .player-info {
             display: flex;
             align-items: center;
@@ -66,6 +74,14 @@
             color: #ffffff;
             font-size: 1.1rem; /* Reduced font size */
             font-weight: 700;
+        }
+
+        .course-name-display {
+            color: #ffffff;
+            font-size: 0.75rem;
+            margin-top: 0.2rem; /* Small margin to separate from player name */
+            text-align: center; /* Ensure text is centered within its own box */
+            width: 100%; /* Ensure it takes full width of its parent for centering */
         }
 
         .total-score {
@@ -251,8 +267,11 @@
                 &larr; Back
             </button>
         <div class="scorecard-header">
-            <div class="player-info">
-                 <span class="player-name">{{player_name}}</span>
+            <div class="header-left-section">
+                <div class="player-info">
+                    <span class="player-name">{{player_name}}</span>
+                </div>
+                <div class="course-name-display">{{course_name|truncatechars:20}}</div>
             </div>
             <div class="total-score">{{ overall_vs_par }}</div>
         </div>

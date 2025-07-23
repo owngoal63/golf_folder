@@ -2111,6 +2111,7 @@ def card_individual_vertical(request, score_id, player_id):
     context = {
         'score': score,
         'course': course,
+        'course_name': course.name,
         'front_nine': front_nine,
         'back_nine': back_nine,
         'front_nine_total': front_nine_total,
