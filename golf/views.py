@@ -1,5 +1,6 @@
 # golf/views.py
 from django.db.models import Avg, Min, Max, Count, F
+from django.db.models import Q, Case, When, IntegerField
 from django.db.models.functions import Round as DBRound
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views.generic.detail import DetailView
@@ -10,6 +11,7 @@ from django.http import HttpResponseRedirect
 from random import randrange
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .forms import CourseForm, RoundForm, GolfGroupForm, BuddyForm, CardInitialForm, CardEntryForm, UserForm
 from .models import *
@@ -2124,3 +2126,32 @@ def card_individual_vertical(request, score_id, player_id):
     }
     
     return render(request, 'golf/card_individual_vertical.html', context)
+
+class YourScoreCards(LoginRequiredMixin, ListView):
+    model = Score
+    template_name = 'golf/your_scorecards_list.html'
+    context_object_name = 'scorecards'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        # Filter scores where current user is one of the players
+        return Score.objects.filter(
+            Q(player_a=self.request.user) |
+            Q(player_b=self.request.user) |
+            Q(player_c=self.request.user) |
+            Q(player_d=self.request.user)
+        ).select_related('course', 'group').annotate(
+            player_id=Case(
+                When(player_a=self.request.user, then=self.request.user.id),
+                When(player_b=self.request.user, then=self.request.user.id),
+                When(player_c=self.request.user, then=self.request.user.id),
+                When(player_d=self.request.user, then=self.request.user.id),
+                output_field=IntegerField()
+            )
+        ).values(
+            'id',
+            'date',
+            'course__name',
+            'group__group_name',
+            'player_id'
+        ).order_by('-date')

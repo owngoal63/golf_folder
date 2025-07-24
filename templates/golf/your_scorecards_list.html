@@ -1,0 +1,38 @@
+<!-- templates/golf/your_scorecards_list.html -->
+{% extends "base.html" %}
+
+{% block title %}Your Scorecards List{% endblock %}
+
+{% block content %}
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Your Scorecards List</h1>
+    <table class="w3-table w3-bordered">
+        {% for scorecard in scorecards %}
+            <tr>
+                <td><a href="/golf/card_individual_vertical/{{scorecard.id}}/{{scorecard.player_id}}/">{{ scorecard.date }} - {{ scorecard.course__name }} - {{scorecard.group__group_name}}</a></td>
+            </tr>
+        {% empty %}
+            <li>No Scorecards yet.</li>
+        {% endfor %}
+    </table>
+    <br>
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; First</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+{% endblock %}
