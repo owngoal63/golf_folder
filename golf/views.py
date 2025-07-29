@@ -2134,18 +2134,29 @@ class YourScoreCards(LoginRequiredMixin, ListView):
     paginate_by = 10
     
     def get_queryset(self):
+        # Get player_id from URL kwargs or use current user
+        player_id = self.kwargs.get('player_id')
+        if player_id:
+            try:
+                from .models import CustomUser
+                target_user = CustomUser.objects.get(id=player_id)
+            except CustomUser.DoesNotExist:
+                target_user = self.request.user
+        else:
+            target_user = self.request.user
+
         # Filter scores where current user is one of the players
         return Score.objects.filter(
-            Q(player_a=self.request.user) |
-            Q(player_b=self.request.user) |
-            Q(player_c=self.request.user) |
-            Q(player_d=self.request.user)
+            Q(player_a=target_user) |
+            Q(player_b=target_user) |
+            Q(player_c=target_user) |
+            Q(player_d=target_user)
         ).select_related('course', 'group').annotate(
             player_id=Case(
-                When(player_a=self.request.user, then=self.request.user.id),
-                When(player_b=self.request.user, then=self.request.user.id),
-                When(player_c=self.request.user, then=self.request.user.id),
-                When(player_d=self.request.user, then=self.request.user.id),
+                When(player_a=target_user, then=target_user.id),
+                When(player_b=target_user, then=target_user.id),
+                When(player_c=target_user, then=target_user.id),
+                When(player_d=target_user, then=target_user.id),
                 output_field=IntegerField()
             )
         ).values(

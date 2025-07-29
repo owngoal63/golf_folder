@@ -9,7 +9,9 @@
     <table class="w3-table w3-bordered">
         {% for buddy in users %}
             <tr>
-                <td style="font-size:11px; width:65%;">{{ buddy.firstname }}&nbsp;{{ buddy.surname }}&nbsp; {{buddy.handicap}}</td><td style="font-size:11px; width:35%;"><button><a href="/golf/list_round_handicaps/?p={{ buddy.id }}">Round History</a></button></td>
+                <td style="font-size:11px; width:65%;">{{ buddy.firstname }}&nbsp;{{ buddy.surname }}&nbsp; {{buddy.handicap}}</td>
+                <td style="font-size:11px; width:17%;"><button><a href="/golf/list_round_handicaps/?p={{ buddy.id }}">Rounds</a></button></td>
+                <td style="font-size:11px; width:17%;"><button><a href="/golf/list_your_scorecards/{{ buddy.id }}/">Scorecards</a></button></td>
             </tr>
         {% empty %}
             <li>No users yet.</li>

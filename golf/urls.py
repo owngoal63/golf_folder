@@ -64,5 +64,6 @@ urlpatterns = [
     path('card_individual/<int:score_id>/', card_individual, name='card_individual'),
     path('card_individual_vertical/<int:score_id>/<int:player_id>/', card_individual_vertical, name='card_individual_vertical'),
 
+    path("list_your_scorecards/<int:player_id>/", login_required(YourScoreCards.as_view()), name = "yourscorecards" ),
     path("list_your_scorecards/", login_required(YourScoreCards.as_view()), name = "yourscorecards" ),
 ]
