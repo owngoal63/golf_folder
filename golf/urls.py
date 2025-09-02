@@ -15,6 +15,7 @@ urlpatterns = [
 
     path("add_round/", login_required(RoundAddView.as_view()), name="addround"),
     path("list_rounds/", login_required(RoundListView.as_view()), name = "roundlist" ),
+    path("list_best_rounds/", login_required(BestRoundListView.as_view()), name = "roundlist" ),
     path("display_round/<int:pk>/", login_required(RoundDetailView.as_view()), name="rounddetail"),
     path("display_round/<int:pk>/update/", login_required(RoundUpdateView.as_view()), name="roundupdate"),
     path("display_round/<int:pk>/delete/", login_required(RoundDeleteView.as_view()), name="rounddelete"),

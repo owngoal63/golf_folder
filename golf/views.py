@@ -132,6 +132,16 @@ class RoundListView(ListView):
     def get_queryset(self, **kwargs):
        qs = super().get_queryset(**kwargs)
        return qs.filter(player=self.request.user)
+    
+class BestRoundListView(ListView):
+    model = Round
+    ordering = ['handicap_differential']
+    paginate_by = 10
+
+    # Filter queryset to show only rounds for this signed in user
+    def get_queryset(self, **kwargs):
+       qs = super().get_queryset(**kwargs)
+       return qs.filter(player=self.request.user)
 
 class RoundDetailView(DetailView):
     model = Round
