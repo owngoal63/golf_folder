@@ -12,6 +12,8 @@ from random import randrange
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Window
+from django.db.models.functions import Rank
 
 from .forms import CourseForm, RoundForm, GolfGroupForm, BuddyForm, CardInitialForm, CardEntryForm, UserForm
 from .models import *
@@ -130,9 +132,30 @@ class RoundListView(ListView):
 
     # Filter queryset to show only rounds for this signed in user
     def get_queryset(self, **kwargs):
-       qs = super().get_queryset(**kwargs)
-       return qs.filter(player=self.request.user)
+        qs = super().get_queryset(**kwargs)
+        return qs.filter(player=self.request.user).order_by('-date')
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_rounds'] = Round.objects.filter(player=self.request.user).count()
+        
+        # Get all rounds for ranking calculation
+        all_rounds = Round.objects.filter(player=self.request.user).order_by('handicap_differential')
+        
+        # Create ranking dictionary
+        ranking_dict = {}
+        for rank, round_obj in enumerate(all_rounds, 1):
+            ranking_dict[round_obj.id] = rank
+        
+        # Add ranking to current page objects
+        for round_obj in context['object_list']:
+            round_obj.handicap_rank = ranking_dict.get(round_obj.id, 0)
+        
+        return context
+    
+from django.views.generic import ListView
+from .models import Round
+
 class BestRoundListView(ListView):
     model = Round
     ordering = ['handicap_differential']
@@ -140,8 +163,24 @@ class BestRoundListView(ListView):
 
     # Filter queryset to show only rounds for this signed in user
     def get_queryset(self, **kwargs):
-       qs = super().get_queryset(**kwargs)
-       return qs.filter(player=self.request.user)
+        qs = super().get_queryset(**kwargs)
+        return qs.filter(player=self.request.user).order_by('handicap_differential')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_rounds'] = Round.objects.filter(player=self.request.user).count()
+        
+        # Add sequential ranking for best rounds view
+        for rank, round_obj in enumerate(context['object_list'], 1):
+            # Calculate actual rank based on page
+            page_obj = context.get('page_obj')
+            if page_obj:
+                actual_rank = rank + (page_obj.number - 1) * self.paginate_by
+            else:
+                actual_rank = rank
+            round_obj.handicap_rank = actual_rank
+        
+        return context
 
 class RoundDetailView(DetailView):
     model = Round

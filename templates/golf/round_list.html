@@ -5,18 +5,27 @@
 
 {% block content %}
 <div class="w3-card w3-teal w3-padding">
-    <h1 class="w3-large">Round List for {{ user.firstname }}</h1>
+    <h1 class="w3-large">Round List for {{ user.firstname }} ({{ total_rounds }} rounds)</h1>
     <button><a href="/golf/list_rounds/">Sort by Date</a></button>&nbsp;<button><a href="/golf/list_best_rounds/">Sort by Best Scores</a></button><br>
     <table class="w3-table w3-bordered">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Round Details</th>
+            </tr>
+        </thead>
+        <tbody>
         {% for round in object_list %}
             <tr>
+                <td style="width:10%;">{{ round.handicap_rank }}</td>
                 <td style="width:90%;"><a href="/golf/display_round/{{ round.id }}/">{{ round.date|date:"d M y" }} | {{ round.course }} | {{round.score}} | {{round.handicap_differential}}</a></td>
             </tr>
         {% empty %}
             <tr>
-                <td>No rounds yet.</td>
+                <td colspan="2">No rounds yet.</td>
             </tr>
         {% endfor %}
+        </tbody>
     </table>
     <br>
 
