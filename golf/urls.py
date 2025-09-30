@@ -12,6 +12,7 @@ urlpatterns = [
     path("display_course/<int:pk>/", login_required(CourseDetailView.as_view()), name="coursedetail"),
     path("display_course/<int:pk>/update/", login_required(CourseUpdateView.as_view()), name="courseupdate"),
     path("display_course/<int:pk>/delete/", login_required(CourseDeleteView.as_view()), name="coursedelete"),
+    path("best_course_list/", login_required(BestCourseListView.as_view()), name = "bestcourselist" ),
 
     path("add_round/", login_required(RoundAddView.as_view()), name="addround"),
     path("list_rounds/", login_required(RoundListView.as_view()), name = "roundlist" ),

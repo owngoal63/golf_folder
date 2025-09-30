@@ -152,9 +152,6 @@ class RoundListView(ListView):
             round_obj.handicap_rank = ranking_dict.get(round_obj.id, 0)
         
         return context
-    
-from django.views.generic import ListView
-from .models import Round
 
 class BestRoundListView(ListView):
     model = Round
@@ -180,6 +177,29 @@ class BestRoundListView(ListView):
                 actual_rank = rank
             round_obj.handicap_rank = actual_rank
         
+        return context
+    
+class BestCourseListView(ListView):
+    model = Round
+    template_name = 'golf/best_course_list.html'
+    context_object_name = 'courses'
+    paginate_by = 10
+
+    def get_queryset(self):
+        # Group by course and calculate average handicap differential
+        return Round.objects.filter(
+            player=self.request.user
+        ).values(
+            'course__name',
+            'course__id'
+        ).annotate(
+            avg_handicap_differential=Avg('handicap_differential'),
+            round_count=Count('id')
+        ).order_by('avg_handicap_differential')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_courses'] = self.get_queryset().count()
         return context
 
 class RoundDetailView(DetailView):
