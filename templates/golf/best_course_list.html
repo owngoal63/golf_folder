@@ -21,7 +21,7 @@
         <tbody>
         {% for course in courses %}
             <tr>
-                <td style="width:10%;">{{ forloop.counter }}</td>
+                <td style="width:10%;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
                 <td style="width:50%;"><a href="/golf/course/{{ course.course__id }}/">{{ course.course__name }}</a></td>
                 <td style="width:20%;">{{ course.avg_handicap_differential|floatformat:2 }}</td>
                 <td style="width:20%;">{{ course.round_count }}</td>
