@@ -629,6 +629,7 @@ def find_best_hole(golf_data):
     # Extract all performances and track each player's best
     for player_key, player_data in golf_data.items():
         firstname = player_data['firstname']
+        course_handicap = player_data['course_handicap']
         player_performances = []
         
         for hole_data in player_data['holes_attr']:
@@ -636,27 +637,34 @@ def find_best_hole(golf_data):
             par = hole_data[1]           # Position 1: par
             stroke_index = hole_data[2]  # Position 2: stroke index  
             gross_score = hole_data[4]   # Position 4: gross score
+            net_score = hole_data[5]     # Position 5: net score
             
             score_vs_par = gross_score - par
+            net_vs_par = net_score - par
             
             performance = {
                 'player': firstname,
                 'hole': hole_num,
                 'score_vs_par': score_vs_par,
+                'net_vs_par': net_vs_par,
                 'stroke_index': stroke_index,
                 'gross_score': gross_score,
-                'par': par
+                'par': par,
+                'course_handicap': course_handicap
             }
             
             all_performances.append(performance)
             player_performances.append(performance)
         
         # Find this player's best hole
+        
         player_performances.sort(key=lambda x: (x['score_vs_par'], x['stroke_index']))
         player_best[firstname] = player_performances[0]
     
+    # print(all_performances)
     # Find overall winner
-    all_performances.sort(key=lambda x: (x['score_vs_par'], x['stroke_index']))
+    # Sorting by lowest 'score_vs_par' then lowest 'stroke_index' then highest 'course_handicap'
+    all_performances.sort(key=lambda x: (x['net_vs_par'], x['stroke_index'], -x['course_handicap']))
     overall_winner = all_performances[0]
     
     return {
@@ -1054,6 +1062,10 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
         player_details["name"] = str(player.buddy_email)
         player_details["firstname"] = CustomUser.objects.filter(email=player.buddy_email)[0].firstname
         player_details["player_id"] = CustomUser.objects.filter(email=player.buddy_email)[0].id
+        if count == 0: player_details["course_handicap"] = score_instance.player_a_course_hcp
+        if count == 1: player_details["course_handicap"] = score_instance.player_b_course_hcp
+        if count == 2: player_details["course_handicap"] = score_instance.player_c_course_hcp
+        if count == 3: player_details["course_handicap"] = score_instance.player_d_course_hcp
         player_details["holes_attr"] = holes_attr[count]
         player_details["running_totals"] = running_totals[count]
         player_dict["player" + str(count + 1)] = player_details
@@ -1243,24 +1255,25 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
         # Best holes by player and Bandit of the day ( only calculate on completion of round).
         if hole_no > 18:
             golf_terminology = {
-                -3: "an Albatross", 
-                -2: "an Eagle",
-                -1: "a Birdie",
-                0: "a Par",
-                1: "a Bogey",
-                2: "a Double Bogey",
-                3: "a Triple Bogey",
-                4: "a Quadruple Bogey",
-                5: "a Quintuple Bogey",
-                6: "a Sextuple Bogey",
-                7: "a Septuple Bogey",
-                8: "a Octuple Bogey"
+                -3: "an net Albatross", 
+                -2: "an net Eagle",
+                -1: "a net Birdie",
+                0: "a net Par",
+                1: "a net Bogey",
+                2: "a net Double Bogey",
+                3: "a net Triple Bogey",
+                4: "a net Quadruple Bogey",
+                5: "a net Quintuple Bogey",
+                6: "a net Sextuple Bogey",
+                7: "a net Septuple Bogey",
+                8: "a net Octuple Bogey"
             }
+            # print(player_dict)
             result = find_best_hole(player_dict)
             # print("OVERALL WINNER:")
             winner = result['overall_winner']
             # print(f"{winner['player']} scored {winner['score_vs_par']} vs par on hole {winner['hole']}")
-            round_meta["bandit_of_the_day"] = f"{winner['player']} scored {golf_terminology[winner['score_vs_par']]} on hole {winner['hole']}" 
+            round_meta["bandit_of_the_day"] = f"{winner['player']} scored {golf_terminology[winner['net_vs_par']]} on hole {winner['hole']}" 
             # print("\nEACH PLAYER'S BEST HOLE:")
             round_meta["player_best_hole"] = []
             for player, best in result['player_best_holes'].items():
