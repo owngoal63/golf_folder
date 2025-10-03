@@ -68,4 +68,9 @@ urlpatterns = [
 
     path("list_your_scorecards/<int:player_id>/", login_required(YourScoreCards.as_view()), name = "yourscorecards" ),
     path("list_your_scorecards/", login_required(YourScoreCards.as_view()), name = "yourscorecards" ),
+
+    # All time best holes
+    path("best_holes_list/", login_required(BestHolesListView.as_view()), name = "bestholeslist" ),
+    # Time-filtered best holes
+    path("best_holes_list/<str:period>/", login_required(BestHolesListView.as_view()), name="bestholeslist_period"),
 ]

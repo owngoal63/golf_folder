@@ -1,0 +1,53 @@
+<!-- templates/golf/best_holes_list.html -->
+{% extends "base.html" %}
+
+{% block title %}Best Holes{% endblock %}
+
+{% block content %}
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Your Top 30 Best Holes</h1>
+    <p>Ranked by gross score relative to par, then by course slope rating and finally by hole stroke index</p>
+    
+    <!-- Filter buttons -->
+    <div style="margin: 15px 0;">
+        <button>
+            <a href="{% url 'bestholeslist' %}">All Time</a>
+        </button>&nbsp;&nbsp;
+        <button>
+            <a href="{% url 'bestholeslist_period' period='1year' %}">Last 12 Mths</a>
+        </button>
+        <p> </p>
+        <button>
+            <a href="{% url 'bestholeslist_period' period='6months' %}">Last 6 Mths</a>
+        </button>&nbsp;&nbsp;
+        <button>
+            <a href="{% url 'bestholeslist_period' period='3months' %}">Last 3 Mths</a>
+        </button>
+    </div>
+    
+    <table class="w3-table w3-bordered">
+        <thead>
+            <tr>
+                <th style="width: 15%;">Date</th>
+                <th style="width: 60%;">Course Hole <small>(SI)</small></th>
+                <th style="width: 10%;">Par</th>
+                <th style="width: 15%;">Score</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for hole in best_holes %}
+            <tr>
+                <td style="white-space: nowrap;">{{ hole.date|date:"d/m/y" }}</td>
+                <td>{{ hole.course_name|truncatechars:12 }} {{ hole.hole_number }} <small>({{ hole.stroke_index }})</small></td>
+                <td style="text-align: center; white-space: nowrap;">{{ hole.par }}</td>
+                <td style="text-align: center; white-space: nowrap;">{{ hole.score }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4">No holes played yet.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

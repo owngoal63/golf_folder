@@ -14,6 +14,8 @@ from django.template.loader import render_to_string
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Window
 from django.db.models.functions import Rank
+from django.utils import timezone
+from datetime import timedelta
 
 from .forms import CourseForm, RoundForm, GolfGroupForm, BuddyForm, CardInitialForm, CardEntryForm, UserForm
 from .models import *
@@ -1286,6 +1288,92 @@ def trackmatch(request, score_id, hole_no, extraparam = False, makereport = Fals
             # print(round_meta["adjusted_scores_string"])
         # print(player_dict)
         return render(request, 'golf/card_entry.html', {"player_dict": player_dict, "round_meta": round_meta, "stableford_medal_positions": stableford_medal_positions, "form": form})
+
+class BestHolesListView(ListView):
+    model = Score
+    template_name = 'golf/best_holes_list.html'
+    context_object_name = 'best_holes'
+    
+    def get_queryset(self):
+        # Get time period filter from URL parameter
+        period = self.kwargs.get('period', 'all')
+        
+        # Calculate date filter based on period
+        cutoff_date = None
+        if period == '3months':
+            cutoff_date = timezone.now().date() - timedelta(days=90)
+        elif period == '6months':
+            cutoff_date = timezone.now().date() - timedelta(days=180)
+        elif period == '1year':
+            cutoff_date = timezone.now().date() - timedelta(days=365)
+        
+        # Get all scores where current user is a player
+        scores_query = Score.objects.filter(
+            Q(player_a=self.request.user) |
+            Q(player_b=self.request.user) |
+            Q(player_c=self.request.user) |
+            Q(player_d=self.request.user)
+        )
+        
+        # Apply date filter if specified
+        if cutoff_date:
+            scores_query = scores_query.filter(date__gte=cutoff_date)
+        
+        scores = scores_query.select_related('course', 'group')
+        
+        best_holes = []
+        
+        for score in scores:
+            # Determine which player field the current user is in
+            player_letter = None
+            if score.player_a == self.request.user:
+                player_letter = 'a'
+            elif score.player_b == self.request.user:
+                player_letter = 'b'
+            elif score.player_c == self.request.user:
+                player_letter = 'c'
+            elif score.player_d == self.request.user:
+                player_letter = 'd'
+            
+            if not player_letter:
+                continue
+            
+            # Loop through all 18 holes
+            for hole_num in range(1, 19):
+                player_score = getattr(score, f'player_{player_letter}_s{hole_num}')
+                hole_par = getattr(score.course, f'hole{hole_num}par')
+                hole_si = getattr(score.course, f'hole{hole_num}SI')
+                
+                # Only include if score exists and is not 0
+                if player_score and player_score != 0 and hole_par:
+                    score_vs_par = player_score - hole_par
+                    
+                    best_holes.append({
+                        'date': score.date,
+                        'group_name': score.group.group_name,
+                        'course_name': score.course.name,
+                        'hole_number': hole_num,
+                        'par': hole_par,
+                        'stroke_index': hole_si,
+                        'slope_rating': score.course.slope_rating,
+                        'score': player_score,
+                        'score_vs_par': score_vs_par,
+                        'score_id': score.id
+                    })
+        
+        # Sort by score vs par (lowest first), then by slope rating (highest first), then by stroke index (lowest first)
+        best_holes.sort(key=lambda x: (x['score_vs_par'], -x['slope_rating'], x['stroke_index']))
+        
+        # Return top 30
+        return best_holes[:30]
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Disable pagination for this view
+        context['is_paginated'] = False
+        # Add current period filter to context
+        context['current_period'] = self.kwargs.get('period', 'all')
+        return context
 
 class CardSetupView2(FormView):
 
