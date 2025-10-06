@@ -12,18 +12,19 @@
     <div style="margin: 15px 0;">
         <button>
             <a href="{% url 'bestholeslist' %}">All Time</a>
-        </button>&nbsp;&nbsp;
-        <button>
-            <a href="{% url 'bestholeslist_period' period='1year' %}">Last 12 Months</a>
         </button>
-        <p> </p>
+        <button>
+            <a href="{% url 'bestholeslist_period' period='1year' %}">Last Year</a>
+        </button>
+        <p></p>
         <button>
             <a href="{% url 'bestholeslist_period' period='6months' %}">Last 6 Months</a>
-        </button>&nbsp;&nbsp;
+        </button>
         <button>
             <a href="{% url 'bestholeslist_period' period='3months' %}">Last 3 Months</a>
         </button>
     </div>
+
     
     <table class="w3-table w3-bordered">
         <thead>
@@ -40,7 +41,19 @@
                 <td style="white-space: nowrap;">{{ hole.date|date:"d/m/y" }}</td>
                 <td>{{ hole.course_name|truncatechars:12 }} {{ hole.hole_number }} <small>({{ hole.stroke_index }})</small></td>
                 <td style="text-align: center; white-space: nowrap;">{{ hole.par }}</td>
-                <td style="text-align: center; white-space: nowrap;">{{ hole.score }}</td>
+                <td style="text-align: center; white-space: nowrap;">
+                    {% if hole.score_vs_par <= -2 %}
+                        <span style="display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background-color: yellow; color: black;">{{ hole.score }}</span>
+                    {% elif hole.score_vs_par == -1 %}
+                        <span style="display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background-color: red; color: white;">{{ hole.score }}</span>
+                    {% elif hole.score_vs_par == 0 %}
+                        <span style="display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background-color: white; color: #4d4d4d; border: 1px solid #ccc;">{{ hole.score }}</span>
+                    {% elif hole.score_vs_par == 1 %}
+                        <span style="display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background-color: #4d4d4d; color: white;">{{ hole.score }}</span>
+                    {% else %}
+                        {{ hole.score }}
+                    {% endif %}
+                </td>
             </tr>
         {% empty %}
             <tr>
