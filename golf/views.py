@@ -1361,8 +1361,8 @@ class BestHolesListView(ListView):
                         'score_id': score.id
                     })
         
-        # Sort by score vs par (lowest first), then by slope rating (highest first), then by stroke index (lowest first)
-        best_holes.sort(key=lambda x: (x['score_vs_par'], -x['slope_rating'], x['stroke_index']))
+        # Sort by score vs par (lowest first), then by stroke index (lowest first), then by slope rating (highest first)
+        best_holes.sort(key=lambda x: (x['score_vs_par'], x['stroke_index'], -x['slope_rating']))
         
         # Return top 30
         return best_holes[:30]
