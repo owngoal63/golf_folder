@@ -1321,6 +1321,11 @@ class BestHolesListView(ListView):
         
         scores = scores_query.select_related('course', 'group')
         
+        # Find the most recent round date for this user
+        most_recent_date = None
+        if scores.exists():
+            most_recent_date = scores.order_by('-date').first().date
+        
         best_holes = []
         
         for score in scores:
@@ -1348,10 +1353,15 @@ class BestHolesListView(ListView):
                 if player_score and player_score != 0 and hole_par:
                     score_vs_par = player_score - hole_par
                     
+                    # Add asterisk if this is from the most recent round
+                    course_display_name = score.course.name
+                    if most_recent_date and score.date == most_recent_date:
+                        course_display_name = f"* {score.course.name}"
+                    
                     best_holes.append({
                         'date': score.date,
                         'group_name': score.group.group_name,
-                        'course_name': score.course.name,
+                        'course_name': course_display_name,
                         'hole_number': hole_num,
                         'par': hole_par,
                         'stroke_index': hole_si,

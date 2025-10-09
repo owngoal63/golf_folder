@@ -37,7 +37,7 @@
         </thead>
         <tbody>
         {% for hole in best_holes %}
-            <tr>
+            <tr style="cursor: pointer;" onclick="window.location='/golf/display_max_hole/{{ hole.score_id }}/';">
                 <td style="white-space: nowrap;">{{ hole.date|date:"d/m/y" }}</td>
                 <td>{{ hole.course_name|truncatechars:12 }} {{ hole.hole_number }} <small>({{ hole.stroke_index }})</small></td>
                 <td style="text-align: center; white-space: nowrap;">{{ hole.par }}</td>
