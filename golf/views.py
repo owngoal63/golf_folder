@@ -2346,3 +2346,119 @@ class YourScoreCards(LoginRequiredMixin, ListView):
             'group__group_name',
             'player_id'
         ).order_by('-date')
+
+
+@login_required
+def matchplay_chart(request, score_id):
+    score = get_object_or_404(Score, id=score_id)
+
+    # Only valid for 2-player matches
+    if score.no_of_players != 2:
+        return HttpResponseRedirect(f'/golf/trackmatch/{score_id}/19/')
+
+    course = score.course
+    holesSI = [getattr(course, f'hole{i}SI') for i in range(1, 19)]
+    holesPar = [getattr(course, f'hole{i}par') for i in range(1, 19)]
+
+    def get_strokes_per_hole(player_hcp):
+        strokes = []
+        for si in holesSI:
+            if player_hcp <= 18:
+                strokes.append(1 if si <= player_hcp else 0)
+            elif player_hcp <= 36:
+                strokes.append(2 if si <= player_hcp - 18 else 1)
+            elif player_hcp <= 54:
+                strokes.append(3 if si <= player_hcp - 36 else 2)
+            else:
+                strokes.append(0)
+        return strokes
+
+    strokes_a = get_strokes_per_hole(score.player_a_course_hcp)
+    strokes_b = get_strokes_per_hole(score.player_b_course_hcp)
+
+    hole_data = []
+    cumulative = 0
+
+    for i in range(1, 19):
+        gross_a = getattr(score, f'player_a_s{i}') or 0
+        gross_b = getattr(score, f'player_b_s{i}') or 0
+        par = holesPar[i - 1]
+        net_a = gross_a - strokes_a[i - 1]
+        net_b = gross_b - strokes_b[i - 1]
+
+        if gross_a == 0 or gross_b == 0:
+            outcome = 0
+            outcome_label = 'H'
+        elif net_a < net_b:
+            outcome = 1
+            outcome_label = score.player_a.firstname[0]
+        elif net_b < net_a:
+            outcome = -1
+            outcome_label = score.player_b.firstname[0]
+        else:
+            outcome = 0
+            outcome_label = 'H'
+
+        cumulative += outcome
+
+        hole_data.append({
+            'hole': i,
+            'par': par,
+            'si': holesSI[i - 1],
+            'gross_a': gross_a if gross_a else '-',
+            'gross_b': gross_b if gross_b else '-',
+            'net_a': net_a if gross_a else '-',
+            'net_b': net_b if gross_b else '-',
+            'strokes_a': strokes_a[i - 1],
+            'strokes_b': strokes_b[i - 1],
+            'outcome': outcome,
+            'outcome_label': outcome_label,
+            'cumulative': cumulative,
+        })
+
+    # Determine perspective: signed-in user's position relative to the match
+    if request.user == score.player_b:
+        # Flip so player_b (the signed-in user) appears on the positive/green axis
+        perspective_player = score.player_b
+        perspective_opponent = score.player_a
+        flip = -1
+    else:
+        # Default: player_a on positive/green axis (also covers non-player viewing)
+        perspective_player = score.player_a
+        perspective_opponent = score.player_b
+        flip = 1
+
+    final_state = cumulative * flip
+    if final_state > 0:
+        result_text = f"{perspective_player.firstname} wins {final_state} Up"
+    elif final_state < 0:
+        result_text = f"{perspective_opponent.firstname} wins {abs(final_state)} Up"
+    else:
+        result_text = "Match Halved — All Square"
+
+    # Build lists for Chart.js (apply perspective flip to cumulative values)
+    chart_labels = [str(h['hole']) for h in hole_data]
+    chart_data = [h['cumulative'] * flip for h in hole_data]
+    chart_colors = []
+    for val in chart_data:
+        if val > 0:
+            chart_colors.append('rgba(0, 150, 136, 0.85)')   # teal = perspective player up
+        elif val < 0:
+            chart_colors.append('rgba(220, 53, 69, 0.85)')   # red = opponent up
+        else:
+            chart_colors.append('rgba(150, 150, 150, 0.6)')  # grey = all square
+
+    context = {
+        'score': score,
+        'hole_data': hole_data,
+        'player_a': score.player_a,
+        'player_b': score.player_b,
+        'perspective_player': perspective_player,
+        'perspective_opponent': perspective_opponent,
+        'result_text': result_text,
+        'final_state': final_state,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
+        'chart_colors': chart_colors,
+    }
+    return render(request, 'golf/matchplay_chart.html', context)

@@ -1,0 +1,149 @@
+<!-- templates/golf/matchplay_chart.html -->
+{% extends "base.html" %}
+
+{% block title %}Match Play Chart{% endblock %}
+
+{% block content %}
+
+<style>
+    .mp-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .player-label {
+        font-weight: bold;
+        font-size: 1.1rem;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+    .label-a {
+        background-color: rgba(0, 150, 136, 0.85);
+        color: white;
+    }
+    .label-b {
+        background-color: rgba(220, 53, 69, 0.85);
+        color: white;
+    }
+    .result-banner {
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        padding: 8px 14px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        {% if final_state > 0 %}
+        background-color: rgba(0, 150, 136, 0.85); color: white;
+        {% elif final_state < 0 %}
+        background-color: rgba(220, 53, 69, 0.85); color: white;
+        {% else %}
+        background-color: rgba(100, 100, 100, 0.7); color: white;
+        {% endif %}
+    }
+    .chart-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Match Play Chart</h1>
+    <p style="margin:0;">{{ score.course }} &nbsp;|&nbsp; {{ score.date|date:"d M Y" }}</p>
+</div>
+
+<br>
+
+<div class="mp-header">
+    <span class="player-label label-a">{{ player_a.firstname }} ({{ score.player_a_course_hcp }})</span>
+    <span style="color:#555; font-size:0.9rem;">vs</span>
+    <span class="player-label label-b">{{ player_b.firstname }} ({{ score.player_b_course_hcp }})</span>
+</div>
+
+<div class="result-banner">{{ result_text }}</div>
+
+<!-- Chart.js bar chart -->
+<div class="chart-container">
+    <canvas id="matchplayChart"></canvas>
+</div>
+
+<br>
+<a href="/golf/trackmatch/{{ score.id }}/19/"><button>Back to Scorecard</button></a>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = {{ chart_labels|safe }};
+    const data   = {{ chart_data|safe }};
+    const colors = {{ chart_colors|safe }};
+
+    // Work out the y-axis bounds symmetrically
+    const maxAbs = Math.max(...data.map(Math.abs), 1);
+    const yMax   = maxAbs + 1;
+
+    const ctx = document.getElementById('matchplayChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Match status after each hole (+ = {{ perspective_player.firstname }} Up, − = {{ perspective_opponent.firstname }} Up)',
+                data: data,
+                backgroundColor: colors,
+                borderRadius: 4,
+                borderWidth: 1,
+                borderColor: colors,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true, position: 'bottom' },
+                title: {
+                    display: true,
+                    text: 'Cumulative match play status — hole by hole',
+                    font: { size: 13 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const val = context.parsed.y;
+                            if (val > 0) return '{{ perspective_player.firstname }} ' + val + ' Up';
+                            if (val < 0) return '{{ perspective_opponent.firstname }} ' + Math.abs(val) + ' Up';
+                            return 'All Square';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    min: -yMax,
+                    max:  yMax,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            if (value > 0) return '{{ perspective_player.firstname|slice:":3" }} ' + value + 'Up';
+                            if (value < 0) return '{{ perspective_opponent.firstname|slice:":3" }} ' + Math.abs(value) + 'Up';
+                            return 'AS';
+                        }
+                    },
+                    grid: {
+                        color: function(context) {
+                            return context.tick.value === 0 ? '#333' : '#e0e0e0';
+                        },
+                        lineWidth: function(context) {
+                            return context.tick.value === 0 ? 2 : 1;
+                        }
+                    }
+                },
+                x: {
+                    title: { display: true, text: 'Hole Number' }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

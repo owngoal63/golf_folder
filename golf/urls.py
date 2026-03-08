@@ -73,4 +73,7 @@ urlpatterns = [
     path("best_holes_list/", login_required(BestHolesListView.as_view()), name = "bestholeslist" ),
     # Time-filtered best holes
     path("best_holes_list/<str:period>/", login_required(BestHolesListView.as_view()), name="bestholeslist_period"),
+
+    # Match play progression chart (2-player only, after scores posted)
+    path('matchplay_chart/<int:score_id>/', login_required(matchplay_chart), name='matchplay_chart'),
 ]
