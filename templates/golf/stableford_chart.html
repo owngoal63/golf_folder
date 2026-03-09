@@ -1,0 +1,125 @@
+<!-- templates/golf/stableford_chart.html -->
+{% extends "base.html" %}
+
+{% block title %}Stableford Chart{% endblock %}
+
+{% block content %}
+
+<style>
+    .sb-header {
+        margin-bottom: 12px;
+    }
+    .leaderboard {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    .lb-card {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        background-color: #f5f5f5;
+        border: 2px solid;
+        font-weight: bold;
+        font-size: 0.95rem;
+    }
+    .color-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+    .chart-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .position-label {
+        font-size: 0.75rem;
+        color: #888;
+        margin-left: 4px;
+    }
+</style>
+
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">Stableford Chart</h1>
+    <p style="margin:0;">{{ score.course }} &nbsp;|&nbsp; {{ score.date|date:"d M Y" }}</p>
+</div>
+
+<br>
+
+<!-- Leaderboard -->
+<div class="leaderboard">
+    {% for player in final_scores %}
+    <div class="lb-card" style="border-color: {{ player.color }};">
+        <span class="color-dot" style="background-color: {{ player.color }};"></span>
+        {{ player.name }}
+        <span style="font-size:1.1rem;">{{ player.total }} pts</span>
+        {% if forloop.first %}<span class="position-label">&#9650; Leader</span>{% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Chart -->
+<div class="chart-container">
+    <canvas id="stablefordChart"></canvas>
+</div>
+
+<br>
+<a href="/golf/trackmatch/{{ score.id }}/19/"><button>Back to Scorecard</button></a>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels   = {{ chart_labels|safe }};
+    const datasets = {{ chart_datasets|safe }};
+
+    const ctx = document.getElementById('stablefordChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets,
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                },
+                title: {
+                    display: true,
+                    text: 'Cumulative Stableford points — hole by hole',
+                    font: { size: 13 }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(items) {
+                            return 'After hole ' + items[0].label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Stableford points' },
+                    ticks: { stepSize: 1 }
+                },
+                x: {
+                    title: { display: true, text: 'Hole Number' }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

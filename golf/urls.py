@@ -76,4 +76,7 @@ urlpatterns = [
 
     # Match play progression chart (2-player only, after scores posted)
     path('matchplay_chart/<int:score_id>/', login_required(matchplay_chart), name='matchplay_chart'),
+
+    # Stableford progression chart (3-4 players)
+    path('stableford_chart/<int:score_id>/', login_required(stableford_chart), name='stableford_chart'),
 ]

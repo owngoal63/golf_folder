@@ -2462,3 +2462,93 @@ def matchplay_chart(request, score_id):
         'chart_colors': chart_colors,
     }
     return render(request, 'golf/matchplay_chart.html', context)
+
+
+@login_required
+def stableford_chart(request, score_id):
+    score = get_object_or_404(Score, id=score_id)
+
+    # Only valid for 3-4 player matches
+    if score.no_of_players < 3:
+        return HttpResponseRedirect(f'/golf/trackmatch/{score_id}/19/')
+
+    course = score.course
+    holesSI = [getattr(course, f'hole{i}SI') for i in range(1, 19)]
+    holesPar = [getattr(course, f'hole{i}par') for i in range(1, 19)]
+
+    stableford_lookup = {1: 1, 0: 2, -1: 3, -2: 4, -3: 5, -4: 6, -5: 7}
+
+    def get_strokes_per_hole(player_hcp):
+        strokes = []
+        for si in holesSI:
+            if player_hcp <= 18:
+                strokes.append(1 if si <= player_hcp else 0)
+            elif player_hcp <= 36:
+                strokes.append(2 if si <= player_hcp - 18 else 1)
+            elif player_hcp <= 54:
+                strokes.append(3 if si <= player_hcp - 36 else 2)
+            else:
+                strokes.append(0)
+        return strokes
+
+    def calc_stableford_points(gross, strokes, par):
+        if not gross or gross == 0:
+            return 0
+        s = (gross - strokes) - par
+        return 0 if s >= 2 else stableford_lookup.get(s, 0)
+
+    player_colors = ['#FFD700', '#C0C0C0', '#CD7F32', '#444444']
+    player_letters = ['a', 'b', 'c', 'd'][:score.no_of_players]
+
+    players = []
+    for idx, letter in enumerate(player_letters):
+        player_obj = getattr(score, f'player_{letter}')
+        hcp = getattr(score, f'player_{letter}_course_hcp')
+        strokes = get_strokes_per_hole(hcp)
+        players.append({
+            'obj': player_obj,
+            'letter': letter,
+            'hcp': hcp,
+            'strokes': strokes,
+            'color': player_colors[idx],
+            'cumulative': [],
+        })
+
+    # Build hole-by-hole cumulative Stableford totals
+    for i in range(1, 19):
+        par = holesPar[i - 1]
+        for player in players:
+            gross = getattr(score, f'player_{player["letter"]}_s{i}') or 0
+            pts = calc_stableford_points(gross, player['strokes'][i - 1], par)
+            prev = player['cumulative'][-1] if player['cumulative'] else 0
+            player['cumulative'].append(prev + pts)
+
+    # Build Chart.js datasets
+    datasets = []
+    for player in players:
+        datasets.append({
+            'label': f"{player['obj'].firstname} (hcp {player['hcp']})",
+            'data': player['cumulative'],
+            'borderColor': player['color'],
+            'backgroundColor': player['color'],
+            'tension': 0.3,
+            'pointRadius': 4,
+            'pointHoverRadius': 6,
+            'borderWidth': 2,
+            'fill': False,
+        })
+
+    # Final leaderboard sorted by total points
+    final_scores = sorted(
+        [{'name': p['obj'].firstname, 'total': p['cumulative'][-1], 'color': p['color']} for p in players],
+        key=lambda x: -x['total']
+    )
+
+    context = {
+        'score': score,
+        'chart_labels': json.dumps([str(i) for i in range(1, 19)]),
+        'chart_datasets': json.dumps(datasets),
+        'final_scores': final_scores,
+        'no_of_players': score.no_of_players,
+    }
+    return render(request, 'golf/stableford_chart.html', context)

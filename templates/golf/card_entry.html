@@ -215,6 +215,9 @@
         {% if round_meta.no_of_players == 2 %}
         &nbsp;<a href="/golf/matchplay_chart/{{round_meta.round_id}}/"><button>&#9654; Match Play Chart</button></a>
         {% endif %}
+        {% if round_meta.no_of_players > 2 %}
+        &nbsp;<a href="/golf/stableford_chart/{{round_meta.round_id}}/"><button>&#9654; Stableford Chart</button></a>
+        {% endif %}
         
         <!-- {% if 'colourize' not in request.get_full_path %}
             &nbsp;&nbsp;<a href="colourize/"><button>&#10041</button>
