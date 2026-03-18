@@ -2552,3 +2552,86 @@ def stableford_chart(request, score_id):
         'no_of_players': score.no_of_players,
     }
     return render(request, 'golf/stableford_chart.html', context)
+
+
+@login_required
+def player_round_chart(request, score_id, player_id):
+    score = get_object_or_404(Score, id=score_id)
+    course = score.course
+
+    # Find which player slot this player_id belongs to
+    player_letter = None
+    player_obj = None
+    for letter in ['a', 'b', 'c', 'd']:
+        p = getattr(score, f'player_{letter}')
+        if p and p.id == player_id:
+            player_letter = letter
+            player_obj = p
+            break
+
+    if not player_letter:
+        return HttpResponseRedirect(f'/golf/trackmatch/{score_id}/19/')
+
+    holesSI = [getattr(course, f'hole{i}SI') for i in range(1, 19)]
+    holesPar = [getattr(course, f'hole{i}par') for i in range(1, 19)]
+    player_hcp = getattr(score, f'player_{player_letter}_course_hcp')
+
+    # Calculate strokes received per hole
+    strokes_per_hole = []
+    for si in holesSI:
+        if player_hcp <= 18:
+            strokes_per_hole.append(1 if si <= player_hcp else 0)
+        elif player_hcp <= 36:
+            strokes_per_hole.append(2 if si <= player_hcp - 18 else 1)
+        elif player_hcp <= 54:
+            strokes_per_hole.append(3 if si <= player_hcp - 36 else 2)
+        else:
+            strokes_per_hole.append(0)
+
+    # Build hole-by-hole cumulative net vs par
+    chart_labels = []
+    chart_data = []
+    chart_colors = []
+    cumulative = 0
+
+    for i in range(1, 19):
+        gross = getattr(score, f'player_{player_letter}_s{i}')
+        if not gross or gross == 0:
+            break  # Stop at first unscored hole
+        net = gross - strokes_per_hole[i - 1]
+        net_vs_par = net - holesPar[i - 1]
+        cumulative += net_vs_par
+
+        chart_labels.append(str(i))
+        chart_data.append(cumulative)
+        if cumulative < 0:
+            chart_colors.append('rgba(0, 150, 136, 0.85)')   # teal = under par
+        elif cumulative > 0:
+            chart_colors.append('rgba(220, 53, 69, 0.85)')   # red = over par
+        else:
+            chart_colors.append('rgba(150, 150, 150, 0.6)')  # grey = level par
+
+    # Final status label
+    if chart_data:
+        final = chart_data[-1]
+        if final < 0:
+            status_text = f"{abs(final)} under par"
+        elif final > 0:
+            status_text = f"{final} over par"
+        else:
+            status_text = "Level par"
+    else:
+        status_text = "No holes scored yet"
+
+    context = {
+        'score': score,
+        'player': player_obj,
+        'player_hcp': player_hcp,
+        'status_text': status_text,
+        'final': chart_data[-1] if chart_data else 0,
+        'chart_labels': json.dumps(chart_labels),
+        'chart_data': json.dumps(chart_data),
+        'chart_colors': json.dumps(chart_colors),
+        'holes_played': len(chart_data),
+    }
+    return render(request, 'golf/player_round_chart.html', context)

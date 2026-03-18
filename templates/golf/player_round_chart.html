@@ -1,0 +1,108 @@
+<!-- templates/golf/player_round_chart.html -->
+{% extends "base.html" %}
+
+{% block title %}Round Chart{% endblock %}
+
+{% block content %}
+
+<div class="w3-card w3-teal w3-padding">
+    <h1 class="w3-large">{{ player.firstname }} — Net Score vs Par</h1>
+    <p style="margin:0;">{{ score.course }} &nbsp;|&nbsp; {{ score.date|date:"d M Y" }} &nbsp;|&nbsp; Course hcp: {{ player_hcp }}</p>
+</div>
+
+<br>
+
+<!-- Status banner -->
+<div style="text-align:center; font-size:1.2rem; font-weight:bold; padding:8px 14px; border-radius:8px; margin-bottom:16px;
+    {% if final < 0 %}background-color:rgba(0,150,136,0.85); color:white;
+    {% elif final > 0 %}background-color:rgba(220,53,69,0.85); color:white;
+    {% else %}background-color:rgba(150,150,150,0.6); color:white;{% endif %}">
+    After {{ holes_played }} hole{{ holes_played|pluralize }} — {{ status_text }}
+</div>
+
+<!-- Chart -->
+<div style="position:relative; width:100%; margin-bottom:20px;">
+    <canvas id="roundChart"></canvas>
+</div>
+
+<br>
+<a href="/golf/trackmatch/{{ score.id }}/19/"><button>Back to Scorecard</button></a>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels   = {{ chart_labels|safe }};
+    const rawData  = {{ chart_data|safe }};
+    const colors   = {{ chart_colors|safe }};
+
+    // Negate values so under par (good) appears above the axis
+    const data = rawData.map(v => -v);
+
+    const maxAbs = Math.max(...data.map(Math.abs), 1);
+    const yMax   = maxAbs + 1;
+
+    const ctx = document.getElementById('roundChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Cumulative net score vs par',
+                data: data,
+                backgroundColor: colors,
+                borderRadius: 4,
+                borderWidth: 1,
+                borderColor: colors,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: '{{ player.firstname }} — cumulative net score vs par (hole by hole)',
+                    font: { size: 13 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            // context.parsed.y is negated, so reverse for golf meaning
+                            const val = -context.parsed.y;
+                            if (val < 0) return Math.abs(val) + ' under par';
+                            if (val > 0) return val + ' over par';
+                            return 'Level par';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    min: -yMax,
+                    max:  yMax,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            // value is negated display value; show golf meaning
+                            if (value > 0) return '-' + value;
+                            if (value < 0) return '+' + Math.abs(value);
+                            return 'E';
+                        }
+                    },
+                    grid: {
+                        color: function(context) {
+                            return context.tick.value === 0 ? '#333' : '#e0e0e0';
+                        },
+                        lineWidth: function(context) {
+                            return context.tick.value === 0 ? 2 : 1;
+                        }
+                    }
+                },
+                x: {
+                    title: { display: true, text: 'Hole Number' }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

@@ -22,6 +22,15 @@
         width:30px;
     }
 
+    .btn-link {
+        color: #fff !important;
+        background-color: #3c4646 !important;
+        border-radius: 8px;
+        padding: 5px 10px;
+        display: inline-block;
+    }
+    .btn-link:hover { background-color: #3f51b5 !important; }
+
     .recessed {
         /* background-color: #fff;  */
         border-radius: 5px;
@@ -89,7 +98,7 @@
             {% if round_meta.no_of_players == 2 %}<th>MP</th>{% endif %}
             {% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}<th>Score</th>{% endif %}
             <tr>
-                <td>A</button></a></td>
+                <td><a href="/golf/card_individual_vertical/{{round_meta.round_id}}/{{player_dict.player1.player_id}}/" class="btn-link">A</a></td>
                 <td>{{player_dict.player1.firstname|truncatechars:7}}</td>
                 <td>{{round_meta.player_a_course_hcp}}</td>
                 <td>{{player_dict.player1.running_totals.0}}/{{player_dict.player1.running_totals.1}}/{{round_meta.player_a_score_target}}</td>
@@ -101,7 +110,7 @@
                 {% if round_meta.hole_no < 19 and request.user.email == round_meta.round_admin %}<td>{{ form.player_A|as_crispy_field }}</td>{% endif %}
             </tr>
             <tr>
-                <td>B</td>
+                <td><a href="/golf/card_individual_vertical/{{round_meta.round_id}}/{{player_dict.player2.player_id}}/" class="btn-link">B</a></td>
                 <td>{{player_dict.player2.firstname|truncatechars:7}}</td>
                 <td>{{round_meta.player_b_course_hcp}}</td>
                 <td>{{player_dict.player2.running_totals.0}}/{{player_dict.player2.running_totals.1}}/{{round_meta.player_b_score_target}}</td>
@@ -114,7 +123,7 @@
             </tr>
             {% if round_meta.no_of_players > 2 %}
             <tr>
-                <td>C</td>
+                <td><a href="/golf/card_individual_vertical/{{round_meta.round_id}}/{{player_dict.player3.player_id}}/" class="btn-link">C</a></td>
                 <td>{{player_dict.player3.firstname|truncatechars:7}}</td>
                 <td>{{round_meta.player_c_course_hcp}}</td>
                 <td>{{player_dict.player3.running_totals.0}}/{{player_dict.player3.running_totals.1}}/{{round_meta.player_c_score_target}}</td>
@@ -127,7 +136,7 @@
             {% endif %}
             {% if round_meta.no_of_players > 3 %}
             <tr>
-                <td>D</td>
+                <td><a href="/golf/card_individual_vertical/{{round_meta.round_id}}/{{player_dict.player4.player_id}}/" class="btn-link">D</a></td>
                 <td>{{player_dict.player4.firstname|truncatechars:7}}</td>
                 <td>{{round_meta.player_d_course_hcp}}</td>
                 <td>{{player_dict.player4.running_totals.0}}/{{player_dict.player4.running_totals.1}}/{{round_meta.player_d_score_target}}</td>
@@ -227,13 +236,13 @@
         
         <table>
             <th>Hole</th><th>Par&nbsp;</th><th>SI&nbsp;&nbsp;</th>
-            <th><a href="/golf/card_individual_vertical/{{round_meta.round_id}}/{{player_dict.player1.player_id}}/"><button>A</th>
-            <th><a href="/golf/card_individual_vertical/{{round_meta.round_id}}/{{player_dict.player2.player_id}}/"><button>B</th>
+            <th><a href="/golf/player_round_chart/{{round_meta.round_id}}/{{player_dict.player1.player_id}}/"><button>A</button></a></th>
+            <th><a href="/golf/player_round_chart/{{round_meta.round_id}}/{{player_dict.player2.player_id}}/"><button>B</button></a></th>
             {% if round_meta.no_of_players > 2 %}
-            <th><a href="/golf/card_individual_vertical/{{round_meta.round_id}}/{{player_dict.player3.player_id}}/"><button>C</th>
+            <th><a href="/golf/player_round_chart/{{round_meta.round_id}}/{{player_dict.player3.player_id}}/"><button>C</button></a></th>
             {% endif %}
             {% if round_meta.no_of_players > 3 %}
-            <th><a href="/golf/card_individual_vertical/{{round_meta.round_id}}/{{player_dict.player4.player_id}}/"><button>D</th>
+            <th><a href="/golf/player_round_chart/{{round_meta.round_id}}/{{player_dict.player4.player_id}}/"><button>D</button></a></th>
             {% endif %}
        
             <!-- <tr><td>{{player_dict.player1.holes_attr.0.0}}</td><td>{{player_dict.player1.holes_attr.0.1}}</td><td>{{player_dict.player1.holes_attr.0.2}}</td><td bgcolor='{{player_dict.player1.holes_attr.0.5}}'>{{player_dict.player1.holes_attr.0.4}}</td><td>{{player_dict.player2.holes_attr.0.4}}</td></tr> -->

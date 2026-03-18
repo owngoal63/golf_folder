@@ -79,4 +79,7 @@ urlpatterns = [
 
     # Stableford progression chart (3-4 players)
     path('stableford_chart/<int:score_id>/', login_required(stableford_chart), name='stableford_chart'),
+
+    # Individual player net score vs par chart
+    path('player_round_chart/<int:score_id>/<int:player_id>/', login_required(player_round_chart), name='player_round_chart'),
 ]
