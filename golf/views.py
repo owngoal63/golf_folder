@@ -2436,17 +2436,52 @@ def matchplay_chart(request, score_id):
     else:
         result_text = "Match Halved — All Square"
 
+    # Detect the hole at which the match is clinched
+    # A match is over when |lead| > holes remaining
+    clinched_hole = None
+    clinch_result_text = None
+    for h in hole_data:
+        holes_remaining = 18 - h['hole']
+        lead = abs(h['cumulative'])
+        if lead > holes_remaining:
+            clinched_hole = h['hole']
+            holes_up = lead
+            winner = perspective_player if h['cumulative'] * flip > 0 else perspective_opponent
+            clinch_result_text = f"{winner.firstname} wins {holes_up}&{holes_remaining}"
+            break
+
+    # Override result text with match play notation if clinched early
+    if clinch_result_text:
+        result_text = clinch_result_text
+
     # Build lists for Chart.js (apply perspective flip to cumulative values)
     chart_labels = [str(h['hole']) for h in hole_data]
     chart_data = [h['cumulative'] * flip for h in hole_data]
     chart_colors = []
-    for val in chart_data:
-        if val > 0:
-            chart_colors.append('rgba(0, 150, 136, 0.85)')   # teal = perspective player up
-        elif val < 0:
-            chart_colors.append('rgba(220, 53, 69, 0.85)')   # red = opponent up
+    chart_border_colors = []
+    chart_border_widths = []
+    for idx, val in enumerate(chart_data):
+        hole_num = hole_data[idx]['hole']
+        if clinched_hole and hole_num > clinched_hole:
+            # Grey out bars after match is clinched
+            chart_colors.append('rgba(200, 200, 200, 0.3)')
+            chart_border_colors.append('rgba(200, 200, 200, 0.5)')
+            chart_border_widths.append(1)
+        elif clinched_hole and hole_num == clinched_hole:
+            # Highlight the decisive hole with a stronger border
+            base = 'rgba(0, 150, 136, 0.85)' if val > 0 else ('rgba(220, 53, 69, 0.85)' if val < 0 else 'rgba(150, 150, 150, 0.6)')
+            chart_colors.append(base)
+            chart_border_colors.append('#333333')   # dark grey border on decisive hole
+            chart_border_widths.append(3)
         else:
-            chart_colors.append('rgba(150, 150, 150, 0.6)')  # grey = all square
+            if val > 0:
+                chart_colors.append('rgba(0, 150, 136, 0.85)')
+            elif val < 0:
+                chart_colors.append('rgba(220, 53, 69, 0.85)')
+            else:
+                chart_colors.append('rgba(150, 150, 150, 0.6)')
+            chart_border_colors.append('rgba(0,0,0,0)')
+            chart_border_widths.append(1)
 
     context = {
         'score': score,
@@ -2457,9 +2492,12 @@ def matchplay_chart(request, score_id):
         'perspective_opponent': perspective_opponent,
         'result_text': result_text,
         'final_state': final_state,
+        'clinched_hole': clinched_hole,
         'chart_labels': chart_labels,
         'chart_data': chart_data,
         'chart_colors': chart_colors,
+        'chart_border_colors': chart_border_colors,
+        'chart_border_widths': chart_border_widths,
     }
     return render(request, 'golf/matchplay_chart.html', context)
 
