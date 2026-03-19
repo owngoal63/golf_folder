@@ -336,15 +336,13 @@ class RoundListHandicapView(ListView):
         # for x in xx:
         #     print(calculate_handicap_on_date(x))
         hcp_history_list = build_handicap_list_over_time(r, player_id)
-        print(hcp_history_list)
-        # hcp_history_list.reverse()
-        # print(hcp_history_list)
-        worst_hcp = max(hcp_history_list, key=lambda item: item[1])[1]
-        best_hcp = min(hcp_history_list, key=lambda item: item[1])[1]
-        worst_hcp_date = max(hcp_history_list, key=lambda item: item[1])[0]
-        best_hcp_date = min(hcp_history_list, key=lambda item: item[1])[0]
-        print("worst hcp", worst_hcp)
-        print("best", best_hcp)
+        if hcp_history_list:
+            worst_hcp = max(hcp_history_list, key=lambda item: item[1])[1]
+            best_hcp = min(hcp_history_list, key=lambda item: item[1])[1]
+            worst_hcp_date = max(hcp_history_list, key=lambda item: item[1])[0]
+            best_hcp_date = min(hcp_history_list, key=lambda item: item[1])[0]
+        else:
+            worst_hcp = best_hcp = worst_hcp_date = best_hcp_date = None
 
         if(num_score_differentials < 3):
             context['message'] = 'Minimum of 3 rounds is required to calculate handicap'
@@ -460,17 +458,18 @@ class BuddyListAllView(ListView):
 
     def get_queryset(self):
         return CustomUser.objects.filter(player_type='REGULAR')
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         from datetime import date
         today = date.today()
-        
-        # Add today's handicap to each user object
+
+        # Add today's handicap and round count to each user object
         for user in context['users']:
             user.handicap = calculate_handicap_on_date(today, user.id)[1]
-            
+            user.round_count = Round.objects.filter(player=user).count() >= 3
+
         return context
 
 class BuddyUpdateView(UpdateView):
